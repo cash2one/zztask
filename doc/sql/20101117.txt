@@ -1,0 +1,68 @@
+#===========================update1==========================================
+#新增LUCENE索引更新列表，取代原来的三个表 lucene_resource_changes, lucene_resources, lucene_sequence
+#`resource_type`  变更资源的类别
+#`resource_name` 变更资源的名称：以表名替代
+#`primary_id` 更新资源表的主键
+#`change_type` 变动类型 1／2／3／：新增add／变更update／删除del
+#`statu` 任务状态，0／1：等待更新／已经更新
+#`handle_time` 索引创建更新时间
+
+drop TABLE if exists TABLE `ast`.`lucene_update_task`;
+
+CREATE  TABLE `ast`.`lucene_update_task` (
+  `id` INT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `gmt_create` DATETIME NOT NULL ,
+  `gmt_modified` DATETIME NULL ,
+  `resource_type` VARCHAR(20) NULL COMMENT 'changed table catalog' ,
+  `resource_name` VARCHAR(20) NULL COMMENT 'changed table name' ,
+  `primary_id` INT(20) NOT NULL COMMENT 'changed data record id' ,
+  `change_type` TINYINT(1) NOT NULL COMMENT '1 add 2 update 3del' ,
+  `statu` TINYINT(1) NULL DEFAULT 0 COMMENT '0 unhandled 1 handled ',
+  `handle_time` DATETIME NULL COMMENT 'lucene index created time',
+  PRIMARY KEY (`id`) )
+ENGINE = MyISAM
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci;
+
+#============================update2 ===================================
+#修改products的trigger
+# 触发器名称:tg_表名＿时间点＿动作(c:create,u:update,d:del)
+#CREATE TRIGGER products_after_insert 
+# AFTER  
+# INSERT   UPDATE   DELETE  
+#ON <表名称>
+#FOR EACH ROW
+#<触发器SQL语句>
+
+delimiter $$
+drop trigger if exists `ast`.`tg_products_after_insert`$$
+drop trigger if exists `ast`.`tg_products_after_update`$$
+drop trigger if exists `ast`.`tg_products_after_delete`$$
+CREATE TRIGGER `ast`.`tg_products_after_insert` AFTER  INSERT  ON `ast`.`products`
+FOR EACH ROW
+begin
+	insert `ast`.`lucene_update_task`(`gmt_create`,`gmt_modified`,`resource_name`,`primary_id`,`change_type`,`statu`) 
+	values(now(),now(),'products',new.id,1,0);
+end$$
+   
+  
+CREATE TRIGGER `ast`.`tg_products_after_update` AFTER  UPDATE  ON `ast`.`products`
+FOR EACH ROW
+begin
+	insert `ast`.`lucene_update_task`(`gmt_create`,`gmt_modified`,`resource_name`,`primary_id`,`change_type`,`statu`) 
+	values(now(),now(),'products',old.id,2,0);
+end$$
+
+CREATE TRIGGER `ast`.`tg_products_after_delete` AFTER  DELETE  ON `ast`.`products`
+FOR EACH ROW
+begin
+	insert `ast`.`lucene_update_task`(`gmt_create`,`gmt_modified`,`resource_name`,`primary_id`,`change_type`,`statu`) 
+	values(now(),now(),'products',old.id,3,0);
+end$$
+
+delimiter ;
+
+#===========================update 3=========================================
+#业务处理：查询变更记录的查询语句
+#===================================
+ 

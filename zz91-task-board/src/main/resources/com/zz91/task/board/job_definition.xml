@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="jobDefinition">
+
+	<typeAlias alias="JobDefinition" type="com.zz91.task.board.domain.JobDefinition"/>
+	
+	<resultMap id="definitionResultMap" class="JobDefinition">
+		<result property="id" column="id"/>
+		<result property="gmtCreated" column="gmt_created"/>
+		<result property="gmtModified" column="gmt_modified"/>
+		<result property="jobName" column="job_name"/>
+		<result property="jobGroup" column="job_group"/>
+		<result property="jobClasspath" column="job_classpath"/>
+		<result property="jobClassName" column="job_class_name"/>
+		<result property="description" column="description"/>
+		<result property="cron" column="cron"/>
+		<result property="isInUse" column="is_in_use"/>
+		<result property="startTime" column="start_time"/>
+		<result property="endTime" column="end_time"/>
+	</resultMap>
+	
+	<delete id="deleteJobDefinitionById" parameterClass="Integer" >
+    delete from job_definition where id = #id:INTEGER#
+	</delete>
+	
+	<insert id="insertJobDefinition" parameterClass="JobDefinition" >
+    insert into job_definition (job_name,job_group, job_classpath, job_class_name,
+    		cron, is_in_use, start_time, end_time, description,gmt_created,gmt_modified)
+    values (#jobName#,
+			#jobGroup#,
+			#jobClasspath#,
+			#jobClassName#,
+			#cron#,
+			#isInUse#,
+			now(),
+			#endTime#,
+			#description#,
+			now(),now())	
+		<selectKey resultClass="java.lang.Integer" keyProperty="id" >
+      		SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<sql id="fullColumn">
+		`id`,
+		`gmt_created`,
+		`gmt_modified`,
+		`job_name`,
+		`job_group`,
+		`job_classpath`,
+		`job_class_name`,
+		`description`,
+		`cron`,
+		`is_in_use`,
+		`start_time`,
+		`end_time`
+	</sql>
+	
+	<sql id="dynamicIsInUse">
+		<dynamic prepend="where">
+			<isNotEmpty property="isInUse" >
+				is_in_use=#isInUse#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="queryAllJobDefinition" parameterClass="java.lang.String" 
+		resultMap="definitionResultMap" >
+		select
+			<include refid="fullColumn" />
+		from `job_definition`
+		<dynamic prepend="where">
+			<isNotEmpty property="value" >
+				is_in_use=#value#
+			</isNotEmpty>
+		</dynamic>
+		limit 500
+	</select>
+	
+	<select id="queryJobDefinition" parameterClass="java.util.HashMap" 
+		resultMap="definitionResultMap" >
+		select
+			<include refid="fullColumn" />
+		from `job_definition`
+		<include refid="dynamicIsInUse"/>
+		<include refid="common.pageOrderBy" />
+		<include refid="common.pageLimit" />
+	</select>
+	
+	<select id="queryJobDefinitionCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer" >
+    	select count(*) from job_definition
+    	<include refid="dynamicIsInUse"/>
+	</select>
+	
+	<select id="queryJobDefinitionById" parameterClass="java.lang.Integer" resultMap="definitionResultMap">
+	    select 
+			id,
+			job_name,
+			job_group,
+			job_classpath,
+			job_class_name,
+			gmt_created,
+			gmt_modified,
+			cron,
+			is_in_use,
+			start_time,
+			end_time,
+			description 
+	    from job_definition
+	    where id = #value#
+	</select>
+	
+	
+	<select id="queryJobDefinitionByName" parameterClass="java.lang.String" resultMap="definitionResultMap">
+    select 
+			id,
+			job_name,
+			job_group,
+			job_classpath,
+			job_class_name,
+			gmt_created,
+			gmt_modified,
+			cron,
+			is_in_use,
+			start_time,
+			end_time,
+			description  
+    from job_definition
+    where job_name=#value#
+	</select>
+	
+	<update id="updateJobDefinition" parameterClass="JobDefinition" >
+	update job_definition 
+	set
+		job_name=#jobName#,
+		job_group=#jobGroup#,
+		job_classpath=#jobClasspath#,
+		job_class_name=#jobClassName#,
+		cron=#cron#,
+		start_time=#startTime#,
+		end_time=#endTime#,
+		description=#description#,
+		gmt_modified=now()
+    where id = #id#
+	</update>
+	
+	<update id="updateIsInUseById" parameterClass="java.util.HashMap">
+		update job_definition
+		set is_in_use=#isInUse#
+		where id=#id#
+	</update>
+	
+	<update id="updateStartDateById" >
+		update job_definition
+		set start_time=#startTime#
+		where id=#id#
+	</update>
+ 
+ <!-- 
+	<select id="queryJobDefinition" parameterClass="map" resultMap="definition">
+    select 
+			id,
+			job_name,
+			job_group,
+			job_classpath,
+			job_class_name,
+			gmt_created,
+			gmt_modified,
+			cron,
+			is_in_use,
+			start_time,
+			end_time,
+			description 
+    from job_definition
+    limit #start#,#limit#
+	</select>
+	<select id="queryJobDefinitionByNames" parameterClass="map" resultMap="definition">
+    select 
+			id,
+			job_name,
+			job_group,
+			job_classpath,
+			job_class_name,
+			gmt_created,
+			gmt_modified,
+			cron,
+			is_in_use,
+			start_time,
+			end_time,
+			description  
+    from job_definition
+		<dynamic prepend="where">
+			<isNotEmpty property="names">
+						job_name in 
+				<iterate  property="names" open="(" close=")"  conjunction=",">
+            		#names[]#
+				</iterate>
+					<iterate  property="names"  conjunction="or">
+						job_name = #names[]#
+					</iterate>
+			</isNotEmpty>
+			<isEmpty property="names">
+						1=2
+			</isEmpty>
+		</dynamic>
+    limit #start#,#limit#
+	</select>
+	
+	<select id="queryAllJobDefinitionCount" resultClass="Integer">
+    select count(*) from job_definition
+	</select>
+  -->
+	
+</sqlMap>

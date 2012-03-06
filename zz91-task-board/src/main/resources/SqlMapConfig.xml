@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMapConfig
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+	<settings useStatementNamespaces="true"/>
+	<!-- common -->
+	<sqlMap resource="com/zz91/task/board/common.xml"/>
+	
+	<!-- job -->
+	<sqlMap resource="com/zz91/task/board/job_definition.xml"/>
+	<sqlMap resource="com/zz91/task/board/job_status.xml"/>
+</sqlMapConfig>

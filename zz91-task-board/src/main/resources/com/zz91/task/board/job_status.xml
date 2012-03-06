@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="jobStatus">
+
+	<typeAlias alias="jobStatus" type="com.zz91.task.board.domain.JobStatus"/>
+
+	<resultMap id="statusResultMap" class="jobStatus">
+		<result property="id" column="id"/>
+		<result property="JobName" column="job_name"/>
+		<result property="gmtBasetime" column="gmt_basetime"/>
+		<result property="result" column="result"/>
+		<result property="gmtTrigger" column="gmt_trigger"/>
+		<result property="errorMsg" column="error_msg"/>
+		<result property="category" column="category"/>
+		<result property="numRetry" column="num_retry"/>
+		<result property="gmtCreated" column="gmt_created"/>
+		<result property="gmtModified" column="gmt_modified"/>
+		<result property="runtime" column="runtime"/>
+		
+	</resultMap>
+	
+	<insert id="insertJobStatus" parameterClass="jobStatus" >
+		insert into `job_status` ( `job_name`, `gmt_basetime`, `result`,
+			`runtime`, `gmt_trigger`, `error_msg`, `category`, `num_retry`,
+			`gmt_created`, `gmt_modified`) 
+		values ( #jobName#, #gmtBasetime#, #result#, #runtime#, #gmtTrigger#,
+			 #errorMsg#, #category#, #numRetry# , now(), now() )
+		<selectKey resultClass="java.lang.Integer" keyProperty="id" >
+      		SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<sql id="fullColumn" >
+		`id`,
+		`job_name`,
+		`gmt_basetime`,
+		`result`,
+		`runtime`,
+		`gmt_trigger`,
+		`error_msg`,
+		`category`,
+		`num_retry`,
+		`gmt_created`,
+		`gmt_modified`
+	</sql>
+	
+	<sql id="dynamicJobName">
+		<dynamic prepend="where">
+			<isNotEmpty property="jobName">
+				job_name=#jobName#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="queryJobStatusByBaseTime" parameterClass="java.util.HashMap" 
+		resultMap="statusResultMap">
+		select
+			<include refid="fullColumn" />
+		from `job_status`
+		where job_name=#jobName# and job_basetime=#jobBasetime#
+	</select>
+	
+	<select id="queryJobStatusByJobName" parameterClass="java.util.HashMap" 
+		resultMap="statusResultMap">
+		select
+			<include refid="fullColumn" />
+		from `job_status`
+		<include refid="dynamicJobName" />
+		<include refid="common.pageOrderBy" />
+		<include refid="common.pageLimit" />
+	</select>
+	
+	<select id="queryJobStatusByJobNameCount" parameterClass="java.util.HashMap" 
+		resultClass="java.lang.Integer">
+		select
+			count(*)
+		from `job_status`
+		<include refid="dynamicJobName" />
+	</select>
+	
+	<update id="updateJobStatus" parameterClass="jobStatus">
+		update `job_status`
+		set
+		`result` = #result#,
+		`runtime` = #runtime#,
+		`error_msg` = #errorMsg#,
+		`category` = #category#,
+		`num_retry` = #numRetry#,
+		`gmt_modified` = now()
+		where id=#id#
+	</update>
+	
+	<delete id="deleteByJobname" parameterClass="java.lang.String">
+		delete from job_status where job_name=#value#
+	</delete>
+
+</sqlMap>		
+ 

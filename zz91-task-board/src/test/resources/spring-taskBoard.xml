@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-2.5.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"
+	default-autowire="byName">
+	 
+	<context:component-scan base-package="com.zz91.task.board"/>
+ 
+	<bean id="taskPropertyPlaceholderConfigurer" class="com.zz91.task.board.util.PropertyPlaceholderConfigurer">
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="locations">
+			<list>
+				<value>classpath:persist.properties</value>
+				<value>classpath:web.properties</value>
+			</list>
+		</property>
+	</bean>
+ 
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="${jdbc.driver}" />
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="initialPoolSize" value="${jdbc.initialPoolSize}"/>
+		<property name="minPoolSize" value="${jdbc.minPoolSize}" />
+		<property name="maxPoolSize" value="${jdbc.maxPoolSize}" />
+		<property name="acquireIncrement" value="${jdbc.acquireIncrement}" />
+		<property name="maxIdleTime" value="${jdbc.maxIdleTime}"/> 
+	</bean>
+	
+	<bean id="sqlMapClient"
+		class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocations">
+			<list>
+				<value>classpath:/SqlMapConfig.xml</value>
+			</list>
+		</property>
+		<property name="dataSource">
+			<ref bean="dataSource"/>
+		</property>
+	</bean>
+	<bean id="quartzScheduler"  class="org.springframework.scheduling.quartz.SchedulerFactoryBean" >  
+		<!--这里使用的是spring中配置的数据源-->
+		<property name="dataSource">
+			<ref bean="dataSource"/>
+		</property>
+		<!--如果要在quartz.properties文件中指定DataSource则要加apache common的 dbcp和pool的依赖-->
+		<property name="configLocation">  
+			<ref local="configLocationResource" />  
+		</property>
+		<property name="applicationContextSchedulerContextKey"  
+			value="applicationContextKey" />  
+		<property name="startupDelay" value="30"/>    
+	</bean> 
+	<bean id="configLocationResource"  
+		class="org.springframework.core.io.ClassPathResource">  
+		<constructor-arg value="quartz.properties"  
+			type="java.lang.String">  
+		</constructor-arg>  
+	</bean>
+	
+	<bean id="manualJob" class="com.zz91.task.board.job.SpringJob" init-method="initJob"/>
+
+ 	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="i18n_web" />
+	</bean>
+
+	<bean
+		class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping">
+		<property name="caseSensitive"  value="false" />
+		<property name="basePackage"    value="com.zz91.task.board.controller" />
+		<!--property name="defaultHandler" value="homeController" /-->
+	</bean>
+	
+	<!-- upload file (Add By Rolyer 2010.04.15)-->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	    <property name="maxUploadSize">
+	        <value>2048000</value>
+	    </property>
+	    <property name="maxInMemorySize">
+	        <value>2048</value>
+	    </property>
+	    <property name="defaultEncoding">
+	        <value>UTF-8</value>
+	    </property>
+	</bean>
+
+	<!--  shared velocity engine which will be used by email and page presentation -->
+	<bean id="velocityEngine"
+		class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+		<property name="resourceLoaderPath" value="${velocity.resourceLoaderPath}"         />
+		<property name="preferFileSystemAccess" value="${velocity.preferFileSystemAccess}" />
+		<property name="velocityProperties">
+			<props>
+				<prop key="input.encoding">${input.encoding}</prop>
+				<prop key="output.encoding">${output.encoding}</prop>
+				<prop key="file.resource.loader.cache">false</prop>
+				<prop key="file.resource.loader.modificationCheckInterval">2</prop>
+				<!--<prop key="velocimacro.library">macro.vm</prop>-->
+				<!-- 针对开发而非实际应用的 -->
+				<prop key="velocimacro.library.autoreload">true</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="velocityConfig"
+		class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+		<property name="velocityEngine" ref="velocityEngine" />
+	</bean>
+	
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.velocity.VelocityLayoutViewResolver">
+		<property name="exposeSpringMacroHelpers" value="true"/>
+		<property name="suffix" value="${velocity.suffix}" />
+		<property name="layoutUrl" value="layout/default.vm" />
+		<property name="contentType" value="text/html;charset=utf-8"/>
+		<property name="toolboxConfigLocation"    value="WEB-INF/vm-toolbox.xml" />
+	</bean>
+
+</beans> 

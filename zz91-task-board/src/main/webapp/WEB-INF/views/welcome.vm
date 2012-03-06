@@ -1,0 +1,27 @@
+<script type="text/javascript" >
+Ext.onReady(function() {
+
+	setInterval(function(){
+		Ext.Ajax.request({
+            url:Context.ROOT+"/monitor.htm",
+            params:{"id":id},
+            success:function(response,opt){
+                var obj = Ext.decode(response.responseText);
+				Ext.get("numTask").dom.innerText=obj.numTask;
+				Ext.get("totalTime").dom.innerText=obj.totalTime;
+				Ext.get("numQueue").dom.innerText=obj.numQueue;
+				Ext.get("nowDate").dom.innerText=obj.nowDate;
+            },
+            failure:function(response,opt){
+            }
+    	});
+	},1000);
+});
+</script>
+
+<div id="monitor">
+	当前时间：<span id="nowDate">0</span><br/>
+	总处理量：<span id="numTask">0</span><br/>
+	总处理时间：<span id="totalTime">0</span><br/>
+	队列中任务数：<span id="numQueue">0</span>
+</div>

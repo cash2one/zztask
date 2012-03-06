@@ -1,0 +1,6 @@
+<link rel="stylesheet" type="text/css" href ="#springUrl('/js/ext32/resources/css/ext-all.css')"/>
+<link rel="stylesheet" type="text/css" href="#springUrl('/themes/desktop-all.css')" />
+<link rel="stylesheet" type="text/css" href="#springUrl('/themes/boomy.css')" />
+<script type="text/javascript" src="#springUrl('/js/ext32/adapter/ext/ext-base.js')"></script>
+<script type="text/javascript" src="#springUrl('/js/ext32/ext-all-debug.js')" ></script>
+<script type="text/javascript" src="#springUrl('/js/ext32/ext-lang-zh_CN.js')"></script>
