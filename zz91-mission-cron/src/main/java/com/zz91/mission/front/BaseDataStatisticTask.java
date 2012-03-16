@@ -117,7 +117,7 @@ public class BaseDataStatisticTask implements ZZTask {
 		result.put(PUBLISH_BBS_REPLY, analysis(PUBLISH_BBS_REPLY, targetDate, sql6));
 		
 		MailUtil.getInstance().sendMail("zz91网站基础数据统计（"+result.get("targetDate")+"）", 
-				"asto.analysis.bd@caiban.net", null, null,
+				"analysis.bd@asto.mail", null, null,
 				"zz91", "zz91-task-basedata", result, null);
 		
 		return true;

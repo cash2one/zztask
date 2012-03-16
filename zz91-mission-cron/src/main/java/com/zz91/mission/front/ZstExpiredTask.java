@@ -95,7 +95,7 @@ public class ZstExpiredTask implements ZZTask {
 		MailUtil.getInstance().sendMail(
 			"[重要]高会过期问题数据", 
 //			"list:cs-expire-trouble", null,
-			"x03570227@163.com,joycesleep@gmail.com", null,  //,joycesleep@gmail.com
+			"zz91.expired.error@asto.mail", null,  //,joycesleep@gmail.com
 			null, "zz91", "zz91-expire-cs",
 			dataMap, MailUtil.PRIORITY_TASK);
 		
@@ -133,7 +133,7 @@ public class ZstExpiredTask implements ZZTask {
 			MailUtil.getInstance().sendMail(
 					"[重要]"+baseDateStr+"时刻过期的高级会员汇总", 
 //			"list:cs-expire-trouble", null,
-					"x03570227@163.com,joycesleep@gmail.com", null,  //,joycesleep@gmail.com
+					"zz91.expired.report@asto.mail", null,  //,joycesleep@gmail.com
 					null, "zz91", "zz91-expire-cs-notice",
 					dataMap, MailUtil.PRIORITY_TASK);
 		}
