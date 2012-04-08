@@ -35,6 +35,7 @@ public class AnalysisLogin implements ZZTask{
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
 		String targetDate=DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -1), LOG_DATE_FORMAT);
+		DBUtils.insertUpdate(DB, "delete from web_base_data_stat where gmt_stat_date='"+targetDate+"' and stat_cate ='login'");
 		return DBUtils.insertUpdate(DB, "delete from analysis_login where gmt_target='"+targetDate+"'");
 	}
 
@@ -48,6 +49,7 @@ public class AnalysisLogin implements ZZTask{
 		
 		String line;
 		Integer num=null;
+		Integer total = 0;
 		while ((line = br.readLine()) != null) {
 			JSONObject jobj = JSONObject.fromObject(line);
 			
@@ -60,12 +62,16 @@ public class AnalysisLogin implements ZZTask{
 			}else{
 				resultMap.put(jobj.getInt(OPERATOR), ++num);
 			}
+			total++;
 		}
 		br.close();
 		
 		for(Integer companyId:resultMap.keySet()){
 			saveToDB(companyId, resultMap.get(companyId), targetDate);
 		}
+		
+		String sql="insert into web_base_data_stat (stat_cate,stat_cate_name, gmt_stat_date, stat_count, gmt_created) values('login','','"+targetDate+"', "+total+",now())";
+		DBUtils.insertUpdate(DB, sql);
 		
 		return true;
 	}
@@ -86,7 +92,7 @@ public class AnalysisLogin implements ZZTask{
 		long start=System.currentTimeMillis();
 		AnalysisLogin analysis=new AnalysisLogin();
 		
-		AnalysisLogin.OPERATION_VALUE="testzhcn";
+		AnalysisLogin.OPERATION_VALUE="login";
 		AnalysisLogin.LOG_FILE="/usr/data/log4z/log/run.";
 		analysis.clear(DateUtil.getDate("2011-12-30", "yyyy-MM-dd"));
 		analysis.exec(DateUtil.getDate("2011-12-30", "yyyy-MM-dd"));
