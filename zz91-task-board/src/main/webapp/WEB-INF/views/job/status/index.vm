@@ -1,0 +1,21 @@
+##set($layout="/layout/blank.vm")
+<script type="text/javascript" src="#springUrl('/app/job/status.js')" ></script>
+<script type="text/javascript" >
+Ext.onReady(function() {
+
+	var statusGrid=new com.zz91.task.board.job.status.StatusOfDefinitionGrid({
+		hideTaskName:false,
+		listUrl:Context.ROOT+"/job/status/queryAllStatus.htm",
+		id:"statusofdefinition",
+		region:"center",
+		layout:"fit"
+	});
+	statusGrid.getStore().reload();
+
+	var viewport = new Ext.Viewport({
+		layout : 'border',
+		items : [statusGrid]
+	});
+	
+});
+</script>

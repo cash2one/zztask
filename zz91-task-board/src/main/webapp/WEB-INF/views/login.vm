@@ -1,0 +1,7 @@
+<script type="text/javascript" >
+	Ext.onReady(function(){
+		com.zz91.task.board.login.UserLoginWin(function(){
+			window.location.href=Context.ROOT+"/index.htm";
+		});
+    });
+</script>

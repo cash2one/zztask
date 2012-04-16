@@ -1,0 +1,87 @@
+<title></title>
+<br>
+<center>
+<table width="700" border="0" cellspacing="0" cellpadding="0">
+	<tbody><tr>
+		<td width="237"><a target="_blank" href="http://www.zz91.com"><img src="http://img0.zz91.com/logomin.gif" border="0"></a></td>
+		<td width="283" align="center"><font color="#990000" style="font-size:26px; font-weight:bold; font:'黑体'">实时报价信息</font></td>
+	</tr>
+</tbody></table>
+<table width="700" border="0" cellspacing="0" cellpadding="0">
+  <tbody><tr>
+    <td align="center">
+	</td>
+  </tr>
+</tbody></table>
+<table width="700" border="0" cellpadding="0" cellspacing="0" style="BORDER-BOTTOM: #ff7300 5px solid; BORDER-TOP: #ff7300 10px solid; BORDER-LEFT: #ff7300 5px solid; BORDER-right: #ff7300 5px solid">
+	<tbody><tr>
+		<td align="center" valign="top" bgcolor="#FFFFFF">
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tbody><tr>
+				<td width="2%" valign="top" background="http://www.zz91.com/cn/mailimages/15login/mail_left.gif" height="154">
+				<img src="http://www.zz91.com/cn/mailimages/15login/mail_left.gif" width="51" height="44"></td>
+				<td width="98%" valign="top"><table width="96%" border="0" cellpadding="0" cellspacing="0" class="lh13">
+                  <tbody><tr>
+                    <td valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="5">
+                      <tbody><tr>
+                        <td>&nbsp;</td>
+                      </tr>
+                      <tr>
+                        <td><font color="#000000" style="font-size:14px;">$!{accountInfo.contact}#if($!{accountInfo.sex}=="1") 女士 #else 先生 #end ：您好！ </font><br>
+                          <br> 
+                        <font style="line-height:20px">以下是您在ZZ91再生网（www.zz91.com）订阅的最新实时报价信息，快去看看吧！</font></td>
+                      </tr>
+					  
+					  #foreach($obj in $!{subscribeList})
+                          <tr>
+                            <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tbody><tr>
+                                  <td height="25" bgcolor="#FF7300">&nbsp;<img src="http://www.zz91.com/cn/img/fold_2.gif" width="16" height="16"> 
+										<font color="#FFFFFF"><b>$!{obj.priceTypeName}</b></font>
+										<a href="http://myrc.zz91.com/subscribe/subscribe.htm?id=$!{obj.id}" target="_blank">修改</a>
+									</td>
+                                </tr>
+                              </tbody></table></td>
+                          </tr>
+    					  #foreach($price in $!{obj.priceList})
+                          <tr>
+                            <td><img src="http://www.zz91.com/cn/images/d2.gif" width="10" height="12"> <a href="http://price.zz91.com/priceDetails_$!{price.id}.htm" target="_blank">$!{price.title}</a>
+    						</td>
+                          </tr>
+    					  #end
+					  #end
+					  
+                    </tbody></table>
+                    
+                      <p align="center"><a href="http://price.zz91.com" target="_blank"><img src="http://img.zz91.com/cn/bizexpress/images/look.gif" width="321" height="82" border="0"></a><br>
+                        <img height="29" alt="" width="257" src="http://img.zz91.com/cn/mailimages/sb_mail3.gif"><br>
+                        <br>
+                    </p></td>
+                  </tr>
+                </tbody></table>
+			  </td>
+			</tr>
+		</tbody></table>
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tbody><tr>
+				<td align="center" bgcolor="#ff7300" class="LL">
+				<img src="http://www.zz91.com/cn/mailimages/15login/mail_bg1.gif" width="495" height="23"></td>
+			</tr>
+			<tr>
+				<td height="60" align="center" bgcolor="#ff7300" class="LL" style="line-height:22px;"><font color="#ffffff"><br>
+			    ZZ91再生网客服中心 <br>
+                www.zz91.com<br> 
+                www.recyclechina.com<br>
+                Tele: +86-571-56612345 <br>
+                Fax: +86-571-56637777 <br>
+                ******************************************************</font><br>
+                <font color="#ffffff">本信由系统自动生成，请勿直接回复！<br>
+                </font></td>
+			</tr>
+		</tbody></table>
+	  </td>
+	</tr>
+</tbody></table>
+</center>
+
+

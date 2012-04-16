@@ -1,0 +1,172 @@
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>定制的信息</title>
+
+<table width="700" border="0" align="center" cellpadding="4" cellspacing="0">
+  <tbody>
+    <tr>
+      <td align="middle"><a href="http://www.zz91.com" target="_blank"><img src="http://www.zz91.com/zz91images/2007logo.gif" border="0"></a></td>
+      <td align="right"><table cellspacing="0" cellpadding="0" width="80%" border="0" style="font-size:12px">
+        <tbody>
+          <tr>
+            <td height="20" align="right" nowrap="nowrap" style="font-size:12px">如果本邮件无法正常显示，请<a href="http://myrc.zz91.com/mysubscribe/bizList.htm" target="_blank">点此查看</a></td>
+          </tr>
+          <tr>
+            <td height="20" align="right" nowrap="nowrap" style="font-size:12px">如果此邮箱不是您的常用邮箱，请<a href="http://myrc.zz91.com/mycompany/updateCompany.htm" target="_blank">点此更换订阅邮箱</a> </td>
+          </tr>
+        </tbody>
+      </table></td>
+    </tr>
+  </tbody>
+</table>
+<table width="700" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tbody><tr>
+    <td>
+	<a href="http://www.zz91.com/upimages/upload/openad3251.html"><img src="http://img.zz91.com/upimages/upload/2011/10/17145544.jpg" border="0"></a>
+    </td>
+  </tr>
+</tbody></table>
+<br>
+<table width="700" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td height="22" align="left" style="font-size:12px"><strong>
+	  $!{accountInfo.contact}#if($!{accountInfo.sex}=="1") 女士 #else 先生 #end
+      ：您好！ 以下是您在ZZ91再生网订阅的最新商机 </strong></td>
+    </tr>
+  </tbody>
+</table>
+<table width="700" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td align="middle" background="http://img.zz91.com/cn/mail/bar_1187770552226.gif" bgcolor="#fa9150" height="27"><table cellspacing="0" cellpadding="0" width="670" border="0"><tbody><tr><td align="left" width="459"><table cellspacing="0" cellpadding="0" width="670" border="0">
+        <tbody>
+          <tr>
+            <td align="left" width="459" style="font-size:12px">已订阅内容</td>
+            <td align="right" width="191" style="font-size:12px"><a href="http://myrc.zz91.com/mysubscribe/manageSubscribeBiz.htm" target="_blank">管理订阅</a> <a href="http://myrc.zz91.com/subscribe/subscribe.htm?subscribeType=0" target="_blank">新增订阅</a></td>
+          </tr>
+        </tbody>
+      </table></td>
+            </tr>
+      </tbody>
+      </table></td>
+    </tr>
+	
+    <tr>
+      <td height="22" align="left" style="border:1px solid #FF9900; padding:5px; font-size:12px">
+		<ul>
+	#foreach($obj in $!{subscribeList})
+    	#set($pt="")
+    	#set($ptname="供求")
+    	#if($!{obj.productsTypeCode}=="10331001")
+    		#set($pt="2")
+    		#set($ptname="求购")
+    	#elseif($!{obj.productsTypeCode}=="10331000")
+    		#set($pt="1")
+    		#set($ptname="供应")
+		#end
+		<li>
+		<a href="http://trade.zz91.com/offerlist--a$!{pt}--b--c--d--e--f--p1--$!{obj.keywordsEncode}.htm" target="_blank"><b>$!{obj.keywords}</b></a>
+		[$!{ptname}]
+		</li>
+	#end
+		</ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+
+#foreach($obj in $!{subscribeList})
+	#set($pt="")
+	#set($ptname="供求")
+	#if($!{obj.productsTypeCode}=="10331001")
+		#set($pt="2")
+		#set($ptname="求购")
+	#elseif($!{obj.productsTypeCode}=="10331000")
+		#set($pt="1")
+		#set($ptname="供应")
+	#end
+<table width="700" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td align="middle" background="http://img.zz91.com/cn/mail/bar_1187770552226.gif" bgcolor="#fa9150" height="27"><table cellspacing="0" cellpadding="0" width="670" border="0">
+        <tbody>
+          <tr>
+            <td align="left" width="300" style="font-size:12px">$!{obj.keywords}最新$!{ptname}信息</td>
+            <td align="left" width="263" style="font-size:12px">&nbsp;</td>
+            <td align="right" width="207" style="font-size:12px">&gt;&gt; <a href="http://myrc.zz91.com/mysubscribe/manageSubscribeBiz.htm" target="_blank">修改订阅条件</a> </td>
+          </tr>
+        </tbody>
+      </table></td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #FF9900; padding:5px">
+      
+      
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody><tr>
+          <td>
+          
+			  #foreach($product in $!{obj.productList})
+			  <div style="width:330px; float:left; margin-right:10px; line-height:20px; height:80px">
+			    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tbody><tr>
+				<td width="70" align="left">
+					#set($pic="http://www.zz91.com/cn/img/noimage.gif")
+					#if($!{product.pic}!="")
+    					#set($pic="http://image01.zz91.com/images.php?picurl=http://img1.zz91.com/$!{product.pic}&width=60&height=60")
+					#end
+					<a href="http://www.zz91.com/cn/mail/countmailfrom.asp?com_id=$!{companyId}&amp;mtype=2&amp;mailto=http://trade.zz91.com/productdetails$!{product.id}.htm" target="_blank">
+						<img src="$!{pic}" width="60" height="60" border="0">
+					</a>
+				</td>
+				<td style="font-size:12px">
+					<div align="left" style="font-size:12px">[$!{product.productType}]
+						<a href="http://www.zz91.com/cn/mail/countmailfrom.asp?com_id=$!{companyId}&amp;mtype=2&amp;mailto=http://trade.zz91.com/productdetails$!{product.id}.htm" target="_blank">$!{product.title}</a>
+						<font color="#999999">($!{product.gmtDate})</font>
+					</div>
+				</td>
+                </tr>
+              </tbody></table>
+			  </div>
+			  #end
+          </td>
+          </tr>
+      </tbody></table>
+      
+      <p align="right" style="font-size:12px"><a href="http://trade.zz91.com/offerlist--a$!{pt}--b--c--d--e--f--p--$!{obj.keywordsEncode}.htm" target="_blank">&gt;&gt;点此进入查看更多$!{obj.keywords}$!{ptname}信息</a></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+#end
+<br>
+<table width="700" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td align="center" bgcolor="#FFDDC1" height="25" style="font-size:12px">成为<strong>ZZ91再生网</strong> <img src="http://www.zz91.com/zz91images/recycle.gif" align="absmiddle"> 再生通会员，享受6大特权，<a href="http://www.zz91.com/service/newzst/" target="_blank">请点击了解详情</a> </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<table width="700" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td align="center" style="line-height:22px">【小提示】你的登录名：$!{accountInfo.account} 忘了密码？<a href="http://china.zz91.com/user/passwordReminder.htm" target="_blank">点此找回</a></td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<hr width="700">
+<table width="700" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td align="center" style="line-height:22px">如果您不想继续订阅此类邮件，请<a href="http://myrc.zz91.com/mysubscribe/manageSubscribeBiz.htm" target="_blank">点击这里</a><br>
+        如果您有任何问题,请<a href="http://www.zz91.com/about/question.asp">给我们留言</a><br>
+      服务热线：0571-56612345<br></td>
+    </tr>
+  </tbody>
+</table>
+<br>
+
+

@@ -1,0 +1,13 @@
+lucene索引部署文档：
+文件目录：
+	应用部署路径：/usr/apps/lucene/
+	索引存放路径：/usr/data/index-store/offerlist
+数据库配置：暂时打包进应用的JAR包类路径下：persist.properties
+
+拷贝相关的JAR包到应用部署路径：
+后台运行程序：nohup java -jar zz91-mission-lucene-index-［版本号］.jar >/usr/logs/zz91-mission-lucene-index/log.log &
+例：
+	nohup java -jar zz91-mission-lucene-index-1.0.0-SNAPSHOT.jar >/usr/logs/zz91-mission-lucene-index/log.log &
+重做所有索引
+当前日期为止30个月内的数据
+java -jar zz91-mission-lucene-index-1.0.0-SNAPSHOT.jar reindexAll 

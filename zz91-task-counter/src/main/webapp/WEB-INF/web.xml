@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+	<display-name>server</display-name>
+	<context-param>
+		<param-name>webAppRootKey</param-name>
+		<param-value>webApp.root</param-value>
+	</context-param>
+
+	<!-- log4j config-->
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>classpath:/log4j.properties</param-value>
+	</context-param>
+
+
+<!--
+	<filter>
+		<filter-name>toHomePageFilter</filter-name>
+		<filter-class>
+			com.ast.ast1949.web.filters.ToHomePageFilter
+		</filter-class>
+		<init-param>
+			<param-name>uri</param-name>
+			<param-value>zz91/index.htm</param-value>
+		</init-param>
+	</filter>
+
+	<filter>
+		<filter-name>loginStatusFilter</filter-name>
+		<filter-class>
+			com.ast.ast1949.web.filters.LoginStatusFilter
+		</filter-class>
+		<init-param>
+			<param-name>loginUrl</param-name>
+			<param-value>/zz91/admin/login.htm</param-value>
+		</init-param>
+	</filter>
+-->
+
+	<filter>
+		<filter-name>authorizeFilter</filter-name>
+		<filter-class>
+			com.ast.ast1949.web.filters.AuthorizeFilter
+		</filter-class>
+		<init-param>
+			<param-name>deniedURL</param-name>
+			<param-value>/zz91/admin/noauth.htm</param-value>
+		</init-param>
+		<init-param>
+			<param-name>loginURL</param-name>
+			<param-value>/zz91/admin/login.htm</param-value>
+		</init-param>
+		<init-param>
+	      	<param-name>noAuthPage</param-name>
+	      	<param-value>/zz91/admin/index.htm|/zz91/admin/login.htm|/zz91/admin/crm/opens/paysure.htm</param-value>
+	    </init-param>
+	    <init-param>
+	      	<param-name>noLoginPage</param-name>
+	      	<param-value>/|/zz91/admin/login.htm|/zz91/admin/logout.htm|/zz91/admin/crm/opens/paysure.htm|/zz91/admin/noauth*|/zz91/admin/error*</param-value>
+	    </init-param>
+	    <!--设定开发调试时自动登录的账户
+	    <init-param>
+	      	<param-name>debug</param-name>
+	      	<param-value>admin</param-value>
+	    </init-param>-->
+
+	</filter>
+
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>
+			org.springframework.web.filter.CharacterEncodingFilter
+		</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+<!--
+	<filter>
+		<filter-name>responseStoreFilter</filter-name>
+		<filter-class>
+			com.ast.ast1949.web.filters.ResponseStoreFilter
+		</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>responseStoreFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+-->
+
+<!--
+	<filter-mapping>
+		<filter-name>toHomePageFilter</filter-name>
+		<url-pattern>/</url-pattern>
+	</filter-mapping>
+-->
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+<!--
+	<filter-mapping>
+		<filter-name>loginStatusFilter</filter-name>
+		<url-pattern>/zz91/admin/*</url-pattern>
+	</filter-mapping>
+-->
+	<filter-mapping>
+		<filter-name>authorizeFilter</filter-name>
+		<url-pattern>*.htm</url-pattern>
+	</filter-mapping>
+
+	<servlet>
+		<servlet-name>SpringMVC</servlet-name>
+		<servlet-class>
+			org.springframework.web.servlet.DispatcherServlet
+		</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>
+				classpath:/spring-task-board.xml,
+				classpath:/spring-persist.xml,
+				classpath:/spring-service.xml
+			</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+<!-- 文件上传 -->
+	<servlet>
+		<servlet-name>UploadServlet</servlet-name>
+		<servlet-class>com.ast.ast1949.web.servlet.UploadServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>SpringMVC</servlet-name>
+		<url-pattern>*.htm</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>UploadServlet</servlet-name>
+		<url-pattern>/zz91/admin/upload</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>login.htm</welcome-file>
+	</welcome-file-list>
+
+</web-app>
