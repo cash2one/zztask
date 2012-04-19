@@ -7,7 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 
 import com.zz91.task.common.ZZTask;
 import com.zz91.util.datetime.DateUtil;
@@ -23,6 +28,10 @@ import com.zz91.util.search.SorlUtil;
  */
 public class RegisterOneWeekLater implements ZZTask {
 	public static String DB = "recyclechina";
+	public static String ACCOUNT = "recyclechina";
+	public static String TEMPLATE_TO_BUYER = "recyclechina-matchToBuyer";
+	public static String TEMPLATE_TO_SELLER = "recyclechina-matchToSeller";
+	public static String TEMPLATE_TO_NOPUB = "recyclechina-noPublishInWeek";
 	public static Integer MAIL_PRIORITY = 20;
 
 	@Override
@@ -53,10 +62,8 @@ public class RegisterOneWeekLater implements ZZTask {
 		Map<String, Object> map = new HashMap<String, Object>();
 		final Map<Integer, Map<String, Object>> productMap = new HashMap<Integer, Map<String, Object>>();
 		final Map<Integer, Map<String, Object>> noproductMap = new HashMap<Integer, Map<String, Object>>();
-		String from = DateUtil.toString(
-				DateUtil.getDateAfterDays(baseDate, -7), "yyyy-MM-dd");
-		String to = DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -6),
-				"yyyy-MM-dd");
+		String from = DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -7), "yyyy-MM-dd");
+		String to = DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -6),"yyyy-MM-dd");
 		String sql = "select c.id,ca.email,ca.backup_email,ca.is_use_backup_email,(select name from products where company_id = c.id limit 1),ca.account,c.deal_type_code from company c left join company_account ca on c.id = ca.company_id "
 				+ "where '" + from + "' < c.gmt_register and c.gmt_register < '" + to + "'";
 		DBUtils.select(DB, sql, new IReadDataHandler() {
@@ -86,32 +93,55 @@ public class RegisterOneWeekLater implements ZZTask {
 		return map;
 	}
 
-	private void sendMatchEmail(Map<Integer, Map<String,Object>> maps){
+	private void sendMatchEmail(Map<Integer, Map<String,Object>> maps) throws SolrServerException{
 		for(Integer companyId:maps.keySet()){
 			SolrQuery query = new SolrQuery();
 			SolrServer server = SorlUtil.getInstance().getSolrServer("rebornProducts");
 			query.setQuery(maps.get(companyId).get("productKeyword").toString());
+			query.addFilterQuery("isChecked:true");
+			query.addFilterQuery("isDeleted:false");
+			String templateName;
+			if("10011000".equals(maps.get(companyId).get("dealTypeCode"))){
+				templateName = TEMPLATE_TO_BUYER;
+				query.addFilterQuery("buyOrSell:1");
+			}else{
+				templateName = TEMPLATE_TO_SELLER;
+				query.addFilterQuery("buyOrSell:0");
+			}
+			query.addSortField("gmtRefresh", ORDER.desc);
+			query.setStart(0);
+			query.setRows(1);
+			QueryResponse rsp = server.query(query);
+			SolrDocumentList sds = rsp.getResults();
+			for(SolrDocument sd :sds){
+				Map<String,Object> map = new HashMap<String,Object>();
+				map.put("name", maps.get(companyId).get("account"));
+				map.put("companyUrl", "http://www.recyclechina.com/companyInfo/details"+companyId+".htm");
+				map.put("companyName", sd.getFieldValue("companyName"));
+				map.put("product", sd.getFieldValue("name"));
+				sendEmail("Recyclechina Match your customer", maps.get(companyId).get("email").toString(), templateName, map);
+			}
 		}
-//		SorlUtil.getInstance().g
-//		for(Integer companyId:maps.keySet()){
-//			Map<String,Object> map = maps.get(companyId);
-//			String sql = "select p.company_id,c.name,p.name from products p left join company c on p.company_id=c.id";
-//			DBUtils.
-//		}
 	}
 
-	private void sendRemindEmail(Map<Integer, Map<String, Object>> map) {
-
+	private void sendRemindEmail(Map<Integer, Map<String, Object>> maps) {
+		for(Integer companyId:maps.keySet()){
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("name", maps.get(companyId).get("account"));
+			sendEmail("Welcome to the RecycleChina", maps.get(companyId).get("email").toString(), TEMPLATE_TO_NOPUB, map);
+		}
 	}
 
 	private void sendEmail(String title, String to, String templateName,
 			Map<String, Object> map) {
-		MailUtil.getInstance().sendMail(title, to, templateName, map,
-				MAIL_PRIORITY);
+//		MailUtil.getInstance().sendMail(title, to, templateName, map,MAIL_PRIORITY);
+		MailUtil.getInstance().sendMail(title, to, ACCOUNT, templateName, map, MAIL_PRIORITY);
 	}
 	
 	public static void main(String[] args) throws Exception{
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+		SorlUtil.getInstance().init("web.properties");
+		MailUtil.getInstance().init("web.properties");
 		RegisterOneWeekLater obj =new RegisterOneWeekLater();
 		Date date = DateUtil.getDate("2012-04-20", "yyyy-MM-dd");
 		obj.exec(date);
