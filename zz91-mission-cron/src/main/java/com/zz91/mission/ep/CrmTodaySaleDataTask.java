@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
+
 import com.zz91.task.common.ZZTask;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
@@ -61,19 +63,24 @@ public class CrmTodaySaleDataTask implements ZZTask {
 		//查找今天有联系的员工
 		String sql = "SELECT sale_account FROM crm_log"
 		+ " where date_format(gmt_created,'%Y-%m-%d') = date_format(date_add(now(), interval -1 day),'%Y-%m-%d') group by sale_account";
+		final String[] account=new String[1];
 		DBUtils.select(DB, sql, new IReadDataHandler() {
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				while(rs.next()) {
-					tongji(rs.getString("sale_account"));
+					account[0]=rs.getString("sale_account");
 				}
 			}
 		});
+		if (account[0] != null) {
+			tongji(account[0]);
+		}
 	}
 	
 	/**
 	 * 客户自动掉公海
 	 */
+	@SuppressWarnings("rawtypes")
 	private void blockCompany() {
 		final String[] bfalg=new String[1];
 		//是否自动掉公海
@@ -233,6 +240,7 @@ public class CrmTodaySaleDataTask implements ZZTask {
 		return false;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	private void blockout(String account,Integer count) {
 		String sql="select id,cid,IFNULL(to_days(now())-to_days(gmt_contact),0)"
 				+ " as day_count from crm_sale_comp where status=1 and sale_account='"+account+"' order by day_count desc,gmt_created limit "+count;
