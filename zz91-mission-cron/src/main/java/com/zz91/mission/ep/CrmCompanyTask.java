@@ -32,7 +32,7 @@ public class CrmCompanyTask implements ZZTask {
 	
 	final static String DATE_FORMAT = "yyyy-MM-dd";
 	final static String DATE_FORMAT_DETAIL = "yyyy-MM-dd HH:mm:ss";
-	final static String API_HOST="http://huanbaoadmin.zz91.com:8080/ep-admin/api";
+	final static String API_HOST="http://huanbaoadmin.zz91.com:8081/ep-admin/api";
 	final static String DB="crm";
 	
 	@Override
@@ -40,7 +40,6 @@ public class CrmCompanyTask implements ZZTask {
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
 		boolean result=false;
