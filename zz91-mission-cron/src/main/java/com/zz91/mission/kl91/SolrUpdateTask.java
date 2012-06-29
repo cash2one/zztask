@@ -1,7 +1,9 @@
 package com.zz91.mission.kl91;
 
+import java.io.IOException;
 import java.util.Date;
 
+import org.apache.commons.httpclient.HttpException;
 import org.apache.log4j.Logger;
 
 import com.zz91.mission.ep.SolrUpdateUtils;
@@ -46,8 +48,11 @@ public class SolrUpdateTask implements ZZTask {
 	}
 
 	private Boolean runUpdateSolr(String type, String command) {
-		String url = "http://localhost:8081/solr/" + type + "/dataimport"
+		String url = "http://192.168.110.119:8201/solr/" + type + "/dataimport"
 				+ (command == null ? "" : command);
+		
+		System.out.println(url);
+		
 		try {
 			HttpUtils.getInstance().httpGet(url, HttpUtils.CHARSET_UTF8);
 		} catch (Exception e) {
@@ -63,7 +68,7 @@ public class SolrUpdateTask implements ZZTask {
 		return false;
 	}
 
-	public static void main(String[] args) {
-
+	public static void main(String[] args) throws HttpException, IOException {
+		HttpUtils.getInstance().httpGet("http://211.155.229.180:8201/solr/kl91Products/dataimport?command=delta-import", HttpUtils.CHARSET_UTF8);
 	}
 }
