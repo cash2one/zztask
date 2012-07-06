@@ -31,7 +31,7 @@ public class SolrUpdateUtils {
 	 */
     public static boolean runUpdateSolr (String type,String command) throws Exception {
     	boolean result  = false;
-    	String commond = "http://localhost:8081/solr/"+type+"/dataimport"+(command==null?"":command);
+    	String commond = "http://192.168.110.3:8081/solr/"+type+"/dataimport"+(command==null?"":command);
     	// 构建httpClient实例
     	HttpClient httpClient = new HttpClient();
     	// 创建get方法
