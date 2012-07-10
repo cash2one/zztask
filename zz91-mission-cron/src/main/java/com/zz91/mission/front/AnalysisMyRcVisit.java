@@ -43,8 +43,8 @@ public class AnalysisMyRcVisit implements ZZTask {
 		String targetDate = DateUtil.toString(
 				DateUtil.getDateAfterDays(baseDate, -1), LOG_DATE_FORMAT);
 		return DBUtils.insertUpdate(DB,
-				"delete from analysis_login where gmt_target='" + targetDate
-						+ "'");
+				"delete from analysis_log where gmt_target='" + targetDate
+						+ "' and operator='zz91_myrc' ");
 	}
 
 	@Override
