@@ -159,7 +159,7 @@ public class TodayWebsiteTask implements ZZTask {
 	
 	// 获取发布信息公司数目
 	private int getPublishCompany(String gmtData) {
-		String sql = "select cid,count(*) as count FROM trade_supply where date_format(gmt_created,'%Y-%m-%d') = date_format('"+gmtData+"','%Y-%m-%d') group by cid";
+		String sql = "select cid,count(*) as count FROM trade_supply where id > 10000000 and date_format(gmt_created,'%Y-%m-%d') = date_format('"+gmtData+"','%Y-%m-%d') group by cid";
 		final Integer[] count=new Integer[1];
 		count[0]=0;
 		DBUtils.select(DB, sql, new IReadDataHandler() {
