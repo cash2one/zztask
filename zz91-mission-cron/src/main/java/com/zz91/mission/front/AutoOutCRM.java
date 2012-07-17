@@ -111,7 +111,7 @@ public class AutoOutCRM implements ZZTask {
 			}
 
 			// 该客户符合条件
-//			DBUtils.insertUpdate(DB, "delete FROM crm_cs where company_id=" + companyId);
+			DBUtils.insertUpdate(DB, "delete FROM crm_cs where company_id=" + companyId);
 		}
 	}
 
