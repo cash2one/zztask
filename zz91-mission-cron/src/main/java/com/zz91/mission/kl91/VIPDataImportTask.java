@@ -1,5 +1,7 @@
 package com.zz91.mission.kl91;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -13,6 +15,8 @@ import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
+import com.zz91.util.encrypt.MD5;
+import com.zz91.util.lang.StringUtils;
 
 public class VIPDataImportTask implements ZZTask {
 
@@ -37,13 +41,8 @@ public class VIPDataImportTask implements ZZTask {
 			}
 		});
 		Integer total=count[0]/100;	
-//		Integer m=0;
-//		if(total%100==0){
-//			
-//		}
 		for(Integer i=1;i<=total;i++){
-			String sqlId="select c.id from company c where c.membership_code <> '10051000' and c.industry_code='10001000' ";
-					//"limit "+100*(i-1) +"," + 100;
+			String sqlId="select c.id from company c where c.membership_code <> '10051000' and c.industry_code='10001000' limit "+100*(i-1) +"," + 100;
 			final List<Integer> list=new ArrayList<Integer>();
 			DBUtils.select(DB_AST, sqlId, new IReadDataHandler() {
 				@Override
@@ -58,11 +57,11 @@ public class VIPDataImportTask implements ZZTask {
 				selectCompany(companyId);
 			}
 		}
-		return false;
+		return true;
 	}
 	//搜索ast公司
-	private void selectCompany(Integer companyId) throws Exception  {
-		String sql="select c.id,ca.email,ca.account,c.address,c.introduction,c.business,ca.contact,ca.sex,c.name,ca.mobile,ca.tel,c.old_id from company c left join company_account ca on ca.company_id=c.id where company_id="+companyId+"";
+	private void selectCompany(Integer companyId) {
+		String sql="select c.id,ca.email,ca.account,c.address,c.introduction,c.business,ca.contact,ca.sex,c.name,ca.mobile,ca.tel,c.old_id,ca.password from company c left join company_account ca on ca.company_id=c.id where company_id="+companyId+"";
 		DBUtils.select(DB_AST, sql, new IReadDataHandler() {			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
@@ -72,7 +71,7 @@ public class VIPDataImportTask implements ZZTask {
 					Integer numLogin=1;;
 					String gmtLastLogin= DateUtil.toString(new Date(),"yyyy-MM-dd HH:mm:ss");
 								
-					String industryCode="";
+					String industryCode="1000";
 	
 					String domain="zz91.com";
 								
@@ -86,10 +85,14 @@ public class VIPDataImportTask implements ZZTask {
 						if(email==null){
 							email="kl91@.com";
 					}
-					String account=rs.getString(3);
-						if(account==null){
-						account="zz91@.com";
+					String accounst=rs.getString(3);
+					String account=accounst;
+					if(StringUtils.isEmail(accounst)){
+						account=(String) account.substring(0, accounst.indexOf("@"));
 					}
+//					if(accounst.contains("@")){
+//						account=(String) account.substring(0, accounst.indexOf("@"));
+//					}
 					String address=rs.getString(4);
 					if(address==null){
 						address="";
@@ -127,8 +130,14 @@ public class VIPDataImportTask implements ZZTask {
 						tel="";
 					}
 					Integer oldId=rs.getInt(12);
-//					String svrCode="1000";			
-//						Integer data=validatePeriod(id, svrCode);
+					String password=(String)rs.getString(13);
+					try {
+						password=MD5.encode(password,MD5.LENGTH_32);
+					} catch (NoSuchAlgorithmException e1) {
+						e1.printStackTrace();
+					} catch (UnsupportedEncodingException e1) {
+						e1.printStackTrace();
+					}
 					Boolean bl = false;
 					try {
 						bl = compareForId(oldId);
@@ -137,8 +146,8 @@ public class VIPDataImportTask implements ZZTask {
 					}
 					if(bl==true){
 						try {
-							saveToKL(id,email,account,membershipCode,business,contact,sex,name,mobile,tel,
-								numLogin,gmtLastLogin,industryCode,domain,isActive,registFlag,oldId);
+							saveToKL(id,email,account,introduction,membershipCode,business,contact,sex,name,mobile,tel,
+								numLogin,gmtLastLogin,industryCode,domain,isActive,registFlag,oldId,password);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -156,7 +165,7 @@ public class VIPDataImportTask implements ZZTask {
 	
 	
 	//根据公司ID获取公司的old_id并且判断
-	private Boolean compareForId(Integer oldId) throws Exception  {
+	private Boolean compareForId(Integer oldId) {
 		String sql="select count(0) from company where old_id="+oldId+"";
 		final Integer[] ids=new Integer[1];
 		ids[0]=0;
@@ -173,36 +182,20 @@ public class VIPDataImportTask implements ZZTask {
 		}
 		return true;
 	}
-//	//验证是否过期的高会
-//	private Integer validatePeriod(Integer id, String svrCode)  throws Exception {
-//		final Integer[] count=new Integer[1];
-//		count[0]=0;
-//		String sql="select count(*) from crm_company_service where company_id="+id+" and crm_service_code="+svrCode+" and apply_status='1' and membership_code <> '10051000' and gmt_end>now() and now()>=gmt_start";
-//		DBUtils.select(DB_AST, sql, new IReadDataHandler() {			
-//			@Override
-//			public void handleRead(ResultSet rs) throws SQLException {
-//				while(rs.next()){
-//					count[0] = rs.getInt(1);
-//				}
-//			}
-//		});
-//		return count[0];
-//	}
-//	
 	//插入到kl91的公司表
-	private void saveToKL(Integer id, String email, String account,
+	private void saveToKL(Integer id, String email, String account,String introduction,
 			String membershipCode, String business, String contact,
 			Integer sex, String name, String mobile, String tel,
 			Integer numLogin, String gmtLastLogin, String industryCode,
-			String domain, Integer isActive, Integer registFlag,Integer oldId) throws Exception {
-		String sql="insert into company(account,company_name,membership_code,sex,contact,mobile,email,tel,business,num_login,gmt_last_login,is_active,domain,industry_code,regist_flag,show_time,gmt_created,gmt_modified,old_id)values('"+account+"','"+name+"','"+membershipCode+"',"+sex+",'"+contact+"','"+mobile+"','"+email+"','"+tel+"','"+business+"','"+numLogin+"','"+gmtLastLogin+"','"+isActive+"','"+domain+"','"+industryCode+"','"+registFlag+"',now(),now(),now(),"+oldId+")";
+			String domain, Integer isActive, Integer registFlag,Integer oldId,String password){
+		String sql="insert into company(account,password,company_name,membership_code,sex,contact,mobile,email,tel,business,introduction,num_login,gmt_last_login,is_active,domain,industry_code,regist_flag,show_time,gmt_created,gmt_modified,old_id)values('"+account+"','"+password+"','"+name+"','"+membershipCode+"',"+sex+",'"+contact+"','"+mobile+"','"+email+"','"+tel+"','"+business+"','"+introduction+"','"+numLogin+"','"+gmtLastLogin+"','"+isActive+"','"+domain+"','"+industryCode+"','"+registFlag+"',now(),now(),now(),"+oldId+")";
 		DBUtils.insertUpdate(DB_KL91, sql );
 		
 	}
 	//开始执行供求	
-	private void execProducts(Integer oldCompanyId) throws Exception  {
+	private void execProducts(Integer oldCompanyId) throws Exception{
 		Integer companyId = getCompanyId(oldCompanyId);
-		String sql="select id from products  where company_id="+oldCompanyId+" and check_status=1 and is_del=0 and is_pause=0";
+		String sql="select id from products  where company_id="+oldCompanyId+" and check_status=1 and is_del=0 and is_pause=0 and category_products_main_code like '1001%'";
 		final List<Integer> list =new ArrayList<Integer>();
 		DBUtils.select(DB_AST, sql, new IReadDataHandler() {				
 			@Override
@@ -214,7 +207,7 @@ public class VIPDataImportTask implements ZZTask {
 		});
 		for(Integer productId:list){
 			final Map<String, Object> map=new HashMap<String, Object>();
-			sql = "select products_type_code,title,tags_admin,location,price_unit,quantity_unit,quantity,color,useful,min_price,max_price from products where id= "+productId;
+			sql = "select products_type_code,title,details,location,price_unit,quantity_unit,quantity,color,useful,min_price,max_price from products where id= "+productId;
 			DBUtils.select(DB_AST, sql, new IReadDataHandler() {				
 				@Override
 				public void handleRead(ResultSet rs) throws SQLException {
@@ -233,7 +226,7 @@ public class VIPDataImportTask implements ZZTask {
 					}
 				}
 			});
-				String productCategoryCode="废塑料";
+				String productCategoryCode="1000";
 				String detailsQuery="";
 				Integer checkedFlag=1;
 				Integer deletedFlag=0;
@@ -316,7 +309,7 @@ public class VIPDataImportTask implements ZZTask {
 			}
 	}
 		
-	private Integer getCompanyId(Integer oldCompanyId) throws Exception  {
+	private Integer getCompanyId(Integer oldCompanyId) {
 		final Integer[] companyId=new Integer[1];
 		companyId[0]=0;
 		String sql="select id from company where old_id="+oldCompanyId+"";
@@ -338,7 +331,7 @@ public class VIPDataImportTask implements ZZTask {
 			String location, String useful, String gmtPost,
 			String gmtRefresh, String gmtExpired, String color,
 			String priceUnit, String quantityUnit, Integer quantity,
-			Integer minPrice, Integer maxPrice,Integer oldId) throws Exception  {
+			Integer minPrice, Integer maxPrice,Integer oldId) {
 		String sql="insert into products(cid,products_category_code,type_code,title,details,details_query,checked_flag," +
 		"deleted_flag,impt_flag,publish_flag,location,useful,gmt_post,gmt_refresh,gmt_expired,color,price_unit,quantity_unit,quantity,min_price,max_price,old_id,show_time,gmt_created,gmt_modified,gmt_check)" +
 		"values('"+cid+"','"+productCategoryCode+"','"+typeCode+"','"+title+"','"+details+"','"+detailsQuery+"','"+checkedFlag+"','"+deletedFlag+"'," +
