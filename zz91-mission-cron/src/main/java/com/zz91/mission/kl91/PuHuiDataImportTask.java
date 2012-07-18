@@ -29,7 +29,7 @@ public class PuHuiDataImportTask implements ZZTask {
 	}
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
-		String sql="select count(*) from company c where c.membership_code <> '10051000' and c.industry_code='10001000' and regtime between '2011-01-01 00:00:00' and '2012-07-01 00:00:00'";
+		String sql="select count(*) from company c where c.membership_code = '10051000' and c.industry_code='10001000' and gmt_created > '2012-01-01 00:00:00' and gmt_created < '2012-07-01 00:00:00'";
 		final Integer[] count=new Integer[1];
 		count[0]=0;
 		DBUtils.select(DB_AST, sql, new IReadDataHandler() {
@@ -42,7 +42,7 @@ public class PuHuiDataImportTask implements ZZTask {
 		});
 		Integer total=count[0]/100;	
 		for(Integer i=1;i<=total;i++){
-			String sqlId="select c.id from company c where c.membership_code <> '10051000' and c.industry_code='10001000' limit "+100*(i-1) +"," + 100;
+			String sqlId="select c.id from company c where c.membership_code = '10051000' and c.industry_code='10001000' and gmt_created > '2012-01-01 00:00:00' and gmt_created < '2012-07-01 00:00:00' limit "+100*(i-1) +"," + 100;
 			final List<Integer> list=new ArrayList<Integer>();
 			DBUtils.select(DB_AST, sqlId, new IReadDataHandler() {
 				@Override
@@ -81,22 +81,31 @@ public class PuHuiDataImportTask implements ZZTask {
 								
 					String membershipCode="10051001";
 								
-					String email=rs.getString(2);
-						if(email==null){
-							email="kl91@.com";
-					}
 					String accounst=rs.getString(3);
 					String account=accounst;
 					if(StringUtils.isEmail(accounst)){
 						account=(String) account.substring(0, accounst.indexOf("@"));
 					}
-//					if(accounst.contains("@")){
-//						account=(String) account.substring(0, accounst.indexOf("@"));
-//					}
+					if(account.contains(".")){
+						account=(String) account.replace(".", "");
+					}
+					if(account.contains("_")){
+						account=(String) account.replace("_", "");
+					}
+					if(account.contains("-")){
+						account=(String) account.replace("-", "");
+					}
+					
+					String email=rs.getString(2);
+					if(email==null){
+						email=account+"@kl91.com";
+					}
+					
 					String address=rs.getString(4);
 					if(address==null){
 						address="";
 					}
+					
 					String introduction=rs.getString(5);
 					if(introduction==null){
 						introduction="";
@@ -105,11 +114,14 @@ public class PuHuiDataImportTask implements ZZTask {
 					if(business==null){
 						business="";
 					}
+					
 					String contact=rs.getString(7);
 					if(contact==null){
 						contact="";
 					}
+					
 					String se=rs.getString(8);
+					
 					Integer sex=0;
 					if(se.equals("M")){
 						sex=0;
@@ -121,16 +133,21 @@ public class PuHuiDataImportTask implements ZZTask {
 					if(name==null){
 						name="";
 					}
+					
 					String mobile=rs.getString(10);
 					if(mobile==null){
 						mobile="";
 					}
+					
 					String tel=rs.getString(11);
 					if(tel==null){
 						tel="";
 					}
+					
 					Integer oldId=rs.getInt(12);
+					
 					String password=(String)rs.getString(13);
+					
 					try {
 						password=MD5.encode(password,MD5.LENGTH_32);
 					} catch (NoSuchAlgorithmException e1) {
@@ -138,6 +155,7 @@ public class PuHuiDataImportTask implements ZZTask {
 					} catch (UnsupportedEncodingException e1) {
 						e1.printStackTrace();
 					}
+					
 					Boolean bl = false;
 					try {
 						bl = compareForId(oldId);
@@ -195,9 +213,9 @@ public class PuHuiDataImportTask implements ZZTask {
 	//开始执行供求	
 	private void execProducts(Integer oldCompanyId) throws Exception{
 		Integer companyId = getCompanyId(oldCompanyId);
-		String sql="select id from products  where company_id="+oldCompanyId+" and check_status=1 and is_del=0 and is_pause=0 and category_products_main_code like '1001%'";
+		String sql="select id from products  where company_id="+oldCompanyId+" and check_status=1 and is_del=0 and is_pause=0 and gmt_created > '2012-01-01 00:00:00' and gmt_created < '2012-07-01 00:00:00' and category_products_main_code like '1001%'";
 		final List<Integer> list =new ArrayList<Integer>();
-		DBUtils.select(DB_AST, sql, new IReadDataHandler() {				
+		DBUtils.select(DB_AST, sql, new IReadDataHandler() {
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				while(rs.next()){
