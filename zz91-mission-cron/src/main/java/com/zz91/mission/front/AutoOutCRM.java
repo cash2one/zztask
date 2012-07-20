@@ -39,7 +39,7 @@ public class AutoOutCRM implements ZZTask {
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
 		// 一个月未联系客户自动掉公海
-		Date omDate = DateUtil.getDateAfterDays(baseDate, -30);
+		Date omDate = DateUtil.getDateAfterDays(baseDate, -31);
 		oneMonthOut(omDate);
 
 		// 过期三个月自动掉公海
