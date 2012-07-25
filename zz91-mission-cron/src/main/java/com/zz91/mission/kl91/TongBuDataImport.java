@@ -58,7 +58,7 @@ public class TongBuDataImport implements ZZTask {
 			selectProducts(productId);
 		}
 		
-		return false;
+		return true;
 	}
 
 	private void updateCompanyInsert(String email, String account,
@@ -97,111 +97,110 @@ public class TongBuDataImport implements ZZTask {
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				while (rs.next()) {
-					// 默认登录总数
-					map.put("numLogin",0);
-					// 默认创建时间
-					map.put("gmtLastLogin",  DateUtil.toString(new Date(),"yyyy-MM-dd HH:mm:ss"));
-					// 给定类别为废塑料
-					map.put("industryCode","1000");
-					// 默认激活
-					map.put("isActive",0);
-					// 默认注册来源为后台导入
-					map.put("registFlag",1);
-					
-					map.put("cid", rs.getInt(1));
-					String accounst = rs.getString(3);
-					// 判断账户是不是邮箱如果是就取@以前的为账户
-					String account = accounst;
-					if (StringUtils.isEmail(accounst)) {
-						account = (String) account.substring(0, accounst.indexOf("@"));
-					}
-					// 如果账户里面包含.则删除.
-					if (account.contains(".")) {
-						account = (String) account.replace(".", "");
-					}
-					if (account.contains("_")) {
-						account = (String) account.replace("_", "");
-					}
-					if (account.contains("-")) {
-						account = (String) account.replace("-", "");
-					}
-					map.put("account", account);
-					// 如果email为空就给定账户加上@kl91.com
-					String email = rs.getString(2);
-					if (email == null) {
-						email = account + "@kl91.com";
-					}
-					map.put("email", email);
-					// 联系人
-					String contact = rs.getString(7);
-					if (contact == null) {
-						contact = "";
-					}
-					map.put("contact",contact);
-					// 性别
-					String se = rs.getString(8);
-					// ast表取出来的性别为char类型的，为了匹配kl91表的Integer
-					Integer sex = 0;
-					if (se.equals("M")) {
-						sex = 0;
-					} else {
-						sex = 1;
-					}
-					map.put("sex", sex);
-					// 联系人名称
-					String companyName = rs.getString(9);
-					if (companyName == null) {
-						companyName = "";
-					}
-					map.put("companyName",companyName);
-					// 手机
-					String mobile = rs.getString(10);
-					if (mobile == null) {
-						mobile = "";
-					}
-					map.put("mobile", mobile);
-					Integer oldId = rs.getInt(12);
-					map.put("oldId", oldId);
-					// 密码
-					String password = (String) rs.getString(13);
-					// 给密码加密
-					try {
-						password = MD5.encode(password, MD5.LENGTH_32);
-					} catch (NoSuchAlgorithmException e1) {
-						e1.printStackTrace();
-					} catch (UnsupportedEncodingException e1) {
-						e1.printStackTrace();
-					}
-					map.put("password", password);
-					// 地址
+					map.put("cid", rs.getString(1));
+					map.put("email", rs.getString(2));
+					map.put("account", rs.getString(3));
 					map.put("address", rs.getString(4));
-					// 公司介绍
 					map.put("introduction", rs.getString(5));
-					// 主营业务
 					map.put("business", rs.getString(6));
-					// 企业网站
-					map.put("website", rs.getString(14));
-					// 座机
+					map.put("contact", rs.getString(7));
+					map.put("sex", rs.getString(8));
+					map.put("name", rs.getString(9));
+					map.put("mobile", rs.getString(10));
 					map.put("tel", rs.getString(11));
+					map.put("oldId", rs.getInt(12));
+					map.put("password", rs.getString(13));
+					map.put("website", rs.getString(14));
 				}
 			}
 		});
+		//邮箱
+		String email=(String)map.get("email");
+		if(email == null){
+			email= "" ;
+		}
+		//账户
+		String accounst=(String)map.get("account");
+		// 判断账户是不是邮箱如果是就取@以前的为账户
+		String account = accounst;
+		if (StringUtils.isEmail(accounst)) {
+			account = (String) account.substring(0, accounst.indexOf("@"));
+		}
+		// 如果账户里面包含.则删除.
+		if (account.contains(".")) {
+			account = (String) account.replace(".", "");
+		}
+		if (account.contains("_")) {
+			account = (String) account.replace("_", "");
+		}
+		
+		if (account.contains("-")) {
+			account = (String) account.replace("-", "");
+		}	
+		//地址
+		String address=(String)map.get("address");
+		if(address == null){
+			address= "" ;
+		}
+		//介绍
+		String introduction=(String)map.get("introduction");
+		if(email == null){
+			introduction= "" ;
+		}
+		//主营业务
+		String business=(String)map.get("business");
+		if(email == null){
+			business= "" ;
+		}
+		//联系人
+		String contact=(String)map.get("contact");
+		if(contact == null){
+			contact= "" ;
+		}
+		//性别
+		String se=(String)map.get("sex");
+		Integer sex=0;
+		if (se.equals("M")) {
+			sex=1;
+		} else {
+			sex=0;
+		}
+		//公司名称
+		String companyName=(String)map.get("name");
+		if(companyName == null){
+			companyName= "" ;
+		}
+		//手机
+		String mobile=(String)map.get("mobile");
+		if(mobile == null){
+			mobile= "" ;
+		}
+		//座机
+		String tel=(String)map.get("tel");
+		if(tel == null){
+			tel= "" ;
+		}
+		//密码
+		String password=(String)map.get("password");
+		try {
+			password = MD5.encode(password, MD5.LENGTH_32);
+		} catch (NoSuchAlgorithmException e1) {
+			e1.printStackTrace();
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		//域名
+		String website=(String)map.get("website");
+		if(website == null){
+			website= "" ;
+		}
+		
 		if(id[0]!=0){
-			updateCompanyInsert(map.get("email").toString(), map.get("account").toString(), 
-					map.get("introduction").toString(),"10051000", map.get("business").toString(), 
-					map.get("contact").toString(), Integer.valueOf(map.get("sex").toString()), map.get("companyName").toString(),
-					map.get("mobile").toString(),map.get("tel").toString(), 1, 
-					DateUtil.toString(new Date(),"yyyy-MM-dd HH:mm:ss"),"1000", map.get("website").toString(),
-					0,1,map.get("password").toString(), 
-					companyId);
+			updateCompanyInsert(email,account,introduction,"10051000",business,contact, sex, companyName,mobile,tel, 1, 
+				DateUtil.toString(new Date(),"yyyy-MM-dd HH:mm:ss"),"1000", website,0,1,password, companyId);
 		}else{
-			saveToKL(map.get("email").toString(), map.get("account").toString(), 
-					map.get("introduction").toString(),"10051000", map.get("business").toString(), 
-					map.get("contact").toString(), Integer.valueOf(map.get("sex").toString()), map.get("companyName").toString(),
-					map.get("mobile").toString(),map.get("tel").toString(), 1, 
-					DateUtil.toString(new Date(),"yyyy-MM-dd HH:mm:ss"),"1000", map.get("website").toString(),
-					0,1,companyId, 
-					map.get("password").toString());
+			saveToKL(email, account, introduction,"10051000", business, contact, sex,companyName,mobile,tel, 1, 
+					DateUtil.toString(new Date(),"yyyy-MM-dd HH:mm:ss"),"1000", website,0,1,companyId, password);
 		}
 	}
 
@@ -281,18 +280,6 @@ public class TongBuDataImport implements ZZTask {
 					}
 				}
 			});
-			// 默认产品类别为废塑料
-			String productCategoryCode = "1000";
-			// 默认摘要
-			String detailsQuery = "";
-			// 默认审核为通过
-			Integer checkedFlag = 1;
-			// 指定供求未删除
-			Integer deletedFlag = 0;
-			// 指定为导入数据
-			Integer imptFlag = 1;
-			// 默认为已发布
-			Integer publishFlag = 1;
 			// 默认时间为当前
 			String gmtPost = DateUtil.toString(new Date(),
 					"yyyy-MM-dd HH:mm:ss");
@@ -369,18 +356,13 @@ public class TongBuDataImport implements ZZTask {
 			Integer pid = getKLProductId(productId);
 			
 			if(pid>0){
-				updateProducts(cid, productCategoryCode, typeCode, title, details,
-						detailsQuery, checkedFlag, deletedFlag, imptFlag, publishFlag, 
-						location, useful, gmtPost, gmtPost, 
+				updateProducts(cid, "1000", typeCode, title, details,"", 1, 0, 1, 1, location, useful, gmtPost, gmtPost, 
 						DateUtil.toString(DateUtil.getDateAfterMonths(new Date(), +6), "yyyy-MM-dd HH:mm:ss"), color,
 						priceUnit, quantityUnit, quantity, minPrice, maxPrice, productId);
 			}else{
-				insertProducts(cid, "1000", typeCode, title, details,
-						"", 1, 0, 1,
-						1, location, useful, gmtPost, gmtPost,
-						DateUtil.toString(DateUtil.getDateAfterMonths(
-								new Date(), +6), "yyyy-MM-dd HH:mm:ss"), color, priceUnit, quantityUnit, quantity,
-								minPrice, maxPrice, productId);
+				insertProducts(cid, "1000", typeCode, title, details,"", 1, 0, 1,1, location, useful, gmtPost, gmtPost,
+					DateUtil.toString(DateUtil.getDateAfterMonths(new Date(), +6), "yyyy-MM-dd HH:mm:ss"), 
+					color, priceUnit, quantityUnit, quantity,minPrice, maxPrice, productId);
 			}
 			
 		}
@@ -441,14 +423,16 @@ public class TongBuDataImport implements ZZTask {
 				+ oldId + ",now(),now(),now(),now())";
 		DBUtils.insertUpdate(DB_KL91, sql);
 	}
-
+	
 	private void saveToKL(String email, String account,
 			String introduction, String membershipCode, String business,
 			String contact, Integer sex, String name, String mobile,
 			String tel, Integer numLogin, String gmtLastLogin,
 			String industryCode, String domain, Integer isActive,
 			Integer registFlag, Integer oldId, String password) {
-		String sql = "insert into company(account,password,company_name,membership_code,sex,contact,mobile,email,tel,business,introduction,num_login,gmt_last_login,is_active,domain,industry_code,regist_flag,show_time,gmt_created,gmt_modified,old_id)values('"
+		String sql = "insert into company(account,password,company_name,membership_code,sex,contact," +
+				"mobile,email,tel,business,introduction,num_login,gmt_last_login,is_active,domain,industry_code," +
+				"regist_flag,show_time,gmt_created,gmt_modified,old_id)values('"
 				+ account
 				+ "','"
 				+ password
