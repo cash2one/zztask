@@ -48,7 +48,7 @@ public class SolrUpdateTask implements ZZTask {
 	}
 
 	private Boolean runUpdateSolr(String type, String command) {
-		String url = "http://192.168.110.119:8201/solr/" + type + "/dataimport"
+		String url = "http://192.168.110.130:8089/solr/" + type + "/dataimport"
 				+ (command == null ? "" : command);
 		
 		System.out.println(url);
