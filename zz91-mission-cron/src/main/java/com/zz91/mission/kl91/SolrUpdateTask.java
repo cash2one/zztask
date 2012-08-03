@@ -51,8 +51,6 @@ public class SolrUpdateTask implements ZZTask {
 		String url = "http://192.168.110.130:8089/solr/" + type + "/dataimport"
 				+ (command == null ? "" : command);
 		
-		System.out.println(url);
-		
 		try {
 			HttpUtils.getInstance().httpGet(url, HttpUtils.CHARSET_UTF8);
 		} catch (Exception e) {
