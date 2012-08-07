@@ -47,7 +47,7 @@ public class CRMDataImport implements ZZTask {
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
 		boolean result=false;
-		String targetDate = DateUtil.toString(baseDate, DATE_FORMAT);
+		String targetDate = DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -1), DATE_FORMAT);
 		do{
 			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/list/todayDataCount.htm?today="+targetDate, HttpUtils.CHARSET_UTF8);
 			JSONObject jb=JSONObject.fromObject(responseText);
