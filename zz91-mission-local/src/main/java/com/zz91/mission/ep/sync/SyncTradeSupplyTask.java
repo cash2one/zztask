@@ -82,12 +82,10 @@ public class SyncTradeSupplyTask implements ZZTask {
 		Integer success=0;
 		Integer failure=0;
 		
-//		long maxShowTime=modifiedSeed;
-		
 		do{
-			if((success+failure)>=100000){
-				break;
-			}
+//			if((success+failure)>=100000){
+//				break;
+//			}
 			
 			List<TradeSupply> list=queryTradeSupply(unSyncMaxId);
 			
@@ -102,23 +100,7 @@ public class SyncTradeSupplyTask implements ZZTask {
 				supply.setGmtModified(new Date(modifiedSeed));
 				
 				unSyncMaxId = supply.getId();
-//				maxShowTime = supply.getGmtModified().getTime();
 			}
-			
-//			long a=System.currentTimeMillis();
-//			FileUtils.createFile("/home/mays/temp/ts100."+a);
-//			
-//			 try {  
-//		            FileWriter fw=new FileWriter("/home/mays/temp/ts100."+a,true);  
-//		            PrintWriter pw=new PrintWriter(fw);  
-//		            pw.println(JSONArray.fromObject(list).toString());  
-//		            pw.close();  
-//		            //bw.close();  
-//		            fw.close();  
-//		        } catch (IOException e) {  
-//		            // TODO Auto-generated catch block  
-//		            e.printStackTrace();  
-//		        }
 			
 			//提交请求
 			NameValuePair[] param=new NameValuePair[]{
@@ -165,9 +147,9 @@ public class SyncTradeSupplyTask implements ZZTask {
 		dataMap.put("successNum", success);
 		dataMap.put("failureNum", failure);
 		dataMap.put("maxShowTime", DateUtil.toString(new Date(modifiedSeed), DATE_FORMAT));
-		dataMap.put("startDate",  DateUtil.toString(new Date(baseDate.getTime()), DATE_FORMAT));
+		dataMap.put("startDate",  DateUtil.toString(new Date(now), DATE_FORMAT));
 		dataMap.put("endDate",  DateUtil.toString(end, DATE_FORMAT));
-		dataMap.put("timeCost", (end.getTime()-baseDate.getTime())/1000);
+		dataMap.put("timeCost", (end.getTime()-now)/1000);
 		
 		MailUtil.getInstance().sendMail(
 				"环保网数据同步报告 交易中心 供应信息", 
@@ -304,14 +286,14 @@ public class SyncTradeSupplyTask implements ZZTask {
     }
 	
 	public static void main(String[] args) {
-		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc2.properties");
-		SyncTradeSupplyTask task = new SyncTradeSupplyTask();
-		
-		try {
-			task.exec(new Date());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+//		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc2.properties");
+//		SyncTradeSupplyTask task = new SyncTradeSupplyTask();
+//		
+//		try {
+//			task.exec(new Date());
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+		System.out.println(DateUtil.toString(new Date(1343804625000l), "yyyy-MM-dd HH:mm:ss"));
 	}
 }
