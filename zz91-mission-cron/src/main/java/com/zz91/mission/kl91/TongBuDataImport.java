@@ -38,33 +38,61 @@ public class TongBuDataImport implements ZZTask {
 		String from = DateUtil.toString(
 				DateUtil.getDateAfterDays(baseDate, -1), "yyyy-MM-dd");
 		String to = DateUtil.toString(baseDate, "yyyy-MM-dd");
-		// 搜出当天注册的供求，并且得到公司id
-		String sqlId = "select company_id,id from products where refresh_time >= '"
-				+ from
-				+ "' and refresh_time < '"
-				+ to
-				+ "' and check_status=1 and is_del=0 and is_pause=0 and category_products_main_code like '1001%' ";
-		final List<Integer> companyIdlist = new ArrayList<Integer>();
-		final List<Integer> productIdlist = new ArrayList<Integer>();
-		DBUtils.select(DB_AST, sqlId, new IReadDataHandler() {
+		// 计算 本次任务 数据条数
+		Integer count = queryCount(from,to);
+		if(count%100==0){
+			count = count/10;
+		}else{
+			count = count/10+1;
+		}
+		for(int i=1;i<=count;i++){
+			// 搜出当天注册的供求，并且得到公司id
+			String sqlId = "select company_id,id from products where refresh_time >= '"
+					+ from
+					+ "' and refresh_time < '"
+					+ to
+					+ "' and check_status=1 and is_del=0 and is_pause=0 and category_products_main_code like '1001%' limit "+(i-1)*10+",10";
+			final List<Integer> companyIdlist = new ArrayList<Integer>();
+			final List<Integer> productIdlist = new ArrayList<Integer>();
+			DBUtils.select(DB_AST, sqlId, new IReadDataHandler() {
+				@Override
+				public void handleRead(ResultSet rs) throws SQLException {
+					while (rs.next()) {
+						companyIdlist.add(rs.getInt(1));
+						productIdlist.add(rs.getInt(2));
+					}
+				}
+			});
+			// 导入公司
+			for (Integer companyId : companyIdlist) {
+				selectKLCompanyIdAndImport(companyId);
+			}
+			// 导入供求
+			for (Integer productId : productIdlist) {
+				selectProducts(productId);
+			}
+		}
+		return true;
+	}
+	
+	private Integer queryCount(String from ,String to){
+		final Integer[] count = {0};
+		// 计算任务处理数据的条数
+		String sqlCount = "select count(0) from products where refresh_time >= '"
+			+ from
+			+ "' and refresh_time < '"
+			+ to
+			+ "' and check_status=1 and is_del=0 and is_pause=0 and category_products_main_code like '1001%' ";
+		DBUtils.select(DB_AST, sqlCount, new IReadDataHandler() {
+			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
-				while (rs.next()) {
-					companyIdlist.add(rs.getInt(1));
-					productIdlist.add(rs.getInt(2));
+				while(rs.next()){
+					count[0] = rs.getInt(1);
 				}
 			}
 		});
-		// 导入公司
-		for (Integer companyId : companyIdlist) {
-			selectKLCompanyIdAndImport(companyId);
-		}
-		// 导入供求
-		for (Integer productId : productIdlist) {
-			selectProducts(productId);
-		}
-
-		return true;
+		return count[0];
 	}
 
 	private void updateCompanyInsert(String email, String account,
