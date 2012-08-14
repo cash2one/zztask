@@ -74,7 +74,7 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 			server.add(docs);
 			
 			docsize=docs.size()+begin;
-			System.out.println("起始>>>>>>>>>>>>>>>>>>>>>>>>>>"+begin);
+			
 			begin=begin+LIMIT;
 			
 		} while (true);
