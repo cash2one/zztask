@@ -27,10 +27,10 @@ import com.zz91.util.search.SolrUtil;
  * @author mays
  *
  */
-public class TsTask extends AbstractIdxTask {
+public class IndexTradeSupplyTask extends AbstractIdxTask {
 
 	final static String DB="ep";
-	final static int LIMIT=20;
+	final static int LIMIT=25;
 	
 	final static String MODEL="tradesupply";
 	
@@ -74,7 +74,7 @@ public class TsTask extends AbstractIdxTask {
 			server.add(docs);
 			
 			docsize=docs.size()+begin;
-			
+			System.out.println("起始>>>>>>>>>>>>>>>>>>>>>>>>>>"+begin);
 			begin=begin+LIMIT;
 			
 		} while (true);
@@ -186,21 +186,19 @@ public class TsTask extends AbstractIdxTask {
 		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		
-		String start="2011-11-09 14:04:11";
-		String end="2011-11-09 14:04:12";
+		String start="2011-11-29 15:13:20";
+		String end="2011-11-29 15:13:21";
 		
-		AbstractIdxTask task=new TsTask();
+		AbstractIdxTask task=new IndexTradeSupplyTask();
 		try {
-			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
+//			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
 			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
+//			task.optimize();
 		} catch (ParseException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-//		String str="1234567890";
-//		System.out.println(str.substring(0,10));
 	}
 
 
