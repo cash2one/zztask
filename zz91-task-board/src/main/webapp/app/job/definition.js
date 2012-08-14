@@ -1,6 +1,7 @@
 Ext.namespace("com.zz91.task.board.job.definition");
 
-com.zz91.task.board.job.definition.Field = ["id","jobName","cron","jobGroup","jobClassName","description","isInUse","jobClasspath"];
+com.zz91.task.board.job.definition.Field = ["id","jobName","cron","jobGroup","jobClassName","description","isInUse","jobClasspath","endTime"];
+com.zz91.task.board.job.definition.GROUP="task";
 
 com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
 	targetStatusGridId:null,
@@ -47,8 +48,8 @@ com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
     		dataIndex : 'id',
     		hidden:true
     	},{
-    		header : "",
-    		sortable : true,
+    		header : "ST",
+    		sortable : false,
     		width:27,
     		dataIndex : 'isInUse',
     		renderer:function(value, metadata, record, rowIndex,colIndex, store) {
@@ -59,13 +60,25 @@ com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
 			}
     	},{
     		header : "jobId",
-    		sortable : true,
+    		sortable : false,
     		dataIndex : 'jobName'
     	},{
     		header : "cron",
     		sortable : false,
     		width:120,
     		dataIndex : 'cron'
+    	},{
+    		header:"最后结束时间",
+    		sortable:false,
+    		width:120,
+    		dataIndex:"endTime",
+    		renderer:function(value, metadata, record, rowIndex,colIndex, store) {
+				if(value!=null){
+					return Ext.util.Format.date(new Date(value.time), 'Y-m-d H:i:s');
+				} else{
+					return "";
+				}
+			}
     	},{
     		header : "组",
     		sortable : false,
@@ -81,6 +94,7 @@ com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
     		dataIndex : 'jobClassName'
     	},{
     		header : "任务描述",
+    		width:200,
     		sortable : false,
     		dataIndex : 'description'
     	}]);
@@ -136,9 +150,7 @@ com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
                             var row = sm.getSelections();
                             var _ids = new Array();
                             for (var i=0,len = row.length;i<len;i++){
-                                var _id=row[i].get("id");
-                                //TODO 一条条删除
-                                com.zz91.task.board.job.definition.deleteDefinition(_id);
+                                com.zz91.task.board.job.definition.deleteDefinition(row[i].get("id"), row[i].get("jobName"), row[i].get("jobGroup"));
                             }
                         });
 	                }
@@ -152,7 +164,7 @@ com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
 	                var _ids = new Array();
 	                for (var i=0,len = row.length;i<len;i++){
 	                	if(row[i].get("isInUse")==0 || row[i].get("isInUse")==""){
-		                    com.zz91.task.board.job.definition.resumeTask(row[i].get("id"),row[i].get("jobName"));
+		                    com.zz91.task.board.job.definition.resumeTask(row[i].get("id"),row[i].get("jobName"),row[i].get("jobGroup"));
 	                	}
 	                }
             	}
@@ -165,38 +177,46 @@ com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
 	                var _ids = new Array();
 	                for (var i=0,len = row.length;i<len;i++){
 	                	if(row[i].get("isInUse")==1){
-		                    com.zz91.task.board.job.definition.pauseTask(row[i].get("id"),row[i].get("jobName"));
+		                    com.zz91.task.board.job.definition.pauseTask(row[i].get("id"),row[i].get("jobName"),row[i].get("jobGroup"));
 	                	}
 	                }
             	}
-            },"-",{
-            	iconCls:"accept16",
-            	text:"简",
-            	handler:function(){
-	            	var sm=grid.getSelectionModel();
-	            	var row = sm.getSelections();
-	                var _ids = new Array();
-	                for (var i=0,len = row.length;i<len;i++){
-		                com.zz91.task.board.job.definition.resumeSimpleTask(row[i].get("id"),row[i].get("cron"),row[i].get("jobName"));
-	                }
-            	}
-            },{
-            	iconCls:"stop16",
-            	text:"简",
-            	handler:function(){
-	            	var sm=grid.getSelectionModel();
-	            	var row = sm.getSelections();
-	                var _ids = new Array();
-	                for (var i=0,len = row.length;i<len;i++){
-		                  com.zz91.task.board.job.definition.pauseSimpleTask(row[i].get("id"),row[i].get("jobName"));
-	                }
-            	}
-            },"->","指定时间：",{
-            	id:"basetime",
+            }
+//            ,"-",{
+//            	iconCls:"accept16",
+//            	text:"简",
+//            	handler:function(){
+//	            	var sm=grid.getSelectionModel();
+//	            	var row = sm.getSelections();
+//	                var _ids = new Array();
+//	                for (var i=0,len = row.length;i<len;i++){
+//		                com.zz91.task.board.job.definition.resumeSimpleTask(row[i].get("id"),row[i].get("cron"),row[i].get("jobName"));
+//	                }
+//            	}
+//            },{
+//            	iconCls:"stop16",
+//            	text:"简",
+//            	handler:function(){
+//	            	var sm=grid.getSelectionModel();
+//	            	var row = sm.getSelections();
+//	                var _ids = new Array();
+//	                for (var i=0,len = row.length;i<len;i++){
+//		                  com.zz91.task.board.job.definition.pauseSimpleTask(row[i].get("id"),row[i].get("jobName"));
+//	                }
+//            	}
+//            }
+            ,"->",{
+            	id:"start",
             	xtype:"datefield",
-            	format:"Y-m-d"
+            	emptyText:"执行时间",
+            	format:"Y-m-d H:i:s"
             },{
-            	iconCls:"edit16",
+            	id:"end",
+            	xtype:"datefield",
+            	emptyText:"执行结束时间",
+            	format:"Y-m-d H:i:s"
+            },{
+            	iconCls:"play16",
             	text:"手动执行",
             	handler:function(btn){
             		
@@ -212,12 +232,20 @@ com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
 	                } else{
                         var row = sm.getSelections();
                         var _ids = new Array();
+                        
+                        var url = Context.ROOT+"/job/definition/doTask.htm";
+                        
                         for (var i=0,len = row.length;i<len;i++){
+                        	if(row[i].get("jobGroup")=="idx_task"){
+                        		url=Context.ROOT+"/job/definition/doIdxTask.htm";
+                        	}
+                        	
                             var _id=row[i].get("id");
-                            var _startDate=Ext.util.Format.date(Ext.getCmp("basetime").getValue(), 'Y-m-d H:i:s');
+                            var _startDate=Ext.util.Format.date(Ext.getCmp("start").getValue(), 'Y-m-d H:i:s');
+                            var _endDate=Ext.util.Format.date(Ext.getCmp("end").getValue(), 'Y-m-d H:i:s');
                             Ext.Ajax.request({
-        	                    url:Context.ROOT+"/job/definition/doTask.htm",
-        	                    params:{"id":row[i].get("id"), "startDate":_startDate},
+        	                    url:url,
+        	                    params:{"id":row[i].get("id"), "start":_startDate, "end":_endDate},
         	                    success:function(response,opt){
         	                    	var obj = Ext.decode(response.responseText);
         	                        if(obj.success){
@@ -253,27 +281,22 @@ com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
 	loadDefinition:function(){
 		//load system definition
 		this.getStore().reload();
+	},
+	columnHide:function(col){
+		this.getColumnModel().setHidden(col,true);
+	},
+	initTask:function(){
+		Ext.getCmp("end").hide();
 	}
 });
 
-com.zz91.task.board.job.definition.deleteDefinition = function(id){
+com.zz91.task.board.job.definition.deleteDefinition = function(id,jobName,jobGroup){
+	var url=Context.ROOT+"/job/definition/deleteDefinition.htm";
+	if(jobGroup=="idx_task"){
+		url=Context.ROOT+"/job/definition/removeIdxTask.htm";
+	}
 	Ext.Ajax.request({
-        url:Context.ROOT+"/job/definition/deleteDefinition.htm",
-        params:{"id":id},
-        success:function(response,opt){
-            var obj = Ext.decode(response.responseText);
-            if(obj.success){
-            	Ext.getCmp("definitiongrid").getStore().reload();
-            }
-        },
-        failure:function(response,opt){
-        }
-	});
-}
-
-com.zz91.task.board.job.definition.pauseTask = function(id,jobName){
-	Ext.Ajax.request({
-        url:Context.ROOT+"/job/definition/pauseTask.htm",
+        url:url,
         params:{"id":id,"jobName":jobName},
         success:function(response,opt){
             var obj = Ext.decode(response.responseText);
@@ -286,9 +309,13 @@ com.zz91.task.board.job.definition.pauseTask = function(id,jobName){
 	});
 }
 
-com.zz91.task.board.job.definition.resumeTask = function(id,jobName){
+com.zz91.task.board.job.definition.pauseTask = function(id,jobName,jobGroup){
+	var url=Context.ROOT+"/job/definition/pauseTask.htm";
+	if(jobGroup=="idx_task"){
+		url=Context.ROOT+"/job/definition/pauseIdxTask.htm";
+	}
 	Ext.Ajax.request({
-        url:Context.ROOT+"/job/definition/resumeTask.htm",
+        url:url,
         params:{"id":id,"jobName":jobName},
         success:function(response,opt){
             var obj = Ext.decode(response.responseText);
@@ -301,24 +328,13 @@ com.zz91.task.board.job.definition.resumeTask = function(id,jobName){
 	});
 }
 
-com.zz91.task.board.job.definition.resumeSimpleTask=function(id,cron,jobName){
+com.zz91.task.board.job.definition.resumeTask = function(id,jobName, jobGroup){
+	var url=Context.ROOT+"/job/definition/resumeTask.htm";
+	if(jobGroup=="idx_task"){
+		url=Context.ROOT+"/job/definition/resumeIdxTask.htm";
+	}
 	Ext.Ajax.request({
-        url:Context.ROOT+"/job/definition/resumeSimpleTask.htm",
-        params:{"id":id,"cron":cron,"jobName":jobName},
-        success:function(response,opt){
-            var obj = Ext.decode(response.responseText);
-            if(obj.success){
-            	Ext.getCmp("definitiongrid").getStore().reload();
-            }
-        },
-        failure:function(response,opt){
-        }
-	});
-}
-
-com.zz91.task.board.job.definition.pauseSimpleTask=function(id,jobName){
-	Ext.Ajax.request({
-        url:Context.ROOT+"/job/definition/pauseSimpleTask.htm",
+        url:url,
         params:{"id":id,"jobName":jobName},
         success:function(response,opt){
             var obj = Ext.decode(response.responseText);
@@ -330,6 +346,36 @@ com.zz91.task.board.job.definition.pauseSimpleTask=function(id,jobName){
         }
 	});
 }
+
+//com.zz91.task.board.job.definition.resumeSimpleTask=function(id,cron,jobName){
+//	Ext.Ajax.request({
+//        url:Context.ROOT+"/job/definition/resumeSimpleTask.htm",
+//        params:{"id":id,"cron":cron,"jobName":jobName},
+//        success:function(response,opt){
+//            var obj = Ext.decode(response.responseText);
+//            if(obj.success){
+//            	Ext.getCmp("definitiongrid").getStore().reload();
+//            }
+//        },
+//        failure:function(response,opt){
+//        }
+//	});
+//}
+//
+//com.zz91.task.board.job.definition.pauseSimpleTask=function(id,jobName){
+//	Ext.Ajax.request({
+//        url:Context.ROOT+"/job/definition/pauseSimpleTask.htm",
+//        params:{"id":id,"jobName":jobName},
+//        success:function(response,opt){
+//            var obj = Ext.decode(response.responseText);
+//            if(obj.success){
+//            	Ext.getCmp("definitiongrid").getStore().reload();
+//            }
+//        },
+//        failure:function(response,opt){
+//        }
+//	});
+//}
 
 
 com.zz91.task.board.job.definition.FormWithParam = Ext.extend(Ext.form.FormPanel,{
@@ -342,7 +388,7 @@ com.zz91.task.board.job.definition.FormWithParam = Ext.extend(Ext.form.FormPanel
 	    
 	    var c={
     		labelAlign : "right",
-            labelWidth : 60,
+            labelWidth : 80,
             layout:"column",
             frame:true,
             items:[{
@@ -362,6 +408,10 @@ com.zz91.task.board.job.definition.FormWithParam = Ext.extend(Ext.form.FormPanel
                 	id:"isInUse",
                 	name:"isInUse"
                 },{
+                	xtype:"hidden",
+                	id:"jobGroup",
+                	name:"jobGroup"
+                },{
                 	id:"jobName",
                 	name:"jobName",
                 	allowBlank:false,
@@ -373,8 +423,14 @@ com.zz91.task.board.job.definition.FormWithParam = Ext.extend(Ext.form.FormPanel
                 	id:"cron",
                 	name:"cron",
                 	allowBlank:false,
-                	itemCls:"required",
-                	fieldLabel:"cron"
+                    itemCls:"required",
+                	fieldLabel:"cron(optimize)"
+                },{
+                	xtype:"datefield",
+                	id:"endTime",
+                	name:"endTime",
+                	format:"Y-m-d H:i:s",
+                	fieldLabel:"最后执行时间"
                 }]
             },{
             	columnWidth:0.5,
@@ -477,7 +533,6 @@ com.zz91.task.board.job.definition.FormWithParam = Ext.extend(Ext.form.FormPanel
 		
 		var form = this;
         var store=new Ext.data.JsonStore({
-                root : "records",
                 fields : com.zz91.task.board.job.definition.Field,
                 url : Context.ROOT + "/job/definition/queryDefinitionById.htm",
                 baseParams:{"id":id},
@@ -492,11 +547,17 @@ com.zz91.task.board.job.definition.FormWithParam = Ext.extend(Ext.form.FormPanel
                                         Ext.MessageBox.alert(MESSAGE.title,MESSAGE.loadError);
                                 } else {
                                         form.getForm().loadRecord(record);
+                                        if(record.get("endTime") != null){
+                                        	form.findById("endTime").setValue(Ext.util.Format.date(new Date(record.get("endTime").time), 'Y-m-d H:i:s'));
+                                        }
                                 }
                         }
                 }
         });
         
+	},
+	initGroup:function(group){
+		this.findById("jobGroup").setValue(com.zz91.task.board.job.definition.GROUP);
 	},
 	saveUrl:Context.ROOT+"/job/definition/createDefinition.htm"
 });
@@ -568,6 +629,8 @@ com.zz91.task.board.job.definition.CreateDefinitionWin = function(){
         id:"formwithparam",
         region:"center"
 	});
+	
+	form.initGroup();
 	
 	var win = new Ext.Window({
         id:"createdefinitionwin" ,

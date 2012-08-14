@@ -3,13 +3,18 @@
  */
 package com.zz91.task.board.dto;
 
+import java.io.Serializable;
+
 /**
  * @author yuyh
  *
  */
-public class UploadDto {
+public class UploadDto implements Serializable{
 
-private static final long serialVersionUID = 1L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	
 	private String tmpFolder = "/tmp/";
 	private String rootFolder = "resources/";

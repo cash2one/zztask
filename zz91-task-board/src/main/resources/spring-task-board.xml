@@ -123,5 +123,11 @@
 		<property name="api" value="${work.api}" />
 		<property name="domain" value="${work.domain}" />
 	</bean>
+	
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="webBindingInitializer">
+			<bean class="com.zz91.task.board.util.DatetimeBindingInitializer" />
+		</property>
+	</bean>
 
 </beans> 

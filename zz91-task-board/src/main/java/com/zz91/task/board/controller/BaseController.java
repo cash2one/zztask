@@ -34,7 +34,6 @@ public class BaseController {
 	 * @throws IOException
 	 *             出现IO异常时抛出
 	 */
-	@SuppressWarnings("unchecked")
 	public ModelAndView printJson(Object obj, Map<String, Object> out) {
 		String jsonString = "";
 		if (obj instanceof List) {

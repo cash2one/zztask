@@ -7,15 +7,14 @@
 <script type="text/javascript" >
 Ext.onReady(function() {
 
+	com.zz91.task.board.job.definition.GROUP = "idx_task";
+	
 	var definitionGrid=new com.zz91.task.board.job.definition.SimpleGrid({
 		targetStatusGridId:"statusofdefinition",
 		layout:"fit",
 		region:"center",
-		listUrl:Context.ROOT+"/job/definition/queryDefinition.htm"
+		listUrl:Context.ROOT+"/job/definition/queryIdxDefinition.htm"
 	});
-	
-	definitionGrid.columnHide(5);
-	definitionGrid.initTask();
 	
 	var statusGrid=new com.zz91.task.board.job.status.StatusOfDefinitionGrid({
 		listUrl:Context.ROOT+"/job/definition/queryStatusOfDefinition.htm",
