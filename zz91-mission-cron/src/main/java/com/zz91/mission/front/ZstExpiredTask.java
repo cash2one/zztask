@@ -140,7 +140,11 @@ public class ZstExpiredTask implements ZZTask {
 	}
 	
 	private void doExpire(Integer id, Set<CompanyAccount> expiredAccount){
+		// 公司表 更新
 		DBUtils.insertUpdate("ast", "update company set membership_code='10051000',zst_flag='0',gmt_modified=now() where id="+id);
+		
+		// 后台CS crm_cs_profile表过期更改
+		DBUtils.insertUpdate("ast", "update crm_cs_profile set membership_code='10051000',gmt_modified=now() where company_id="+id);
 		
 		//过期通知
 		CompanyAccount account=queryAccount(id);
