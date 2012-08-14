@@ -15,6 +15,7 @@ import com.zz91.task.board.domain.JobDefinition;
 import com.zz91.task.board.dto.Pager;
 import com.zz91.task.board.service.JobDefinitionService;
 import com.zz91.util.Assert;
+import com.zz91.util.lang.StringUtils;
 
 /**
  * @author yuyh
@@ -27,7 +28,7 @@ public class JobDefinitionServiceImpl implements JobDefinitionService{
 	private JobDefinitionDao jobDefinitionDao;
 	
 	@Override
-	public Pager<JobDefinition> pageJobDefinition(Boolean isuse,
+	public Pager<JobDefinition> pageJobDefinition(Boolean isuse, String jobGroup,
 			Pager<JobDefinition> page) {
 		String isinuse=null;
 		if(isuse!=null && isuse){
@@ -36,8 +37,13 @@ public class JobDefinitionServiceImpl implements JobDefinitionService{
 		if(isuse!=null && !isuse){
 			isinuse = JobDefinitionDao.ISUSE_FALSE;
 		}
-		page.setTotals(jobDefinitionDao.queryJobDefinitionCount(isinuse));
-		page.setRecords(jobDefinitionDao.queryJobDefinition(isinuse, page));
+		
+		if(StringUtils.isEmpty(jobGroup)){
+			jobGroup = JobDefinitionService.GROUP;
+		}
+		
+		page.setTotals(jobDefinitionDao.queryJobDefinitionCount(isinuse, jobGroup));
+		page.setRecords(jobDefinitionDao.queryJobDefinition(isinuse, jobGroup, page));
 		return page;
 	}
 
@@ -103,5 +109,11 @@ public class JobDefinitionServiceImpl implements JobDefinitionService{
 	public Integer updateStartDateById(Date startDate, Integer id) {
 		
 		return jobDefinitionDao.updateStartDateById(startDate, id);
+	}
+
+	@Override
+	public Integer updateEndTime(String jobName, Long endTime) {
+		
+		return jobDefinitionDao.updateEndTime(jobName, new Date(endTime));
 	}
 }

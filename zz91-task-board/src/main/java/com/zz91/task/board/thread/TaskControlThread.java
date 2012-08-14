@@ -18,20 +18,22 @@ import org.quartz.CronExpression;
 import com.zz91.task.board.domain.JobDefinition;
 import com.zz91.task.board.service.JobDefinitionService;
 import com.zz91.task.board.service.JobStatusService;
+import com.zz91.task.board.thread.idx.OptimizeThread;
+import com.zz91.task.common.AbstractIdxTask;
 
 /**
  * @author mays (mays@zz91.com)
  * 
  *         created on 2011-3-18
  */
-public class TaskThread extends Thread {
+public class TaskControlThread extends Thread {
 
 	private static TaskRunThreadPool mainPool; // 任务执行线程池
 
 	private int corePoolSize = 2; // 池中最小线程数量：2
-	private int maximumPoolSize = 10; // 同时存在的最大线程数量：10
+	private int maximumPoolSize = 5; // 同时存在的最大线程数量：10
 	private long keepAliveTime = 5; // 线程空闲保持时间：5秒
-	private int workQueueSize = 100; // 工作队列最大值:100
+	private int workQueueSize = 20; // 工作队列最大值:100
 
 	private static long numTask = 0; // 已处理数量
 	private static long totalTime = 0; // 总处理时间
@@ -42,24 +44,27 @@ public class TaskThread extends Thread {
 	JobDefinitionService jobDefinitionService;
 	JobStatusService jobStatusService;
 	public static Map<String, JobDefinition> runningTasks = new ConcurrentHashMap<String, JobDefinition>();
+	public final static Map<String, AbstractIdxTask> BUILD_TASK_MAP = new ConcurrentHashMap<String, AbstractIdxTask>();
+	public final static Map<String, Long> LAST_BUILD_TIME_MAP = new ConcurrentHashMap<String, Long>();
+	
 //	public static Map<String, TaskRunThread> runningThread = new ConcurrentHashMap<String, TaskRunThread>();
 	public static boolean runSwitch = false;
 
-	public TaskThread(int corePoolSize, int maximumPoolSize,
+	public TaskControlThread(int corePoolSize, int maximumPoolSize,
 			long keepAliveTime, int workQueueSize) {
 		this.corePoolSize = corePoolSize;
 		this.maximumPoolSize = maximumPoolSize;
 		this.keepAliveTime = keepAliveTime;
 		this.workQueueSize = workQueueSize;
 
-		TaskThread.mainPool = new TaskRunThreadPool(corePoolSize, maximumPoolSize,
+		TaskControlThread.mainPool = new TaskRunThreadPool(corePoolSize, maximumPoolSize,
 				keepAliveTime, TimeUnit.SECONDS,
 				new ArrayBlockingQueue<Runnable>(workQueueSize),
 				new ThreadPoolExecutor.AbortPolicy());
 	}
 	
-	public TaskThread(){
-		TaskThread.mainPool = new TaskRunThreadPool(corePoolSize, maximumPoolSize,
+	public TaskControlThread(){
+		TaskControlThread.mainPool = new TaskRunThreadPool(corePoolSize, maximumPoolSize,
 				keepAliveTime, TimeUnit.SECONDS,
 				new ArrayBlockingQueue<Runnable>(workQueueSize),
 				new ThreadPoolExecutor.AbortPolicy());
@@ -73,13 +78,15 @@ public class TaskThread extends Thread {
 	public void run() {
 		while (runSwitch) {
 
+			Date now=new Date();
+
+			//普通任务
 			for (String jobname : runningTasks.keySet()) {
 				JobDefinition task = runningTasks.get(jobname);
 				
 				//如果nexttime为null，表示已经执行过了，此时重新计算nexttime并写入nexttime
 				//否则判断当前时间是否大于nexttime，如果是则执行
 				
-				Date now=new Date();
 				if(task.getNextFireTime()==null){
 					
 					CronExpression cron;
@@ -93,16 +100,38 @@ public class TaskThread extends Thread {
 						e.printStackTrace();
 					}
 				}else{
-					if(now.getTime()>=task.getNextFireTime()){
+					if(now.getTime()>=task.getNextFireTime() && getTaskSize()<=workQueueSize){
 						mainPool.execute(new TaskRunThread(task,jobDefinitionService, jobStatusService));
 						task.setNextFireTime(null);
 					}
 				}
 			}
 			
-			TaskThread.numTask = mainPool.getNumTask();
-			TaskThread.totalTime = mainPool.getTotalTime();
-			TaskThread.numQueue = mainPool.getQueue().size();
+			//索引优化任务
+			for(String jobname:BUILD_TASK_MAP.keySet()){
+				AbstractIdxTask task=BUILD_TASK_MAP.get(jobname);
+				if(task.getNextFireTime() == null){
+					CronExpression cron;
+					try {
+						cron = new CronExpression(task.getCron());
+						if(CronExpression.isValidExpression(task.getCron())){
+							Date nextFireTime=cron.getNextValidTimeAfter(now);
+							task.setNextFireTime(nextFireTime.getTime());
+						}
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+				}else{
+					if(now.getTime()>=task.getNextFireTime() && getTaskSize()<=workQueueSize){
+						mainPool.execute(new OptimizeThread(jobname, jobStatusService));
+						task.setNextFireTime(null);
+					}
+				}
+			}
+			
+			TaskControlThread.numTask = mainPool.getNumTask();
+			TaskControlThread.totalTime = mainPool.getTotalTime();
+			TaskControlThread.numQueue = mainPool.getQueue().size();
 
 			try {
 				Thread.sleep(1000);
@@ -177,6 +206,8 @@ public class TaskThread extends Thread {
 		return numQueue;
 	}
 
-	
+	synchronized public static int getTaskSize(){
+		return mainPool.getQueue().size();
+	}
 	
 }

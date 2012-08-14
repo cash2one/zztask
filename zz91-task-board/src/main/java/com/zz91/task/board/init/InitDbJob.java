@@ -11,11 +11,11 @@ import org.quartz.CronExpression;
 import com.zz91.task.board.domain.JobDefinition;
 import com.zz91.task.board.service.JobDefinitionService;
 import com.zz91.task.board.service.JobStatusService;
-import com.zz91.task.board.thread.RunningSimpleTask;
-import com.zz91.task.board.thread.TaskThread;
+import com.zz91.task.board.thread.TaskControlThread;
+import com.zz91.task.board.thread.idx.LastBuildThread;
+import com.zz91.task.board.thread.idx.ListenIdxChangeThread;
 import com.zz91.task.board.util.ClassHelper;
-import com.zz91.task.common.ZZSchedulerTask;
-import com.zz91.util.lang.StringUtils;
+import com.zz91.task.common.AbstractIdxTask;
 
 /**
  * 系统启动时加载数据库中的任务信息
@@ -38,29 +38,49 @@ public class InitDbJob {
 
 	public void initJob() {
 
-		TaskThread.runSwitch = true;
+		TaskControlThread.runSwitch = true;
 
-		TaskThread taskThread = new TaskThread();
+		TaskControlThread taskThread = new TaskControlThread();
+		taskThread.setName("TaskControlThread");
 		taskThread.setJobDefinitionService(jobDefinitionService);
 		taskThread.setJobStatusService(jobStatusService);
 		taskThread.start();
+		
+		ListenIdxChangeThread listenIdxThread = new ListenIdxChangeThread();
+		listenIdxThread.setName("indexChangeListenThread");
+		listenIdxThread.setJobStatusService(jobStatusService);
+		listenIdxThread.start();
+		
+		LastBuildThread lastBuildThread = new LastBuildThread();
+		lastBuildThread.setName("holdLastBuildThread");
+		lastBuildThread.setJobDefinitionService(jobDefinitionService);
+		lastBuildThread.start();
 
 		List<JobDefinition> jobList = jobDefinitionService
 				.queryAllJobDefinition(true);
 
 		for (JobDefinition def : jobList) {
-			if (def.getCron() != null
-					&& CronExpression.isValidExpression(def.getCron())) {
-				TaskThread.addRunTask(def);
-				continue;
+			
+			//普通任务
+			if(JobDefinitionService.GROUP.equals(def.getJobGroup())){
+				if (def.getCron() != null
+						&& CronExpression.isValidExpression(def.getCron())) {
+					TaskControlThread.addRunTask(def);
+					continue;
+				}
 			}
 			
-			if(StringUtils.isNumber(def.getCron())){
+			//搜索引擎索引任务
+			if(JobDefinitionService.GROUP_IDX.equals(def.getJobGroup())){
 				try {
-					ZZSchedulerTask task=(ZZSchedulerTask) ClassHelper.load(def.getJobClasspath(), def.getJobClassName()).newInstance();
-					task.startTask(Long.valueOf(def.getCron()));
-					RunningSimpleTask.putTask(def.getJobName(), task);
-					continue;
+					AbstractIdxTask jobInstance = (AbstractIdxTask) ClassHelper.load(
+							def.getJobClasspath(), def.getJobClassName())
+							.newInstance();
+					jobInstance.setCron(def.getCron());
+					
+					TaskControlThread.BUILD_TASK_MAP.put(def.getJobName(), jobInstance);
+					TaskControlThread.LAST_BUILD_TIME_MAP.put(def.getJobName(), def.getEndTime().getTime());
+					
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				} catch (InstantiationException e) {
@@ -69,11 +89,11 @@ public class InitDbJob {
 					e.printStackTrace();
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
-				}finally{
-					
 				}
 			}
+			
 		}
 
 	}
+
 }
