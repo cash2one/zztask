@@ -3,6 +3,7 @@ package com.zz91.task.board.init;
 import org.apache.log4j.Logger;
 
 import com.zz91.util.db.pool.DBPoolFactory;
+import com.zz91.util.search.SolrUtil;
 
 /**
  * 系统启动时加载数据库中的任务信息
@@ -15,25 +16,9 @@ public class InitSystem {
 
 	final static Logger LOG = Logger.getLogger(InitSystem.class);
 	
-	private String propFile="classpath:db-zztask.properties";
-
 	public void init() {
-		DBPoolFactory.getInstance().init(propFile);
+		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 	}
 
-	/**
-	 * @return the propFile
-	 */
-	public String getPropFile() {
-		return propFile;
-	}
-
-	/**
-	 * @param propFile the propFile to set
-	 */
-	public void setPropFile(String propFile) {
-		this.propFile = propFile;
-	}
-	
-	
 }

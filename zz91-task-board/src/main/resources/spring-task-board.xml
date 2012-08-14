@@ -52,7 +52,6 @@
 		
 	<bean id="initSystem" class="com.zz91.task.board.init.InitSystem"
 		init-method="init" >
-		<property name="propFile" value="file:/usr/tools/config/db/db-zztask-jdbc.properties"></property>
 	</bean>
 
 	<bean id="messageSource"
