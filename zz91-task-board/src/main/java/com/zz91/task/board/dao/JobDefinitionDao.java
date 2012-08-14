@@ -12,9 +12,9 @@ public interface JobDefinitionDao {
 
 	final static String ISUSE_FALSE = "0";
 
-	public Integer queryJobDefinitionCount(String isinuse);
+	public Integer queryJobDefinitionCount(String isinuse, String jobGroup);
 
-	public List<JobDefinition> queryJobDefinition(String isinuse,
+	public List<JobDefinition> queryJobDefinition(String isinuse, String jobGroup,
 			Pager<JobDefinition> page);
 	
 	public Integer deleteJobDefinition(Integer id);
@@ -29,4 +29,5 @@ public interface JobDefinitionDao {
 	public Integer updateIsInUseById(Integer id, String isinuse);
 	
 	public Integer updateStartDateById(Date startDate, Integer id);
+	public Integer updateEndTime(String jobName, Date endTime);
 }

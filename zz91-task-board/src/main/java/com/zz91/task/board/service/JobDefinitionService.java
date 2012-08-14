@@ -15,7 +15,11 @@ import com.zz91.task.board.dto.Pager;
  */
 public interface JobDefinitionService {
 	
-	public Pager<JobDefinition> pageJobDefinition(Boolean isuse, Pager<JobDefinition> page);
+	public final static String GROUP = "task";
+	
+	public final static String GROUP_IDX="idx_task";
+	
+	public Pager<JobDefinition> pageJobDefinition(Boolean isuse, String jobGroup, Pager<JobDefinition> page);
 	
 	public Integer deleteJobDefinition(Integer id);
 
@@ -34,5 +38,7 @@ public interface JobDefinitionService {
 	public Integer startTask(Integer id);
 	
 	public Integer updateStartDateById(Date startDate, Integer id);
+	
+	public Integer updateEndTime(String jobName, Long endTime);
 
 }

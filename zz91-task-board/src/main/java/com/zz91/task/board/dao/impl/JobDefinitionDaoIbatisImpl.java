@@ -39,10 +39,11 @@ public class JobDefinitionDaoIbatisImpl extends SqlMapClientDaoSupport
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<JobDefinition> queryJobDefinition(String isinuse,
+	public List<JobDefinition> queryJobDefinition(String isinuse, String jobGroup,
 			Pager<JobDefinition> page) {
 		Map<String, Object> root = new HashMap<String, Object>();
 		root.put("isInUse", isinuse);
+		root.put("jobGroup", jobGroup);
 		root.put("page", page);
 
 		return getSqlMapClientTemplate().queryForList(
@@ -50,9 +51,10 @@ public class JobDefinitionDaoIbatisImpl extends SqlMapClientDaoSupport
 	}
 
 	@Override
-	public Integer queryJobDefinitionCount(String isinuse) {
+	public Integer queryJobDefinitionCount(String isinuse, String jobGroup) {
 		Map<String, Object> root = new HashMap<String, Object>();
 		root.put("isInUse", isinuse);
+		root.put("jobGroup", jobGroup);
 		return (Integer) getSqlMapClientTemplate().queryForObject(
 				SQL_PREFIX + "queryJobDefinitionCount", root);
 	}
@@ -91,56 +93,12 @@ public class JobDefinitionDaoIbatisImpl extends SqlMapClientDaoSupport
 		return getSqlMapClientTemplate().update(SQL_PREFIX+"updateStartDateById", root);
 	}
 
-	
-	// @Override
-	// public JobDefinition queryJobDefinitionById(Integer id) {
-	// return null;
-	// }
-
-	// @Override
-	// public JobDefinition queryJobDefinitionByName(String paramName) {
-	// return null;
-	// }
-
-	// @Override
-	// public Integer updateJobDefinition(JobDefinition jobDefinition) {
-	// return null;
-	// }
-
-	// @Override
-	// public Integer queryAllJobDefinitionCount(String isinuse) {
-	// return (Integer) this.getSqlMapClientTemplate()
-	// .queryForObject("jobDefinition.queryAllJobDefinitionCount");
-	// }
-	//
-	// @Override
-	// public List<JobDefinition> queryJobDefinition(Integer start, Integer
-	// limit) {
-	// Map params = new HashMap();
-	// params.put("start", start);
-	// params.put("limit", limit);
-	// return
-	// this.getSqlMapClientTemplate().queryForList("jobDefinition.queryJobDefinition",
-	// params);
-	// }
-	//
-	// @Override
-	//
-	// @Override
-	//
-	// @Override
-	// public List<JobDefinition> queryJobDefinitionByNames(List<String>
-	// paramNames, Integer start,
-	// Integer limit) {
-	// Map params = new HashMap();
-	// params.put("names", paramNames);
-	// params.put("start", start);
-	// params.put("limit", limit);
-	// return
-	// this.getSqlMapClientTemplate().queryForList("jobDefinition.queryJobDefinitionByNames",
-	// params);
-	// }
-	//
-	// @Override
+	@Override
+	public Integer updateEndTime(String jobName, Date endTime) {
+		Map<String, Object> root =  new HashMap<String, Object>();
+		root.put("jobName", jobName);
+		root.put("endTime", endTime);
+		return getSqlMapClientTemplate().update(SQL_PREFIX+"updateEndTime", root);
+	}
 
 }

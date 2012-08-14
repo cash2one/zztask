@@ -3,6 +3,7 @@ package com.zz91.task.board.domain;
 import java.io.Serializable;
 import java.util.Date;
 
+@Deprecated
 public class JobParameter implements Serializable {
 	/**
 	 * 

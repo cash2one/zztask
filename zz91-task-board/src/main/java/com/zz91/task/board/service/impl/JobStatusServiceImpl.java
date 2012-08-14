@@ -49,6 +49,11 @@ public class JobStatusServiceImpl implements JobStatusService {
 
 	@Override
 	public Integer updateJobStatusById(JobStatus jobStatus) {
+		
+		if(jobStatus.getErrorMsg()!=null && jobStatus.getErrorMsg().length()>2000){
+			jobStatus.setErrorMsg(jobStatus.getErrorMsg().substring(0, 2000));
+		}
+		
 		return jobStatusDao.updateJobStatus(jobStatus);
 	}
 

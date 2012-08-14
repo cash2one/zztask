@@ -10,7 +10,7 @@ import java.util.Date;
 /**
  * @author mays(mays@zz91.net)
  * 
- * 任务抽象类，所有mission都必需继承自AbstractZZTask类<br />
+ * 任务抽象类，所有mission都必需实现ZZTask接口<br />
  * 
  * init():<br/>
  * 在新增任务，或者编辑任务且需要重新上传jar包时调用，一般init用来生成数据表<br/><br/>
