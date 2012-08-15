@@ -15,6 +15,8 @@ public class SolrUpdateUtils {
 	public static final String TRADE_BUY = "tradebuy";
 	public static final String NEWS = "news";
 	public static final String EXHIBIT = "exhibit";
+	public static final String TRADECATEGORY="tradecategory";
+	public static final String SUBNETCATEGORY="subnetcategory";
 	public static final String DELTA_IMPORT = "?command=delta-import";
 	public static final String FULL_IMPORT = "?command=full-import";
 	/**
