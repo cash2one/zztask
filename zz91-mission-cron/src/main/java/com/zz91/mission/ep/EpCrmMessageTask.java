@@ -42,7 +42,6 @@ public class EpCrmMessageTask implements ZZTask {
 			//差日期条件等
 			String reTotalSql="SELECT count(id) total FROM message m " 
 					+ "where date_format(gmt_created,'%Y-%m-%d')= date_add(date_format(now(),'%Y-%m-%d'),INTERVAL -1 DAY)";
-			System.out.println(reTotalSql);
 			DBUtils.select(ADMINDB, reTotalSql, new IReadDataHandler() {
 				
 				@Override
@@ -171,14 +170,14 @@ public class EpCrmMessageTask implements ZZTask {
 		return false;
 	}
 	
-	public static void main(String[] args) {
-		try {
-			DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
-			EpCrmMessageTask et=new EpCrmMessageTask();
-			et.exec(null);
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-	}
+//	public static void main(String[] args) {
+//		try {
+//			DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+//			EpCrmMessageTask et=new EpCrmMessageTask();
+//			et.exec(null);
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//		}
+//	}
 
 }
