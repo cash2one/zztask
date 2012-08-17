@@ -14,6 +14,9 @@ Ext.onReady(function() {
 		listUrl:Context.ROOT+"/job/definition/queryDefinition.htm"
 	});
 	
+	definitionGrid.columnHide(5);
+	definitionGrid.initTask();
+	
 	var statusGrid=new com.zz91.task.board.job.status.StatusOfDefinitionGrid({
 		listUrl:Context.ROOT+"/job/definition/queryStatusOfDefinition.htm",
 		id:"statusofdefinition",

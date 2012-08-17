@@ -15,6 +15,7 @@ import com.zz91.task.board.domain.JobStatus;
 import com.zz91.task.board.service.JobDefinitionService;
 import com.zz91.task.board.service.JobStatusService;
 import com.zz91.task.board.util.ClassHelper;
+import com.zz91.task.board.util.StacktraceUtil;
 import com.zz91.task.common.ZZTask;
 
 /**
@@ -79,31 +80,22 @@ public class TaskRunThread extends Thread {
 			}
 			
 		} catch (MalformedURLException e) {
-			status.setResult("异常中断");
-			status.setErrorMsg(e.toString());
-			//e.printStackTrace();
-			LOG.debug("taskbasetime:"+targetDate.getTime()+" 异常："+e.toString());
+			status.setResult(e.getMessage());
+			status.setErrorMsg(StacktraceUtil.getStackTrace(e));
 		} catch (ClassNotFoundException e) {
-			status.setResult("异常中断");
-			status.setErrorMsg(e.toString());
-			//e.printStackTrace();
-			LOG.debug("taskbasetime:"+targetDate.getTime()+" 异常："+e.toString());
+			status.setResult(e.getMessage());
+			status.setErrorMsg(StacktraceUtil.getStackTrace(e));
 		} catch (InstantiationException e) {
-			status.setResult("异常中断");
-			status.setErrorMsg(e.toString());
-			//e.printStackTrace();
-			LOG.debug("taskbasetime:"+targetDate.getTime()+" 异常："+e.toString());
+			status.setResult(e.getMessage());
+			status.setErrorMsg(StacktraceUtil.getStackTrace(e));
 		} catch (IllegalAccessException e) {
-			status.setResult("异常中断");
-			status.setErrorMsg(e.toString());
-			//e.printStackTrace();
-			LOG.debug("taskbasetime:"+targetDate.getTime()+" 异常："+e.toString());
+			status.setResult(e.getMessage());
+			status.setErrorMsg(StacktraceUtil.getStackTrace(e));
 		} catch (Exception e) {
-			status.setResult("异常中断");
-			status.setErrorMsg(e.toString());
-			//e.printStackTrace();
-			LOG.debug("taskbasetime:"+targetDate.getTime()+" 异常："+e.toString());
+			status.setResult(e.getMessage());
+			status.setErrorMsg(StacktraceUtil.getStackTrace(e));
 		}
+		
 		Date end = new Date();
 		status.setRuntime(end.getTime() - start.getTime());
 		LOG.debug("taskbasetime:"+targetDate.getTime()+" 任务执行结束。。。。");
@@ -121,4 +113,5 @@ public class TaskRunThread extends Thread {
 	public void setTargetDate(Date targetDate){
 		this.targetDate = targetDate;
 	}
+	
 }

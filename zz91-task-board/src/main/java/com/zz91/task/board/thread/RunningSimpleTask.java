@@ -15,6 +15,7 @@ import com.zz91.task.common.ZZSchedulerTask;
  *
  * created on 2011-3-31
  */
+@Deprecated
 public class RunningSimpleTask {
 
 	static Map<String, ZZSchedulerTask> RUNNING_TASK = new ConcurrentHashMap<String, ZZSchedulerTask>();

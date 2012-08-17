@@ -65,6 +65,9 @@
 			<isNotEmpty property="isInUse" >
 				is_in_use=#isInUse#
 			</isNotEmpty>
+			<isNotEmpty property="jobGroup" prepend="and">
+				job_group=#jobGroup#
+			</isNotEmpty>
 		</dynamic>
 	</sql>
 	
@@ -98,18 +101,7 @@
 	
 	<select id="queryJobDefinitionById" parameterClass="java.lang.Integer" resultMap="definitionResultMap">
 	    select 
-			id,
-			job_name,
-			job_group,
-			job_classpath,
-			job_class_name,
-			gmt_created,
-			gmt_modified,
-			cron,
-			is_in_use,
-			start_time,
-			end_time,
-			description 
+			<include refid="fullColumn" />
 	    from job_definition
 	    where id = #value#
 	</select>
@@ -117,18 +109,7 @@
 	
 	<select id="queryJobDefinitionByName" parameterClass="java.lang.String" resultMap="definitionResultMap">
     select 
-			id,
-			job_name,
-			job_group,
-			job_classpath,
-			job_class_name,
-			gmt_created,
-			gmt_modified,
-			cron,
-			is_in_use,
-			start_time,
-			end_time,
-			description  
+			<include refid="fullColumn" />
     from job_definition
     where job_name=#value#
 	</select>
@@ -156,63 +137,16 @@
 	
 	<update id="updateStartDateById" >
 		update job_definition
-		set start_time=#startTime#
+		set start_time=#startTime#,
+		gmt_modified=now();
 		where id=#id#
 	</update>
- 
- <!-- 
-	<select id="queryJobDefinition" parameterClass="map" resultMap="definition">
-    select 
-			id,
-			job_name,
-			job_group,
-			job_classpath,
-			job_class_name,
-			gmt_created,
-			gmt_modified,
-			cron,
-			is_in_use,
-			start_time,
-			end_time,
-			description 
-    from job_definition
-    limit #start#,#limit#
-	</select>
-	<select id="queryJobDefinitionByNames" parameterClass="map" resultMap="definition">
-    select 
-			id,
-			job_name,
-			job_group,
-			job_classpath,
-			job_class_name,
-			gmt_created,
-			gmt_modified,
-			cron,
-			is_in_use,
-			start_time,
-			end_time,
-			description  
-    from job_definition
-		<dynamic prepend="where">
-			<isNotEmpty property="names">
-						job_name in 
-				<iterate  property="names" open="(" close=")"  conjunction=",">
-            		#names[]#
-				</iterate>
-					<iterate  property="names"  conjunction="or">
-						job_name = #names[]#
-					</iterate>
-			</isNotEmpty>
-			<isEmpty property="names">
-						1=2
-			</isEmpty>
-		</dynamic>
-    limit #start#,#limit#
-	</select>
 	
-	<select id="queryAllJobDefinitionCount" resultClass="Integer">
-    select count(*) from job_definition
-	</select>
-  -->
+	<update id="updateEndTime" >
+		update job_definition
+		set end_time=#endTime#,
+			gmt_modified=now()
+		where job_name=#jobName#
+	</update>
 	
 </sqlMap>

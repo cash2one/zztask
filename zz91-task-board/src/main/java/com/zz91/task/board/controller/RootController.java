@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.zz91.task.board.dto.ExtResult;
-import com.zz91.task.board.thread.TaskThread;
+import com.zz91.task.board.thread.TaskControlThread;
 import com.zz91.task.board.util.TaskConst;
 import com.zz91.task.board.util.TimeHelper;
 import com.zz91.util.auth.AuthMenu;
@@ -90,9 +90,9 @@ public class RootController extends BaseController {
 	@RequestMapping
 	public ModelAndView monitor(HttpServletRequest request,
 			Map<String, Object> out) {
-		return printJson("{'numQueue':" + TaskThread.getNumQueue()
-				+ ",'numTask':" + TaskThread.getNumTask() + ",'totalTime':'"
-				+ TimeHelper.formatTime(TaskThread.getTotalTime() / 1000000)
+		return printJson("{'numQueue':" + TaskControlThread.getNumQueue()
+				+ ",'numTask':" + TaskControlThread.getNumTask() + ",'totalTime':'"
+				+ TimeHelper.formatTime(TaskControlThread.getTotalTime() / 1000000)
 				+ "','nowDate':'"
 				+ DateUtil.toString(new Date(), "yyyy-MM-dd hh:mm:ss") + "'}",
 				out);

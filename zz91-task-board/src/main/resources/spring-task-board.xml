@@ -52,7 +52,6 @@
 		
 	<bean id="initSystem" class="com.zz91.task.board.init.InitSystem"
 		init-method="init" >
-		<property name="propFile" value="file:/usr/tools/config/db/db-zztask-jdbc.properties"></property>
 	</bean>
 
 	<bean id="messageSource"
@@ -122,6 +121,12 @@
 		<property name="projectPassword" value="${work.project.password}"></property>
 		<property name="api" value="${work.api}" />
 		<property name="domain" value="${work.domain}" />
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="webBindingInitializer">
+			<bean class="com.zz91.task.board.util.DatetimeBindingInitializer" />
+		</property>
 	</bean>
 
 </beans> 

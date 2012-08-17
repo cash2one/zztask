@@ -1,0 +1,33 @@
+##set($layout="/layout/blank.vm")
+<script type="text/javascript" src="#springUrl('/app/lib/FileUploadField.js')" ></script>
+<script type="text/javascript" src="#springUrl('/app/lib/UploadWin.js')" ></script>
+<script type="text/javascript" src="#springUrl('/app/job/status.js')" ></script>
+<script type="text/javascript" src="#springUrl('/app/job/definition.js')" ></script>
+<script type="text/javascript" src="#springUrl('/app/lib/FileUploadField.js')" ></script>
+<script type="text/javascript" >
+Ext.onReady(function() {
+
+	com.zz91.task.board.job.definition.GROUP = "idx_task";
+	
+	var definitionGrid=new com.zz91.task.board.job.definition.SimpleGrid({
+		targetStatusGridId:"statusofdefinition",
+		layout:"fit",
+		region:"center",
+		listUrl:Context.ROOT+"/job/definition/queryIdxDefinition.htm"
+	});
+	
+	var statusGrid=new com.zz91.task.board.job.status.StatusOfDefinitionGrid({
+		listUrl:Context.ROOT+"/job/definition/queryStatusOfDefinition.htm",
+		id:"statusofdefinition",
+		region:"east",
+		width:480,
+		split:true
+	});
+
+	var viewport = new Ext.Viewport({
+		layout : 'border',
+		items : [definitionGrid,statusGrid]
+	});
+	
+});
+</script>
