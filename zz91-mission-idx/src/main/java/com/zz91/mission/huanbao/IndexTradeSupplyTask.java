@@ -50,7 +50,7 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 			}
 		});
 		
-		if(dealCount[0]!=null && dealCount[0]>0){
+		if(dealCount[0]!=null && dealCount[0]>4){
 			return true;
 		}
 		
@@ -163,14 +163,14 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 	private void parseComp(SolrInputDocument doc, Integer cid){
 		
 		final Map<String, Object> result=new HashMap<String, Object>();
-		DBUtils.select(DB, "select name, member_code, gmt_created from company where id="+cid,  new IReadDataHandler() {
+		DBUtils.select(DB, "select name, member_code, gmt_created from comp_profile where id="+cid,  new IReadDataHandler() {
 			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				while (rs.next()) {
 					result.put("name", rs.getObject(1));
-					result.put("memberCode", rs.getObject(1));
-					result.put("gmtRegister", rs.getObject(1));
+					result.put("memberCode", rs.getObject(2));
+					result.put("gmtRegister", rs.getObject(3));
 				}
 			}
 		});
