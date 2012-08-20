@@ -21,7 +21,7 @@ import com.zz91.util.lang.StringUtils;
 public class PuHuiTask implements ZZTask{
 	
 
-	private final static String DB_AST = "ast";
+	private final static String DB_AST = "astoback";
 	private final static String DB_KL91 = "kl91_test";
 
 	@Override
@@ -31,7 +31,7 @@ public class PuHuiTask implements ZZTask{
 
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
-		String sql="select count(*) from products where check_status = 1 and is_del = 0 and is_pause = 0 and category_products_assist_code like '1001%'";
+		String sql="select count(*) from products where check_status = 1 and is_del = 0 and is_pause = 0 and category_products_main_code like '1001%'";
 		final Integer[] count=new Integer[1];
 		count[0]=0;
 		DBUtils.select(DB_AST, sql, new IReadDataHandler() {
@@ -44,7 +44,7 @@ public class PuHuiTask implements ZZTask{
 		});
 		Integer total=count[0]/100;	
 		for(Integer i=1;i<=total;i++){
-			String sqlId = "select company_id,id from products where check_status=1 and is_del=0 and is_pause=0 and category_products_assist_code like '1001%' limit "+100*(i-1) +"," + 100;
+			String sqlId = "select company_id,id from products where check_status=1 and is_del=0 and is_pause=0 and category_products_main_code like '1001%' limit "+100*(i-1) +"," + 100;
 			final List<Integer> companyIdlist = new ArrayList<Integer>();
 			final List<Integer> productIdlist = new ArrayList<Integer>();
 			DBUtils.select(DB_AST, sqlId, new IReadDataHandler() {
