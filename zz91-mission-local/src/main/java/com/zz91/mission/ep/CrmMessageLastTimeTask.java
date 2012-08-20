@@ -1,10 +1,5 @@
 package com.zz91.mission.ep;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,13 +11,8 @@ import net.sf.json.JSONObject;
 
 import org.apache.log4j.Logger;
 
-import com.sun.media.sound.HsbParser;
 import com.zz91.task.common.ZZTask;
-import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
-import com.zz91.util.db.IInsertUpdateHandler;
-import com.zz91.util.db.IReadDataHandler;
-import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.http.HttpUtils;
 /**
  * @author 黄怀清
@@ -35,7 +25,7 @@ public class CrmMessageLastTimeTask implements ZZTask {
 
 	final static String API_HOST="http://huanbaoadmin.zz91.com:8081/ep-admin/api";
 	
-	final static String CRMDB="crm-test";
+	final static String CRMDB="crm";
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
 		// TODO Auto-generated method stub
