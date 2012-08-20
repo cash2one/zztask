@@ -22,7 +22,7 @@ public class PuHuiTask implements ZZTask{
 	
 
 	private final static String DB_AST = "astoback";
-	private final static String DB_KL91 = "kl91_test";
+	private final static String DB_KL91 = "kl91";
 
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
