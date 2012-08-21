@@ -345,7 +345,7 @@ public class CrmCompanyTask implements ZZTask {
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		CrmCompanyTask comp = new CrmCompanyTask();
 		try {
-			comp.exec(DateUtil.getDate("2012-08-07", "yyyy-MM-dd"));
+			comp.exec(DateUtil.getDate("2012-08-20", "yyyy-MM-dd"));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		} catch (Exception e) {

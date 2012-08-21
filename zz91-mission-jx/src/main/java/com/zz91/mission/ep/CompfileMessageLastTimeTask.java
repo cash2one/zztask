@@ -15,7 +15,6 @@ import com.zz91.task.common.ZZTask;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IInsertUpdateHandler;
 import com.zz91.util.db.IReadDataHandler;
-import com.zz91.util.db.pool.DBPoolFactory;
 /**
  * @author 黄怀清
  * 2012-08-14
