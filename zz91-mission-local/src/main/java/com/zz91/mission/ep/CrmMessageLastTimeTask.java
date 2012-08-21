@@ -35,7 +35,7 @@ public class CrmMessageLastTimeTask implements ZZTask {
 
 	final static String API_HOST="http://huanbaoadmin.zz91.com:8081/ep-admin/api";
 	
-	final static String CRMDB="crm-test";
+	final static String CRMDB="crm";
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
 		// TODO Auto-generated method stub
