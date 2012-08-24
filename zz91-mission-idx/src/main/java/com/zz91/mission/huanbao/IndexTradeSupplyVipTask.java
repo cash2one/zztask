@@ -98,7 +98,7 @@ public class IndexTradeSupplyVipTask extends AbstractIdxTask {
 				begin=0;
 			}
 			
-			System.out.println("vip>>>>>"+docsize+">>>>>>"+begin);
+//			System.out.println("vip>>>>>"+docsize+">>>>>>"+begin);
 			
 		} while (true);
 		
