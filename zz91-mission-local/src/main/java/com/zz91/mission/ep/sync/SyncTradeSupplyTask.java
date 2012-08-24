@@ -25,7 +25,6 @@ import com.zz91.task.common.ZZTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
-import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.http.HttpUtils;
 import com.zz91.util.lang.StringUtils;
 import com.zz91.util.mail.MailUtil;
