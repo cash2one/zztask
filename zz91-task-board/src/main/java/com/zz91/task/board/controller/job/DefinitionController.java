@@ -336,8 +336,8 @@ public class DefinitionController extends BaseController {
 						.newInstance();
 				jobInstance.setCron(jobDefinition.getCron());
 				
-				TaskControlThread.BUILD_TASK_MAP.put(jobDefinition.getJobName(), jobInstance);
 				TaskControlThread.LAST_BUILD_TIME_MAP.put(jobDefinition.getJobName(), jobDefinition.getEndTime().getTime());
+				TaskControlThread.BUILD_TASK_MAP.put(jobDefinition.getJobName(), jobInstance);
 				
 				jobDefinitionService.startTask(id);
 				

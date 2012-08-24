@@ -1,0 +1,6 @@
+UPDATE:
+2.2.1-SNAPSHOT
+1.solrutil初始化properties指向错误
+
+2.2.0-SNAPSHOT
+1.在原任务系统基础上，实现solr索引任务管理与调度

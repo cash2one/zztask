@@ -78,8 +78,8 @@ public class InitDbJob {
 							.newInstance();
 					jobInstance.setCron(def.getCron());
 					
-					TaskControlThread.BUILD_TASK_MAP.put(def.getJobName(), jobInstance);
 					TaskControlThread.LAST_BUILD_TIME_MAP.put(def.getJobName(), def.getEndTime().getTime());
+					TaskControlThread.BUILD_TASK_MAP.put(def.getJobName(), jobInstance);
 					
 				} catch (MalformedURLException e) {
 					e.printStackTrace();

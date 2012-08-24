@@ -206,7 +206,7 @@ public class TaskControlThread extends Thread {
 		return numQueue;
 	}
 
-	synchronized public static int getTaskSize(){
+	public static int getTaskSize(){
 		return mainPool.getQueue().size();
 	}
 	
