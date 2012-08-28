@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.solr.common.util.Hash;
-
 import com.zz91.mission.domain.subscribe.CompanyAccount;
 import com.zz91.task.common.ZZTask;
 import com.zz91.util.datetime.DateUtil;
