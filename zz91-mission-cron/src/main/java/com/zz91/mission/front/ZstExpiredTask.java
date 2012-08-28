@@ -146,6 +146,9 @@ public class ZstExpiredTask implements ZZTask {
 		// 后台CS crm_cs_profile表过期更改
 		DBUtils.insertUpdate("ast", "update crm_cs_profile set membership_code='10051000',gmt_modified=now() where company_id="+id);
 		
+		// 将过期高会的供求ID，插入products_zst_expired（过期客户供求表）
+		queryProductIdForExpired(id);
+		
 		//过期通知
 		CompanyAccount account=queryAccount(id);
 		if(account==null){
@@ -217,6 +220,27 @@ public class ZstExpiredTask implements ZZTask {
 			}
 		});
 	}
+	
+	private void queryProductIdForExpired(Integer companyId){
+		String sql = "select id from products where company_id = "+companyId;
+		final Set<Integer> set = new HashSet<Integer>();
+		DBUtils.select(DB, sql, new IReadDataHandler() {
+			@Override
+			public void handleRead(ResultSet rs) throws SQLException {
+				while(rs.next()){
+					set.add(rs.getInt(1));
+				}
+			}
+		});
+		for(Integer id:set){
+			insertProductIdToExpiredTable(id);
+		}
+	}
+	
+	private void insertProductIdToExpiredTable(Integer productId){
+		// insert入 products_zst_expired 表
+		DBUtils.insertUpdate(DB, "INSERT INTO products_zst_expired(gmt_created,gmt_modified,product_id) VALUES(now(),now(),"+productId+")");
+	}
 
 	@Override
 	public boolean init() throws Exception {
@@ -227,7 +251,7 @@ public class ZstExpiredTask implements ZZTask {
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 
 		ZstExpiredTask task=new ZstExpiredTask();
-		ZstExpiredTask.DB="ast_test";
+		ZstExpiredTask.DB="ast";
 		task.exec(DateUtil.getDate("2012-11-01", "yyyy-MM-dd"));
 	}
 }
