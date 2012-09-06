@@ -4,7 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.common.SolrInputDocument;
@@ -13,6 +15,7 @@ import com.zz91.task.common.AbstractIdxTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
+import com.zz91.util.lang.StringUtils;
 import com.zz91.util.search.SolrUtil;
 
 public class IndexCompanyTask extends AbstractIdxTask{
@@ -23,6 +26,13 @@ public class IndexCompanyTask extends AbstractIdxTask{
 	final static String MODEL="company";
 	final static int IMPORT_ID_SPLIT=50000000;
 	final static int RESET_LIMIT=5000;
+	
+	final static Map<String, Integer> SORT_MEMBER = new HashMap<String, Integer>();
+	
+	static{
+		SORT_MEMBER.put("10011000", 100);
+		SORT_MEMBER.put("10011001", 200);
+	}
 	
 	@Override
 	public Boolean idxReq(Long start, Long end) throws Exception {
@@ -122,11 +132,28 @@ public class IndexCompanyTask extends AbstractIdxTask{
 				
 			}
 		});
+		for(SolrInputDocument doc:docs){
+			parseMember(doc,(Integer) doc.getFieldValue("id"));
+		}
 		return docs;
 	}
 	
 	private Long resetStart(SolrInputDocument doc){
 		Date d=(Date) doc.getFieldValue("gmtModified");
 		return d.getTime();
+	}
+	
+	private void parseMember(SolrInputDocument doc,Integer id){
+		if(id>IMPORT_ID_SPLIT){
+			String memberCode = doc.get("memberCode").toString();
+			if(StringUtils.isNotEmpty(memberCode)){
+				doc.addField("sortMemberCode", SORT_MEMBER.get(memberCode));
+			}else{
+				doc.addField("sortMemberCode", -100);
+			}
+		}else{
+			//导入的公司信息
+			doc.addField("sortMemberCode",0);
+		}
 	}
 }
