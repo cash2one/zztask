@@ -50,7 +50,6 @@ public class AnalysisOperator implements ZZTask {
 				JSONObject res = LogUtil.getInstance().readMongo(param,limit * SIZE, SIZE);
 				List<JSONObject> list = res.getJSONArray("records");
 				if (list == null || list.size() == 0) {
-					System.out.println("break");
 					break;
 				}
 				for (int i = 0; i < list.size(); i++) {
