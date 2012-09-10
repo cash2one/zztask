@@ -92,7 +92,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 		
 		StringBuffer sql=new StringBuffer();
 		sql.append("select ");
-		sql.append("comp.id,comp.name,comp.member_code,comp.details_query,comp.industry_code,comp.industry_name,comp.business_code,comp.main_buy,")
+		sql.append("comp.id,comp.name,comp.member_code,comp.details_query,comp.industry_code,comp.business_code,comp.main_buy,")
 			.append("comp.main_product_buy,comp.main_supply,comp.main_product_supply,comp.address,comp.province_code,comp.area_code,comp.del_status,comp.gmt_modified,")
 			.append("comp.tags,comp.view_count,comp.message_count,comp.main_brand,comp.gmt_created,comp.member_code_block");
 		sql.append("from comp_profile comp");
@@ -111,7 +111,6 @@ public class IndexCompanyTask extends AbstractIdxTask{
 					doc.addField("memberCodeBlock", rs.getObject("member_code_block"));
 					doc.addField("detailsQuery", rs.getObject("details_query"));
 					doc.addField("industryCode",rs.getObject("industry_code"));
-					doc.addField("industryName", rs.getObject("industry_name"));
 					doc.addField("businessCode", rs.getObject("business_code"));
 					doc.addField("mainBuy", rs.getObject("main_buy"));
 					doc.addField("mainProductBuy", rs.getObject("main_product_buy"));

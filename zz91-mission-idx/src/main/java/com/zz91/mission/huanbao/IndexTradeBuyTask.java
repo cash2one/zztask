@@ -86,7 +86,7 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 		StringBuffer sql=new StringBuffer();
 		sql.append("select ");
 		sql.append("tb.id,tb.cid,tb.title,tb.province_code,tb.area_code,tb.quantity,tb.message_count,tb.quantity_year,tb.quantity_untis,")
-			.append("tb.details_query,tb.valid_days,tb.gmt_refresh,tb.gmt_expired,tb.pause_status,tb.check_status,tb.del_status,tb.view_count,tb.favorite_count,tb.plus_count,tb.gmt_modified");
+			.append("tb.details_query,tb.valid_days,tb.gmt_refresh,tb.gmt_expired,tb.pause_status,tb.check_status,tb.del_status,tb.view_count,tb.favorite_count,tb.plus_count,tb.gmt_modified,tb.tags_sys");
 		sql.append(" from trade_buy tb");
 		sqlwhere(sql, start, end);
 		sql.append(" order by gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
@@ -118,6 +118,7 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 					doc.addField("favoriteCount", rs.getObject("favorite_count"));
 					doc.addField("plusCount", rs.getObject("plus_count"));
 					doc.addField("gmtModified", rs.getObject("gmt_modified"));
+					doc.addField("tagsSys", rs.getObject("tags_sys"));
 					docs.add(doc);
 				}
 				
