@@ -97,11 +97,11 @@ public class IndexNewsTask extends AbstractIdxTask {
 		final List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
 		StringBuffer sql = new StringBuffer();
 		sql.append("select")
-			.append("new.id,new.title,new.title_index,new.category_code,new.description,new.tags,new.news_source,")
-			.append("new.view_count,new.pause_status,new.gmt_publish,new.gmt_modified");
-		sql.append("from news new");
+			.append("n.id,n.title,n.title_index,n.category_code,n.description,n.tags,n.news_source,")
+			.append("n.view_count,n.pause_status,n.gmt_publish,n.gmt_modified");
+		sql.append("from news n");
 		sqlwhere(sql, start, end);
-		sql.append(" order by gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
+		sql.append(" order by n.gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			
 			@Override

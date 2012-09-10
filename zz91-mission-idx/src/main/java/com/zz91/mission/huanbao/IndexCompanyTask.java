@@ -78,8 +78,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 
 	@Override
 	public void optimize() throws Exception {
-		
-		
+		SolrUtil.getInstance().getSolrServer(MODEL).optimize();
 	}
 	
 	private void sqlwhere(StringBuffer sql, Long start, Long end){
@@ -95,7 +94,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 		sql.append("select ");
 		sql.append("comp.id,comp.name,comp.member_code,comp.details_query,comp.industry_code,comp.industry_name,comp.business_code,comp.main_buy,")
 			.append("comp.main_product_buy,comp.main_supply,comp.main_product_supply,comp.address,comp.province_code,comp.area_code,comp.del_status,comp.gmt_modified,")
-			.append("comp.tags,comp.view_count,comp.message_count,comp.main_brand,comp.gmt_created");
+			.append("comp.tags,comp.view_count,comp.message_count,comp.main_brand,comp.gmt_created,comp.member_code_block");
 		sql.append("from comp_profile comp");
 		sqlwhere(sql, start, end);
 		sql.append(" order by gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
@@ -109,6 +108,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 					doc.addField("id", rs.getObject("id"));
 					doc.addField("name", rs.getObject("name"));
 					doc.addField("memberCode", rs.getObject("member_code"));
+					doc.addField("memberCodeBlock", rs.getObject("member_code_block"));
 					doc.addField("detailsQuery", rs.getObject("details_query"));
 					doc.addField("industryCode",rs.getObject("industry_code"));
 					doc.addField("industryName", rs.getObject("industry_name"));
