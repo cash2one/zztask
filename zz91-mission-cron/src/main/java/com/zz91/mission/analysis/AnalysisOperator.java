@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
@@ -33,18 +32,16 @@ public class AnalysisOperator implements ZZTask {
 				+ from + "'";
 		DBUtils.insertUpdate(DB, sql);
 		sql = "delete from analysis_operate where gmt_created='" + from + "'";
-		DBUtils.insertUpdate(DB, sql);
-		
-		return true;
+		return DBUtils.insertUpdate(DB, sql);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
+		LogUtil.getInstance().init(WEB_PROP);
 		Date to = DateUtil.getDateAfterDays(baseDate, -1);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("appCode", "zz91.admin");
-		param.put("operator", "kongsj");
 		param.put("time", LogUtil.getInstance().mgCompare(">=",String.valueOf(to.getTime()), "<",String.valueOf(baseDate.getTime())));
 		Map<String, Map<String, Integer>> omap = new HashMap<String, Map<String, Integer>>();
 		Map<String, Map<String, Integer>> pmap = new HashMap<String, Map<String, Integer>>();
@@ -53,6 +50,7 @@ public class AnalysisOperator implements ZZTask {
 				JSONObject res = LogUtil.getInstance().readMongo(param,limit * SIZE, SIZE);
 				List<JSONObject> list = res.getJSONArray("records");
 				if (list == null || list.size() == 0) {
+					System.out.println("break");
 					break;
 				}
 				for (int i = 0; i < list.size(); i++) {
