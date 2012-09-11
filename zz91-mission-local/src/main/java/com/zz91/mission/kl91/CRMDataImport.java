@@ -29,7 +29,7 @@ public class CRMDataImport implements ZZTask {
 	private static final String DATE_FORMAT="yyyy-MM-dd";
 	private final static String DATE_FORMAT_DETAIL = "yyyy-MM-dd HH:mm:ss";
 	private static String API_HOST="http://www.kl91.com";
-	final static String DB="klcrm";
+	final static String DB="kl91_crm_test";
 	static final Integer LIMIT = 10;
 	
 /**
@@ -49,7 +49,8 @@ public class CRMDataImport implements ZZTask {
 		boolean result=false;
 		String targetDate = DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -1), DATE_FORMAT);
 		do{
-			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/list/todayDataCount.htm?today="+targetDate, HttpUtils.CHARSET_UTF8);
+			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/list/todayDataCount.htm?today="
+					+targetDate, HttpUtils.CHARSET_UTF8);
 			JSONObject jb=JSONObject.fromObject(responseText);
 			int count = jb.getInt("i");
 			int page = getSize(count);
@@ -58,7 +59,8 @@ public class CRMDataImport implements ZZTask {
 			// 循环获取所有数据
 			for(int i=1;i<=page;i++){
 				try {
-					responseText = HttpUtils.getInstance().httpGet(API_HOST+"/list/todayData.htm?today="+targetDate+"&start="+getStart(i), HttpUtils.CHARSET_UTF8);
+					responseText = HttpUtils.getInstance().httpGet(API_HOST+"/list/todayData.htm?today="+
+							targetDate+"&start="+getStart(i), HttpUtils.CHARSET_UTF8);
 				} catch (Exception e) {
 					throw new Exception(e.getMessage()+"   start:"+i);
 				}
@@ -75,11 +77,13 @@ public class CRMDataImport implements ZZTask {
 				String gmtRegister = buildData(object.getString("gmtCreated"));
 				//插入公司信息
 				loadCompany(object.getInt("id"), object.getString("companyName") ,
-						object.getString("account") , object.getString("email") , object.getString("contact") , Short.valueOf(object.getString("sex")) ,
+						object.getString("account") , object.getString("email") , object.getString("contact") , 
+						Short.valueOf(object.getString("sex")) ,
 						object.getString("mobile") , object.getString("tel") ,
 						object.getString("fax") , object.getString("address") ,
 						object.getString("zip") , object.getString("introduction") , object.getString("industryCode") ,
-						object.getString("membershipCode") , Short.valueOf(object.getString("registFlag")) , object.getString("business") ,
+						object.getString("membershipCode") , Short.valueOf(object.getString("registFlag")) , 
+						object.getString("business") ,
 						object.getString("areaCode") , 
 						object.getInt("numLogin") ,  gmtLogin, gmtRegister,object.getString("position"));
 				if (!isExsitCompany(object.getInt("id"))) {
@@ -216,6 +220,7 @@ public class CRMDataImport implements ZZTask {
 	/**
 	 * 插入公司表
 	 */
+	
 	private void loadCompany(Integer cid, String cname,
 			String account, String email, String name, Short sex,
 			String mobile, String phone,
@@ -228,9 +233,18 @@ public class CRMDataImport implements ZZTask {
 		details = details.replaceAll("'", "");
 		// 判断导入数据来源
 		if (registerCode == 1) {
-			cname +="(ZZ91)";
-		} else if(registerCode == 2) {
-			cname +="(其他网站)";
+			cname +="(ZZ91普会)";
+			registerCode=2;
+			
+		}else if(registerCode ==0 ){
+			cname +="(kl91客户注册)";
+			registerCode=0;
+		}else if(registerCode == 4) {
+			cname +="(ZZ91高会)";
+			registerCode=3;
+		}else if(registerCode == 6) {
+			cname +="(ZZ91私海)";
+			registerCode=4;
 		}
 		if (!isExsitCompany(cid)) {
 			sql ="INSERT INTO crm_company ( "
@@ -255,7 +269,7 @@ public class CRMDataImport implements ZZTask {
 				+"name = '" + name + "', "
 				+"sex = " + sex + ", "
 				+"mobile = '" + mobile + "', "
-				+"phone = '" + phone + "', "
+				+"phone = '" + phone + "'," 
 				+"fax = '" + fax + "', "
 				+"position = '" + position + "', "
 				+"address = '" + address + "', "
@@ -337,8 +351,8 @@ public class CRMDataImport implements ZZTask {
 	public static void main(String[] args) throws Exception {
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		CRMDataImport obj = new CRMDataImport();
-//		API_HOST = "http://localhost:8090/front";
-		Date date = DateUtil.getDate("2012-08-04", "yyyy-MM-dd");
+	//	API_HOST = "http://localhost:8090/front";
+		Date date = DateUtil.getDate("2012-08-03", "yyyy-MM-dd");
 		obj.exec(date);
 	}
 
