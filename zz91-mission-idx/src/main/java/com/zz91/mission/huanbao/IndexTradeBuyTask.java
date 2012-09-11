@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -39,7 +40,7 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 			}
 		});
 		
-		if(dealCount[0]!=null && dealCount[0]>4){
+		if(dealCount[0]!=null){
 			return true;
 		}
 		
@@ -126,14 +127,35 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 				
 			}
 		});
+		
+		for(SolrInputDocument doc : docs){
+			parseCodeBlock(doc,(Integer)doc.getFieldValue("cid"));
+		}
 		return  docs;
 	}
+	
+	 private void parseCodeBlock( SolrInputDocument doc,Integer cid){
+		  final String [] result =new String [1];
+		 DBUtils.select(DB, "select member_code_block  from comp_profile where id ="+cid, new IReadDataHandler() {
+			
+			@Override
+			public void handleRead(ResultSet rs) throws SQLException {
+				while(rs.next()){
+					result[0] = rs.getString("member_code_block");
+				}
+			}
+		});
+		 if(result[0]!=null&&"".equals("")){
+			 doc.addField("memberCodeBlock",result[0]);
+		 }
+		
+	 }
 	
 	public static void main(String[] args) {
 		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		
-		String start="2011-11-21 11:49:49";
+		String start="2012-05-21 11:49:49";
 		String end ="2012-11-25 17:10:41";
 		
 		IndexTradeBuyTask task=new IndexTradeBuyTask();

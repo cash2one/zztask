@@ -44,7 +44,7 @@ public class IndexTradeCategoryTask extends AbstractIdxTask {
 			}
 		});
 
-		if (dealCount[0] != null && dealCount[0] > 4) {
+		if (dealCount[0] != null) {
 			return true;
 		}
 

@@ -65,7 +65,7 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 			}
 		});
 		
-		if(dealCount[0]!=null && dealCount[0]>4){
+		if(dealCount[0]!=null){
 			return true;
 		}
 		
@@ -171,6 +171,7 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 		for(SolrInputDocument doc:docs){
 			parseCategory(doc, categoryMap);
 			parseComp(doc, (Integer) doc.getFieldValue("cid"));
+			parseCodeBlock(doc,(Integer) doc.getFieldValue("cid"));
 		}
 		
 		return docs;
@@ -267,6 +268,23 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 		} catch (ParseException e) {
 		}
 	}
+	
+	 private void parseCodeBlock( SolrInputDocument doc,Integer cid){
+		  final String [] result =new String [1];
+		 DBUtils.select(DB, "select member_code_block  from comp_profile where id ="+cid, new IReadDataHandler() {
+			
+			@Override
+			public void handleRead(ResultSet rs) throws SQLException {
+				while(rs.next()){
+					result[0] = rs.getString("member_code_block");
+				}
+			}
+		});
+		 if(result[0]!=null&&"".equals("")){
+			 doc.addField("memberCodeBlock",result[0]);
+		 }
+		
+	 }
 	
 	public static void main(String[] args) throws SolrServerException, IOException {
 		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
