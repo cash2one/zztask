@@ -2,6 +2,7 @@ package com.zz91.mission.huanbao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,6 +14,7 @@ import com.zz91.task.common.AbstractIdxTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
+import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.search.SolrUtil;
 
 public class IndexTradeBuyTask extends AbstractIdxTask{
@@ -125,5 +127,25 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 			}
 		});
 		return  docs;
+	}
+	
+	public static void main(String[] args) {
+		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+		
+		String start="2011-11-21 11:49:49";
+		String end ="2012-11-25 17:10:41";
+		
+		IndexTradeBuyTask task=new IndexTradeBuyTask();
+		try {
+//			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
+			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
+//			task.optimize();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 }

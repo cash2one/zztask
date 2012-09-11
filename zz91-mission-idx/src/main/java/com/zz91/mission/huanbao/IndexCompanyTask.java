@@ -2,6 +2,7 @@ package com.zz91.mission.huanbao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import com.zz91.task.common.AbstractIdxTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
+import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.lang.StringUtils;
 import com.zz91.util.search.SolrUtil;
 
@@ -94,7 +96,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 		sql.append("select ");
 		sql.append("comp.id,comp.name,comp.member_code,comp.details_query,comp.industry_code,comp.business_code,comp.main_buy,")
 			.append("comp.main_product_buy,comp.main_supply,comp.main_product_supply,comp.address,comp.province_code,comp.area_code,comp.del_status,comp.gmt_modified,")
-			.append("comp.tags,comp.view_count,comp.message_count,comp.main_brand,comp.gmt_created,comp.member_code_block");
+			.append("comp.tags,comp.view_count,comp.message_count,comp.main_brand,comp.gmt_created,comp.member_code_block ");
 		sql.append("from comp_profile comp");
 		sqlwhere(sql, start, end);
 		sql.append(" order by gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
@@ -154,5 +156,25 @@ public class IndexCompanyTask extends AbstractIdxTask{
 			//导入的公司信息
 			doc.addField("sortMemberCode",0);
 		}
+	}
+	
+	public static void main(String[] args) {
+		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+		
+		String start="2012-09-10 11:49:49";
+		String end ="2012-09-11 17:10:41";
+		
+		IndexCompanyTask task=new IndexCompanyTask();
+		try {
+//			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
+			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
+//			task.optimize();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 }

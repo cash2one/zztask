@@ -2,6 +2,7 @@ package com.zz91.mission.huanbao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,12 +14,13 @@ import com.zz91.task.common.AbstractIdxTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
+import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.search.SolrUtil;
 
 public class IndexSubnetcategoryTask extends AbstractIdxTask {
 
 	final static String DB="ep";
-	final static int LIMIT=25;
+	final static int LIMIT=20;
 	final static int RESET_LIMIT=5000;
 	final static String MODEL="subnetcategory";
 	
@@ -85,12 +87,11 @@ public class IndexSubnetcategoryTask extends AbstractIdxTask {
 		final List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
 		StringBuffer sql=new StringBuffer();
 		sql.append("select ");
-		sql.append("sc.id,sc.parent_id,sc.code,sc.name,sc.keyword")
+		sql.append("sc.id,sc.parent_id,sc.code,sc.name,sc.keyword,")
 			.append("sc.sort,sc.show_index,sc.gmt_created,sc.gmt_modified");
 		sql.append(" from subnet_category sc");
 		sqlwhere(sql, start, end);
 		sql.append(" order by gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
-		
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			
 			@Override
@@ -99,7 +100,7 @@ public class IndexSubnetcategoryTask extends AbstractIdxTask {
 				while(rs.next()){
 					doc = new SolrInputDocument();
 					doc.addField("id", rs.getObject("id"));
-					doc.addField("parent_id", rs.getObject("parentId"));
+					doc.addField("parentId", rs.getObject("parent_id"));
 					doc.addField("code", rs.getObject("code"));
 					doc.addField("name", rs.getObject("name"));
 					doc.addField("keyword", rs.getObject("keyword"));
@@ -114,5 +115,24 @@ public class IndexSubnetcategoryTask extends AbstractIdxTask {
 		});
 		return  docs;
 	}
-
+	
+	public static void main(String[] args) {
+		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+		
+		String start="2011-09-10 11:49:49";
+		String end ="2012-09-11 17:10:41";
+		
+		IndexSubnetcategoryTask task=new IndexSubnetcategoryTask();
+		try {
+//			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
+			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
+//			task.optimize();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
 }

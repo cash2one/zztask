@@ -2,6 +2,7 @@ package com.zz91.mission.huanbao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,6 +14,7 @@ import com.zz91.task.common.AbstractIdxTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
+import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.search.SolrUtil;
 
 public class IndexExhibitTask extends AbstractIdxTask {
@@ -85,13 +87,12 @@ public class IndexExhibitTask extends AbstractIdxTask {
 	private List<SolrInputDocument> queryDocs(Long start, Long end, int begin){
 		final List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
 		StringBuffer sql=new StringBuffer();
-		sql.append("select");
+		sql.append("select ");
 		sql.append("ex.id,ex.name,ex.plate_category_code,ex.industry_code,ex.show_name,ex.organizers,ex.province_code,ex.area_code,ex.pause_status,")
-			.append("ex.gmt_start,ex.gmt_end,ex.gmt_publish,ex.gmt_sort,ex.gmt_modified");
+			.append("ex.gmt_start,ex.gmt_end,ex.gmt_publish,ex.gmt_sort,ex.gmt_modified ");
 		sql.append("from exhibit ex");
 		sqlwhere(sql, start, end);
 		sql.append(" order by gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
-		
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 	
 			@Override
@@ -120,5 +121,25 @@ public class IndexExhibitTask extends AbstractIdxTask {
 		});
 		return  docs;
 	}
-
+	
+	public static void main(String[] args) {
+		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+		
+		String start="2011-09-10 11:49:49";
+		String end ="2012-09-11 17:10:41";
+		
+		IndexExhibitTask task=new IndexExhibitTask();
+		try {
+//			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
+			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
+//			task.optimize();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 }

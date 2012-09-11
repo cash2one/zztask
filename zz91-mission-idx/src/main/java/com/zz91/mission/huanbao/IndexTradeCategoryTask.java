@@ -2,6 +2,7 @@ package com.zz91.mission.huanbao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import com.zz91.task.common.AbstractIdxTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
+import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.lang.StringUtils;
 import com.zz91.util.search.SolrUtil;
 
@@ -22,7 +24,7 @@ public class IndexTradeCategoryTask extends AbstractIdxTask {
 
 
 	final static String DB = "ep";
-	final static int LIMIT = 25;
+	final static int LIMIT = 50;
 
 	final static String MODEL = "tradecategory";
 	final static int RESET_LIMIT = 5000;
@@ -101,9 +103,9 @@ public class IndexTradeCategoryTask extends AbstractIdxTask {
 	private List<SolrInputDocument> queryDocs(Long start,Long end,Integer begin,Map<String, String> categoryMap){
 		final List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
 		StringBuffer sql = new StringBuffer();
-		sql.append("select");
+		sql.append("select ");
 		sql.append("tc.id,tc.code,tc.name,tc.sort,tc.leaf,")
-			.append("tc.tags,tc.show_index,tc.gmt_created,tc.gmt_modified");
+			.append("tc.tags,tc.show_index,tc.gmt_created,tc.gmt_modified ");
 		sql.append("from trade_category tc");
 		sqlwhere(sql, start, end);
 		sql.append(" order by gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
@@ -152,5 +154,25 @@ public class IndexTradeCategoryTask extends AbstractIdxTask {
 			return  code.substring(0, length);
 		}
 		return code;
+	}
+	
+	public static void main(String[] args) {
+		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+		
+		String start="2011-09-10 11:49:49";
+		String end ="2012-09-11 17:10:41";
+		
+		IndexTradeCategoryTask task=new IndexTradeCategoryTask();
+		try {
+//			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
+			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
+//			task.optimize();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 }

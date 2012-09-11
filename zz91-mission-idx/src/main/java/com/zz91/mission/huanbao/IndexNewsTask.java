@@ -2,6 +2,7 @@ package com.zz91.mission.huanbao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,6 +14,7 @@ import com.zz91.task.common.AbstractIdxTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
+import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.search.SolrUtil;
 
 public class IndexNewsTask extends AbstractIdxTask {
@@ -96,9 +98,9 @@ public class IndexNewsTask extends AbstractIdxTask {
 	private List<SolrInputDocument> queryDocs(Long start,Long end,Integer begin){
 		final List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
 		StringBuffer sql = new StringBuffer();
-		sql.append("select")
+		sql.append("select ")
 			.append("n.id,n.title,n.title_index,n.category_code,n.description,n.tags,n.news_source,")
-			.append("n.view_count,n.pause_status,n.gmt_publish,n.gmt_modified");
+			.append("n.view_count,n.pause_status,n.gmt_publish,n.gmt_modified ");
 		sql.append("from news n");
 		sqlwhere(sql, start, end);
 		sql.append(" order by n.gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
@@ -126,5 +128,25 @@ public class IndexNewsTask extends AbstractIdxTask {
 		});
 		
 		return docs;
+	}
+	
+	public static void main(String[] args) {
+		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+		
+		String start="2012-05-10 11:49:49";
+		String end ="2012-09-11 17:10:41";
+		
+		IndexNewsTask task=new IndexNewsTask();
+		try {
+//			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
+			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
+//			task.optimize();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 }
