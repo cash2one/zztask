@@ -49,7 +49,7 @@ public class NewsTask implements ZZTask{
 	private List<Integer> queryIds(String basedate,String date){
 		final List<Integer> ids=new ArrayList<Integer>();
 		
-		DBUtils.select(DB, "select id from news where gmt_modified > '"+basedate+"' or gmt_modified < '"+date+"' limit "+LIMIT, new IReadDataHandler() {
+		DBUtils.select(DB, "select id from news where gmt_modified >= '"+basedate+"' and gmt_modified < '"+date+"' limit "+LIMIT, new IReadDataHandler() {
 			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
