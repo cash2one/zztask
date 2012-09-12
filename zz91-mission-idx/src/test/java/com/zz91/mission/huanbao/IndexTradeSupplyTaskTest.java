@@ -36,6 +36,7 @@ public class IndexTradeSupplyTaskTest {
 		SolrQuery query = new SolrQuery();
 //		query.setQuery("*:*");
 		query.setQuery("sortRefresh:1345996800000");
+		
 		query.addSortField("sortRefresh", ORDER.desc);
 		query.addSortField("sortMember", ORDER.desc);
 		query.addSortField("score", ORDER.desc);
@@ -44,9 +45,10 @@ public class IndexTradeSupplyTaskTest {
 //		query.set(GroupParams.GROUP_FORMAT, "simple");
 		query.set(GroupParams.GROUP, true);
 		query.set(GroupParams.GROUP_FIELD, "gcid");
-//		query.set(GroupParams.GROUP_MAIN, true);
-		query.set(GroupParams.GROUP_TRUNCATE, true);
-		query.set(GroupParams.GROUP_TOTAL_COUNT, true);
+		query.set(GroupParams.GROUP_MAIN, true);
+		query.set(GroupParams.GROUP_LIMIT,2);
+//		query.set(GroupParams.GROUP_TRUNCATE, true);
+//		query.set(GroupParams.GROUP_TOTAL_COUNT, true);
 		
 		query.setRows(100);
 //		query.setStart(7700);
