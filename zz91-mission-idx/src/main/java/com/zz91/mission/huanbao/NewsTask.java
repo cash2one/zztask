@@ -26,32 +26,35 @@ public class NewsTask implements ZZTask{
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
 		
-		deal(DateUtil.toString(baseDate, "yyyy-MM-dd HH:mm:ss"));		
+		Date date =  new Date(baseDate.getTime()+1000);
+		deal(DateUtil.toString(baseDate, "yyyy-MM-dd HH:mm:ss"),DateUtil.toString(date, "yyyy-MM-dd HH:mm:ss"));	
+		
 		return false;
 	}
 	
-	private void deal(String dt){
+	private void deal(String basedate,String date){
 		int docsize=0;
 		do {
-			List<Integer> ids=queryIds(dt);
+			List<Integer> ids=queryIds(basedate,date);
 			if(ids.size()<=0){
 				break;
 			}
 			docsize=docsize+ids.size();
-			updateGmtModified(dt, ids);
+			updateGmtModified(basedate, ids);
 		} while (true);
 		
 	//System.out.println(dt+":>>>>>>>>>"+docsize);
 	}
 	
-	private List<Integer> queryIds(String d){
+	private List<Integer> queryIds(String basedate,String date){
 		final List<Integer> ids=new ArrayList<Integer>();
 		
-		DBUtils.select(DB, "select id from news where gmt_modified='"+d+"' limit "+LIMIT, new IReadDataHandler() {
+		DBUtils.select(DB, "select id from news where gmt_modified > '"+basedate+"' or gmt_modified < '"+date+"' limit "+LIMIT, new IReadDataHandler() {
 			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
-				while (rs.next()) {
+				
+				while (rs.next()) {	
 					ids.add(rs.getInt(1));
 				}
 			}
@@ -60,11 +63,11 @@ public class NewsTask implements ZZTask{
 		return ids;
 	}
 	
-	private void updateGmtModified(String d, List<Integer> ids){
+	private void updateGmtModified(String basedate, List<Integer> ids){
 		
 		Date dm = null;
 		try {
-			dm = DateUtil.getDate(d, "yyyy-MM-dd HH:mm:ss");
+			dm = DateUtil.getDate(basedate, "yyyy-MM-dd HH:mm:ss");
 		} catch (ParseException e) {
 			return ;
 		}
@@ -75,7 +78,7 @@ public class NewsTask implements ZZTask{
 		for(Integer id:ids){
 			nd=nd+1000;
 			sql="update news set gmt_modified='"+DateUtil.toString(new Date(nd),"yyyy-MM-dd HH:mm:ss")+"' where id="+id;
-			
+
 			DBUtils.insertUpdate(DB, sql);
 		}
 	}
@@ -87,7 +90,6 @@ public class NewsTask implements ZZTask{
 	
 	public static void main(String[] args) throws Exception {
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
-		
 		NewsTask task=new NewsTask();
 		task.exec(new Date());
 	}
