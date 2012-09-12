@@ -5,30 +5,37 @@
  */
 package com.zz91.mission.ep;
 
+import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+
+import org.apache.commons.httpclient.HttpException;
+
 import com.zz91.task.common.ZZTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
+import com.zz91.util.db.IInsertUpdateHandler;
 import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.http.HttpUtils;
 import com.zz91.util.lang.StringUtils;
 
 public class CrmCompanyAssignTask implements ZZTask{
 	
-	Logger LOG=Logger.getLogger(CrmCompanyAssignTask.class);
 	
 	final static String DATE_FORMAT = "yyyy-MM-dd";
 	final static String DATE_FORMAT_DETAIL = "yyyy-MM-dd HH:mm:ss";
 	final static String API_HOST="http://huanbaoadmin.zz91.com:8081/ep-admin/api";
 	final static String DB="crm";
+	
+	final static int LIMIT=25;
 	
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
@@ -37,234 +44,260 @@ public class CrmCompanyAssignTask implements ZZTask{
 
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
-		boolean result=false;
-		String targetDate = DateUtil.toString(baseDate, DATE_FORMAT);
-		do{
-			Integer start=0;
-			Integer limit=10;
-			//注册数据导入
-			regData(targetDate,start,limit);
-			//非注册数据导入
-			unRegData(targetDate,start,limit);
-			
-			//统计今天注册客户
-//			tongji(targetDate);
-			result=true;
-		}while(false);
-		return result;
-	}
-	
-	//注册的
-	public void regData(String  targetDate , Integer start , Integer limit) throws Exception{
-		//查询昨天新注册的公司数量
-		String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/regCompanyCount.htm?date="+targetDate, HttpUtils.CHARSET_UTF8);
-		JSONObject object = JSONObject.fromObject(responseText);
-		Integer count = Integer.valueOf(object.getString("regTotals"));
-		Integer n=((count-1)/limit)+1;
-		for (int i = 0; i < n; i++) {
-			//插入
-			insertRegData(targetDate, start, limit);
-			start+=limit;
-		}
-	}
-	
-	//非注册
-	public void unRegData(String  targetDate , Integer start , Integer limit) throws Exception{
-		//查询昨天新注册的公司数量
-		String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/unRegCompanyCount.htm?date="+targetDate, HttpUtils.CHARSET_UTF8);
-		JSONObject object = JSONObject.fromObject(responseText);
-		Integer count = Integer.valueOf(object.getString("unRegTotals"));
-		Integer n=((count-1)/limit)+1;
-		for (int i = 0; i < n; i++) {
-			//插入非注册
-//			insertUnRegData(targetDate, start, limit);
-			start+=limit;
-		}
-	}
-	
-	//插入新注册客户数据
-	private int insertRegData(String targetDate,Integer start,Integer limit)  throws Exception{
-		Integer result=0;
+		String from = DateUtil.toString(baseDate, DATE_FORMAT);
+		String to=DateUtil.toString(DateUtil.getDateAfterDays(baseDate, 1), DATE_FORMAT);
 		
-		String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/regCompany.htm?date="+targetDate+"&start="+start+"&limit="+limit, HttpUtils.CHARSET_UTF8);
-		JSONArray jsonarray=JSONArray.fromObject(responseText);
-		for (Iterator iter = jsonarray.iterator(); iter.hasNext();) {
-			JSONObject object = (JSONObject) iter.next();
-			String gmtLogin = buildData(object.getString("gmtLogin"));
-			String gmtRegister = buildData(object.getString("gmtRegister"));
-			//插入公司信息
-			loadCompany(object.getInt("id"), object.getString("cname") , object.getInt("uid"),
-					object.getString("account") , object.getString("email") , object.getString("name") , Short.valueOf(object.getString("sex")) ,
-					object.getString("mobile") , object.getString("phoneCountry") , object.getString("phoneArea") , object.getString("phone") ,
-					object.getString("faxCountry") , object.getString("faxArea") , object.getString("fax") , object.getString("address") ,
-					object.getString("addressZip") , object.getString("details") , object.getString("industryCode") ,
-					object.getString("memberCode") , Short.valueOf(object.getString("registerCode")) , object.getString("businessCode") ,
-					object.getString("provinceCode") , object.getString("areaCode") , Short.valueOf(object.getString("mainBuy")) ,
-					object.getString("mainProductBuy") , Short.valueOf(object.getString("mainSupply")) , object.getString("mainProductSupply") ,
-					object.getInt("loginCount") ,  gmtLogin, gmtRegister, object.getString("contact"), object.getString("position"));
-			if (!isExsitCompany(object.getInt("id"))) {
-				LOG.info(">>>>>>>>>>>>>>>>>插入失败:数据ID:"+object.getInt("id")+";帐号:"+object.getString("account")
-						+";公司:"+object.getString("cname"));
-			}
-		}
-		return result;
+		syncProfile(from, to);
+		
+		return true;
 	}
 	
-//	//更新非注册客户数据
-//	private int insertUnRegData(String targetDate,Integer start,Integer limit)  throws Exception{
-//		Integer result=0;
-//		
-//		String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/unRegCompany.htm?date="+targetDate+"&start="+start+"&limit="+limit, HttpUtils.CHARSET_UTF8);
-//		JSONArray jsonarray=JSONArray.fromObject(responseText);
-//		for (Iterator iter = jsonarray.iterator(); iter.hasNext();) {
-//			JSONObject object = (JSONObject) iter.next();
-//			String gmtLogin = buildData(object.getString("gmtLogin"));
-//			String gmtRegister = buildData(object.getString("gmtRegister"));
-//			//插入公司信息
-//			loadCompany(object.getInt("id"), object.getString("cname") , object.getInt("uid"),
-//					object.getString("account") , object.getString("email") , object.getString("name") , Short.valueOf(object.getString("sex")) ,
-//					object.getString("mobile") , object.getString("phoneCountry") , object.getString("phoneArea") , object.getString("phone") ,
-//					object.getString("faxCountry") , object.getString("faxArea") , object.getString("fax") , object.getString("address") ,
-//					object.getString("addressZip") , object.getString("details") , object.getString("industryCode") ,
-//					object.getString("memberCode") , Short.valueOf(object.getString("registerCode")) , object.getString("businessCode") ,
-//					object.getString("provinceCode") , object.getString("areaCode") , Short.valueOf(object.getString("mainBuy")) ,
-//					object.getString("mainProductBuy") , Short.valueOf(object.getString("mainSupply")) , object.getString("mainProductSupply") ,
-//					object.getInt("loginCount") ,  gmtLogin, gmtRegister, object.getString("contact"), object.getString("position"));
-//			if (!isExsitCompany(object.getInt("id"))) {
-//				LOG.info(">>>>>>>>>>>>>>>>>插入失败:数据ID:"+object.getInt("id")+";帐号:"+object.getString("account")
-//						+";公司:"+object.getString("cname"));
-//			}
-//		}
-//		return result;
-//	}
-	
-	
-	/**
-	 * 插入公司表
-	 */
-	private void loadCompany(Integer cid, String cname, Integer uid,
-			String account, String email, String name, Short sex,
-			String mobile, String phoneCountry, String phoneArea, String phone,
-			String faxCountry, String faxArea, String fax, String address,
-			String addressZip, String details, String industryCode,
-			String memberCode, Short registerCode, String businessCode,
-			String provinceCode, String areaCode, Short mainBuy,
-			String mainProductBuy, Short mainSupply, String mainProductSupply,
-			Integer loginCount, String gmtLogin, String gmtRegister, String contact, String position) {
-		String sql = "";
-		details = details.replaceAll("'", "");
-		if (!isExsitCompany(cid)) {
-			if (registerCode == 1) {
-				sql ="INSERT INTO crm_company ( "
-					+"cid,regist_status,cname,uid,account,"
-					+"email,name,sex,mobile,phone_country,phone_area,phone,"
-					+"fax_country,fax_area,fax,position,contact,address,address_zip,details,industry_code,"
-					+"member_code,register_code,business_code,province_code,area_code,main_buy,"
-					+"main_product_buy,main_supply,main_product_supply,login_count,gmt_login,"
-					+"gmt_register,gmt_input,gmt_created,gmt_modified) VALUES ("
-					+cid+",1,'"+cname+"',"+uid+",'"+account+"','"
-					+email+"','"+name+"',"+sex+",'"+mobile+"','"+phoneCountry+"','"+phoneArea+"','"+phone+"','"
-					+faxCountry+"','"+faxArea+"','"+fax+"','"+position+"','"+contact+"','"+address+"','"+addressZip+"','"+details+"','"+industryCode+"','"
-					+memberCode+"','"+registerCode+"','"+businessCode+"','"+provinceCode+"','"+areaCode+"',"+mainBuy+",'"
-					+mainProductBuy+"',"+mainSupply+",'"+mainProductSupply+"',"+loginCount+",'"+gmtLogin+"','"
-					+gmtRegister+"',now(),now(),now())";
-			} else {
-				sql ="INSERT INTO crm_company ( "
-					+"cid,regist_status,cname,uid,account,"
-					+"email,name,sex,mobile,phone_country,phone_area,phone,"
-					+"fax_country,fax_area,fax,position,contact,address,address_zip,details,industry_code,"
-					+"member_code,register_code,business_code,province_code,area_code,main_buy,"
-					+"main_product_buy,main_supply,main_product_supply,login_count,ctype,gmt_login,"
-					+"gmt_register,gmt_input,gmt_created,gmt_modified) VALUES ("
-					+cid+",1,'"+cname+"',"+uid+",'"+account+"','"
-					+email+"','"+name+"',"+sex+",'"+mobile+"','"+phoneCountry+"','"+phoneArea+"','"+phone+"','"
-					+faxCountry+"','"+faxArea+"','"+fax+"','"+position+"','"+contact+"','"+address+"','"+addressZip+"','"+details+"','"+industryCode+"','"
-					+memberCode+"','"+registerCode+"','"+businessCode+"','"+provinceCode+"','"+areaCode+"',"+mainBuy+",'"
-					+mainProductBuy+"',"+mainSupply+",'"+mainProductSupply+"',"+loginCount+",5,'"+gmtLogin+"','"
-					+gmtRegister+"',now(),now(),now())";
+	@SuppressWarnings("rawtypes")
+	private void syncProfile(String from, String to) throws HttpException, IOException{
+		JSONArray list=null;
+		int start=0;
+		do{
+			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/.htm?from="+from+"&to="+to+"&start="+start+"&limit="+LIMIT, HttpUtils.CHARSET_UTF8);
+			if(StringUtils.isEmpty(responseText) || !responseText.startsWith("[")){
+				break;
 			}
-		} else {
-			sql="UPDATE crm_company SET "
-				+"cname = '" + cname + "', "
-				+"uid = " + uid + ", "
-				+"account = '" + account + "', "
-				+"email = '" + email + "', "
-				+"name = '" + name + "', "
-				+"sex = " + sex + ", "
-				+"mobile = '" + mobile + "', "
-				+"phone_country = '" + phoneCountry + "', "
-				+"phone_area = '" + phoneArea  + "', "
-				+"phone = '" + phone + "', "
-				+"fax_country = '" + faxCountry + "', "
-				+"fax_area = '" + faxArea + "', "
-				+"fax = '" + fax + "', "
-				+"position = '" + position + "', "
-				+"contact = '" + contact + "', "
-				+"address = '" + address + "', "
-				+"address_zip = '"+ addressZip + "', "
-				+"details = '" + details.replace("'", "") + "', "
-				+"industry_code = '" + industryCode + "', "
-				+"member_code = '" + memberCode + "', "
-				+"business_code = '" + businessCode + "', "
-				+"province_code = '" + provinceCode + "', "
-				+"area_code = '" + areaCode + "', "
-				+"main_buy = " + mainBuy + ", "
-				+"main_product_buy = '" + mainProductBuy + "', "
-				+"main_supply = " + mainSupply + ", "
-				+"main_product_supply = '" + mainProductSupply + "', "
-				+"login_count = " + loginCount + ", "
-				+"gmt_login = '" + gmtLogin + "'"
-				+"WHERE cid="+cid;
-		}
-		boolean result=DBUtils.insertUpdate(DB, sql);
-		if (result) {
-			backupCompany( cid,  cname,  uid,
-					 account,  email,  name,  sex,
-					 mobile,  phoneCountry,  phoneArea,  phone,
-					 faxCountry,  faxArea,  fax,  address,
-					 addressZip,  details,  industryCode,
-					 memberCode,  registerCode,  businessCode,
-					 provinceCode,  areaCode,  mainBuy,
-					 mainProductBuy,  mainSupply,  mainProductSupply,
-					 loginCount,  gmtLogin,  gmtRegister, contact, position);
-		} else {
-			LOG.info(">>>>>>>>>>>>>>>>>创建客户失败:"+sql);
-		}
+			
+			
+			if(list.size()<=0){
+				break;
+			}
+			
+			list=JSONArray.fromObject(responseText);
+			Integer cid=0;
+			for (Iterator iter = list.iterator(); iter.hasNext();) {
+				JSONObject obj = (JSONObject) iter.next();
+				
+				cid=obj.getInt("cid");
+				if(isExsitCompany(cid)){
+					updateProfile(obj);
+				}else{
+					insertProfile(obj);
+				}
+				
+				if(!isExsitCompanyBackup(cid)){
+					insertBackup(obj);
+				}
+			}
+			
+			start=start+LIMIT;
+		}while(true);
 	}
 	
-	/**
-	 * 插入备份表
-	 */
-	private void backupCompany(Integer cid, String cname, Integer uid,
-			String account, String email, String name, Short sex,
-			String mobile, String phoneCountry, String phoneArea, String phone,
-			String faxCountry, String faxArea, String fax, String address,
-			String addressZip, String details, String industryCode,
-			String memberCode, Short registerCode, String businessCode,
-			String provinceCode, String areaCode, Short mainBuy,
-			String mainProductBuy, Short mainSupply, String mainProductSupply,
-			Integer loginCount, String gmtLogin, String gmtRegister, String contact, String position) {
-		if (!isExsitCompanyBackup(cid)) {
-			String sql="INSERT INTO crm_company_backup ( "
-				+"id,cname,uid,account,"
-				+"email,name,sex,mobile,phone_country,phone_area,phone,"
-				+"fax_country,fax_area,fax,position,contact,address,address_zip,details,industry_code,"
-				+"member_code,register_code,business_code,province_code,area_code,main_buy,"
-				+"main_product_buy,main_supply,main_product_supply,login_count,gmt_login,"
-				+"gmt_register,gmt_input,gmt_created,gmt_modified) VALUES ("
-				+cid+",'"+cname+"',"+uid+",'"+account+"','"
-				+email+"','"+name+"',"+sex+",'"+mobile+"','"+phoneCountry+"','"+phoneArea+"','"+phone+"','"
-				+faxCountry+"','"+faxArea+"','"+fax+"','"+position+"','"+contact+"','"+address+"','"+addressZip+"','"+details+"','"+industryCode+"','"
-				+memberCode+"','"+registerCode+"','"+businessCode+"','"+provinceCode+"','"+areaCode+"',"+mainBuy+",'"
-				+mainProductBuy+"',"+mainSupply+",'"+mainProductSupply+"',"+loginCount+",'"+gmtLogin+"','"
-				+gmtRegister+"',now(),now(),now())";
-			boolean result = DBUtils.insertUpdate(DB, sql);
-			if (!result) {
-				LOG.info(">>>>>>>>>>>>>>>>>备份新创建客户失败:"+sql);
+	private void insertProfile(final JSONObject obj){
+		
+		StringBuffer sql= new StringBuffer();
+		sql.append("insert into crm_company (");
+		sql.append("cid,regist_status,cname,uid,account,"); //5
+		sql.append("email,name,sex,mobile,phone_country,phone_area,phone,"); //7
+		sql.append("fax_country,fax_area,fax,position,contact,address,address_zip,details,industry_code,"); //9
+		sql.append("member_code,register_code,business_code,province_code,area_code,main_buy,"); //6
+		sql.append("main_product_buy,main_supply,main_product_supply,login_count,ctype,gmt_login,"); //6
+		sql.append("gmt_register,gmt_input,gmt_created,gmt_modified)"); //4
+		sql.append("values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, now(),now(),now())");  //34
+		
+		DBUtils.insertUpdate(DB, sql.toString(), new IInsertUpdateHandler() {
+			
+			@Override
+			public void handleInsertUpdate(PreparedStatement ps)
+					throws SQLException {
+				ps.setObject(1, obj.get("cid"));
+				ps.setObject(2, 1);
+				ps.setObject(3, obj.get("cname"));
+				ps.setObject(4, obj.get("uid"));
+				ps.setObject(5, obj.get("account"));
+				ps.setObject(6, obj.get("email"));
+				ps.setObject(7, obj.get("name"));
+				ps.setObject(8, obj.get("sex"));
+				ps.setObject(9, obj.get("mobile"));
+				ps.setObject(10, obj.get("phoneCountry"));
+				ps.setObject(11, obj.get("phoneArea"));
+				ps.setObject(12, obj.get("phone"));
+				ps.setObject(13, obj.get("faxCountry"));
+				ps.setObject(14, obj.get("faxArea"));
+				ps.setObject(15, obj.get("fax"));
+				ps.setObject(16, obj.get("position"));
+				ps.setObject(17, obj.get("contact"));
+				ps.setObject(18, obj.get("address"));
+				ps.setObject(19, obj.get("addressZip"));
+				ps.setObject(20, obj.get("details"));
+				ps.setObject(21, obj.get("industryCode"));
+				ps.setObject(22, obj.get("memberCode"));
+				ps.setObject(23, obj.get("registerCode"));
+				ps.setObject(24, obj.get("businessCode"));
+				ps.setObject(25, obj.get("provinceCode"));
+				ps.setObject(26, obj.get("areaCode"));
+				ps.setObject(27, obj.get("mainBuy"));
+				ps.setObject(28, obj.get("mainProductBuy"));
+				ps.setObject(29, obj.get("mainSupply"));
+				ps.setObject(30, obj.get("mainProductSupply"));
+				ps.setObject(31, obj.get("loginCount"));
+				if(obj.getInt("registerCode")!=1){
+					ps.setObject(32, 5);  //CTYPE
+				}else{
+					ps.setObject(32, 0);
+				}
+				ps.setObject(33, buildData(obj.getString("gmtLogin")));
+				ps.setObject(34, buildData(obj.getString("gmtRegister")));
+				
+				ps.executeQuery();
 			}
-		}
+		});
 	}
 	
+	private void insertBackup(final JSONObject obj){
+		StringBuffer sql= new StringBuffer();
+		sql.append("insert into crm_company_backup (");
+		sql.append("id,cname,uid,account,");  //4
+		sql.append("email,name,sex,mobile,phone_country,phone_area,phone,"); //7
+		sql.append("fax_country,fax_area,fax,position,contact,address,address_zip,details,industry_code,");  //9
+		sql.append("member_code,register_code,business_code,province_code,area_code,main_buy,"); //6
+		sql.append("main_product_buy,main_supply,main_product_supply,login_count,gmt_login,"); //5
+		sql.append("gmt_register,gmt_input,gmt_created,gmt_modified) ");  //1+3
+		sql.append("values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,now(),now(),now()) ");
+		
+		DBUtils.insertUpdate(DB, sql.toString(), new IInsertUpdateHandler() {
+			
+			@Override
+			public void handleInsertUpdate(PreparedStatement ps)
+					throws SQLException {
+				ps.setObject(1, obj.get("cid"));
+				ps.setObject(2, obj.get("cname"));
+				ps.setObject(3, obj.get("uid"));
+				ps.setObject(4, obj.get("account"));
+				
+				ps.setObject(5, obj.get("email"));
+				ps.setObject(6, obj.get("name"));
+				ps.setObject(7, obj.get("sex"));
+				ps.setObject(8, obj.get("mobile"));
+				ps.setObject(9, obj.get("phoneCountry"));
+				ps.setObject(10, obj.get("phoneArea"));
+				ps.setObject(11, obj.get("phone"));
+				
+				ps.setObject(12, obj.get("faxCountry"));
+				ps.setObject(13, obj.get("faxArea"));
+				ps.setObject(14, obj.get("fax"));
+				ps.setObject(15, obj.get("position"));
+				ps.setObject(16, obj.get("contact"));
+				ps.setObject(17, obj.get("address"));
+				ps.setObject(18, obj.get("addressZip"));
+				ps.setObject(19, obj.get("details"));
+				ps.setObject(20, obj.get("industryCode"));
+				
+				ps.setObject(21, obj.get("memberCode"));
+				ps.setObject(22, obj.get("registerCode"));
+				ps.setObject(23, obj.get("businessCode"));
+				ps.setObject(24, obj.get("provinceCode"));
+				ps.setObject(25, obj.get("areaCode"));
+				ps.setObject(26, obj.get("mainBuy"));
+			
+				ps.setObject(27, obj.get("mainProductBuy"));
+				ps.setObject(28, obj.get("mainSupply"));
+				ps.setObject(29, obj.get("mainProductSupply"));
+				ps.setObject(30, obj.get("loginCount"));
+				ps.setObject(31, buildData(obj.getString("gmtLogin"))); 
+				
+				ps.setObject(32, buildData(obj.getString("gmtRegister")));
+				
+				ps.executeQuery();
+			}
+		});
+	}
+	
+	private void updateProfile(final JSONObject obj){
+		StringBuffer sql= new StringBuffer();
+		sql.append("update crm_company set ");
+		
+		sql.append(" cname=?,");
+		sql.append(" uid=?,");
+		sql.append(" account=?,");
+		sql.append(" email=?,");
+		sql.append(" name=?,");  //5
+		
+		sql.append(" sex=?,");
+		sql.append(" mobile=?,");
+		sql.append(" phone_country=?,");
+		sql.append(" phone_area=?,");
+		sql.append(" phone=?,");  //10
+		
+		sql.append(" fax_country=?,");
+		sql.append(" fax_area=?,");
+		sql.append(" fax=?,");
+		sql.append(" position=?,");
+		sql.append(" contact=?,"); //15
+		
+		sql.append(" address=?,");
+		sql.append(" address_zip=?,");
+		sql.append(" details=?,");
+		sql.append(" industry_code=?,");
+		sql.append(" member_code=?,");  //20
+		
+		sql.append(" business_code=?,");
+		sql.append(" province_code=?,");
+		sql.append(" area_code=?,");
+		sql.append(" main_buy=?,");
+		sql.append(" main_product_buy=?,"); //25
+		
+		sql.append(" main_supply=?,");
+		sql.append(" main_product_supply=?,");
+		sql.append(" login_count=?,");
+		sql.append(" gmt_login=?,");  //29
+		sql.append(" gmt_modified=now() ");
+		
+		sql.append(" where cid=?");
+		
+		DBUtils.insertUpdate(DB, sql.toString(), new IInsertUpdateHandler() {
+			
+			@Override
+			public void handleInsertUpdate(PreparedStatement ps)
+					throws SQLException {
+				
+				ps.setObject(1, obj.get("cname"));
+				ps.setObject(2, obj.get("uid"));
+				ps.setObject(3, obj.get("account"));
+				ps.setObject(4, obj.get("email"));
+				ps.setObject(5, obj.get("name"));
+
+				ps.setObject(6, obj.get("sex"));
+				ps.setObject(7, obj.get("mobile"));
+				ps.setObject(8, obj.get("phoneCountry"));
+				ps.setObject(9, obj.get("phoneArea"));
+				ps.setObject(10, obj.get("phone"));
+				
+				ps.setObject(11, obj.get("faxCountry"));
+				ps.setObject(12, obj.get("faxArea"));
+				ps.setObject(13, obj.get("fax"));
+				ps.setObject(14, obj.get("position"));
+				ps.setObject(15, obj.get("contact"));
+				
+				ps.setObject(16, obj.get("address"));
+				ps.setObject(17, obj.get("addressZip"));
+				ps.setObject(18, obj.get("details"));
+				ps.setObject(19, obj.get("industryCode"));
+				ps.setObject(20, obj.get("memberCode"));
+				
+				ps.setObject(21, obj.get("businessCode"));
+				ps.setObject(22, obj.get("provinceCode"));
+				ps.setObject(23, obj.get("areaCode"));
+				ps.setObject(24, obj.get("mainBuy"));
+				ps.setObject(25, obj.get("mainProductBuy"));
+				
+				ps.setObject(26, obj.get("mainSupply"));
+				ps.setObject(27, obj.get("mainProductSupply"));
+				ps.setObject(28, obj.get("loginCount"));
+				ps.setObject(29, buildData(obj.getString("gmtLogin")));  //TODO 日期类型
+				
+				ps.setObject(30, obj.get("cid"));
+				
+				ps.executeQuery();
+			}
+		});
+	}
+
 	private boolean isExsitCompanyBackup(Integer cid) {
 		final Map<String, Integer> map=new HashMap<String, Integer>();
 		String sql = "select count(*) from crm_company_backup where id="+cid;
