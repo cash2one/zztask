@@ -96,7 +96,6 @@ public class CrmCompanyTask implements ZZTask {
 		return result;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void tongji(String targetDate) {
 		//100110001010:浙江 100110001009:江苏  100110001008:上海 100110001018:广东 
 		//100110001014:山东 100110001000:北京 100110001002:河北
