@@ -46,9 +46,10 @@ public class CrmCompanyTask implements ZZTask {
 	public boolean exec(Date baseDate) throws Exception {
 		boolean result=false;
 		String targetDate = DateUtil.toString(baseDate, DATE_FORMAT);
-		String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/todayUpdateCompanyCount.htm?date="+targetDate, HttpUtils.CHARSET_UTF8);
-		JSONObject object = JSONObject.fromObject(responseText);
-		Integer count = Integer.valueOf(object.getString("totals"));
+//		String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/todayUpdateCompanyCount.htm?date="+targetDate, HttpUtils.CHARSET_UTF8);
+//		JSONObject object = JSONObject.fromObject(responseText);
+//		Integer count = Integer.valueOf(object.getString("totals"));
+		int count=1000;
 		do{
 			Integer start=0;
 			Integer limit=10;
@@ -345,7 +346,7 @@ public class CrmCompanyTask implements ZZTask {
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		CrmCompanyTask comp = new CrmCompanyTask();
 		try {
-			comp.exec(DateUtil.getDate("2012-08-20", "yyyy-MM-dd"));
+			comp.exec(DateUtil.getDate("2012-09-12", "yyyy-MM-dd"));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
