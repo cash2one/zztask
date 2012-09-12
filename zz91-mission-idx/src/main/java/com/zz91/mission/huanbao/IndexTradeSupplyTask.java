@@ -65,7 +65,7 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 			}
 		});
 		
-		if(dealCount[0]!=null){
+		if(dealCount[0]!=null && dealCount[0] >0 ){
 			return true;
 		}
 		
@@ -171,7 +171,6 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 		for(SolrInputDocument doc:docs){
 			parseCategory(doc, categoryMap);
 			parseComp(doc, (Integer) doc.getFieldValue("cid"));
-			parseCodeBlock(doc,(Integer) doc.getFieldValue("cid"));
 		}
 		
 		return docs;
@@ -225,14 +224,15 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 	private void parseComp(SolrInputDocument doc, Integer cid){
 		
 		final Map<String, Object> result=new HashMap<String, Object>();
-		DBUtils.select(DB, "select name, member_code, gmt_created from comp_profile where id="+cid,  new IReadDataHandler() {
+		DBUtils.select(DB, "select name, member_code ,member_code_block, gmt_created from comp_profile where id="+cid,  new IReadDataHandler() {
 			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				while (rs.next()) {
-					result.put("name", rs.getObject(1));
-					result.put("memberCode", rs.getObject(2));
-					result.put("gmtRegister", rs.getObject(3));
+					result.put("name", rs.getObject("name"));
+					result.put("memberCode", rs.getObject("member_code"));
+					result.put("memberCodeBlock", rs.getObject("member_code_block"));
+					result.put("gmtRegister", rs.getObject("gmt_created"));
 				}
 			}
 		});
@@ -269,22 +269,7 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 		}
 	}
 	
-	 private void parseCodeBlock( SolrInputDocument doc,Integer cid){
-		  final String [] result =new String [1];
-		 DBUtils.select(DB, "select member_code_block  from comp_profile where id ="+cid, new IReadDataHandler() {
-			
-			@Override
-			public void handleRead(ResultSet rs) throws SQLException {
-				while(rs.next()){
-					result[0] = rs.getString("member_code_block");
-				}
-			}
-		});
-		 if(result[0]!=null&&"".equals("")){
-			 doc.addField("memberCodeBlock",result[0]);
-		 }
-		
-	 }
+	
 	
 	public static void main(String[] args) throws SolrServerException, IOException {
 		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
@@ -302,7 +287,7 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 		
 //		String start="2011-11-29 15:13:20";
 //		String end="2011-11-29 15:13:21";
-		String start="2011-11-21 11:49:49";
+		String start="2012-09-21 11:49:49";
 		String end ="2012-11-25 17:10:41";
 //		
 		AbstractIdxTask task=new IndexTradeSupplyTask();
