@@ -145,10 +145,7 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 				}
 			}
 		});
-		 if(result[0]!=null&&"".equals("")){
 			 doc.addField("memberCodeBlock",result[0]);
-		 }
-		
 	 }
 	
 	public static void main(String[] args) {
