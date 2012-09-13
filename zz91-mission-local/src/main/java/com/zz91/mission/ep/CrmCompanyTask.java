@@ -52,7 +52,7 @@ public class CrmCompanyTask implements ZZTask {
 		int count=1000;
 		do{
 			Integer start=0;
-			Integer limit=10;
+			Integer limit=20;
 			Integer n=((count-1)/limit)+1;
 			for (int i = 0; i < n; i++) {
 				//插入
@@ -345,7 +345,7 @@ public class CrmCompanyTask implements ZZTask {
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		CrmCompanyTask comp = new CrmCompanyTask();
 		try {
-			comp.exec(DateUtil.getDate("2012-09-12", "yyyy-MM-dd"));
+			comp.exec(DateUtil.getDate("2012-09-13", "yyyy-MM-dd"));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		} catch (Exception e) {

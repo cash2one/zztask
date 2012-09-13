@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,11 +25,11 @@ import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IInsertUpdateHandler;
 import com.zz91.util.db.IReadDataHandler;
+import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.http.HttpUtils;
 import com.zz91.util.lang.StringUtils;
 
 public class CrmCompanyAssignTask implements ZZTask{
-	
 	
 	final static String DATE_FORMAT = "yyyy-MM-dd";
 	final static String DATE_FORMAT_DETAIL = "yyyy-MM-dd HH:mm:ss";
@@ -52,27 +53,27 @@ public class CrmCompanyAssignTask implements ZZTask{
 		return true;
 	}
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	private void syncProfile(String from, String to) throws HttpException, IOException{
 		JSONArray list=null;
 		int start=0;
 		do{
-			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/.htm?from="+from+"&to="+to+"&start="+start+"&limit="+LIMIT, HttpUtils.CHARSET_UTF8);
+			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/crm/syncProfile.htm?from="+from+"&to="+to+"&start="+start+"&limit="+LIMIT, HttpUtils.CHARSET_UTF8);
 			if(StringUtils.isEmpty(responseText) || !responseText.startsWith("[")){
 				break;
 			}
 			
+			list=JSONArray.fromObject(responseText);
 			
 			if(list.size()<=0){
 				break;
 			}
 			
-			list=JSONArray.fromObject(responseText);
 			Integer cid=0;
 			for (Iterator iter = list.iterator(); iter.hasNext();) {
-				JSONObject obj = (JSONObject) iter.next();
+				final JSONObject obj = (JSONObject) iter.next();
 				
-				cid=obj.getInt("cid");
+				cid=obj.getInt("id");
 				if(isExsitCompany(cid)){
 					updateProfile(obj);
 				}else{
@@ -98,14 +99,14 @@ public class CrmCompanyAssignTask implements ZZTask{
 		sql.append("member_code,register_code,business_code,province_code,area_code,main_buy,"); //6
 		sql.append("main_product_buy,main_supply,main_product_supply,login_count,ctype,gmt_login,"); //6
 		sql.append("gmt_register,gmt_input,gmt_created,gmt_modified)"); //4
-		sql.append("values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, now(),now(),now())");  //34
+		sql.append("values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?, now(),now(),now())");  //34
 		
 		DBUtils.insertUpdate(DB, sql.toString(), new IInsertUpdateHandler() {
 			
 			@Override
 			public void handleInsertUpdate(PreparedStatement ps)
 					throws SQLException {
-				ps.setObject(1, obj.get("cid"));
+				ps.setObject(1, obj.get("id"));
 				ps.setObject(2, 1);
 				ps.setObject(3, obj.get("cname"));
 				ps.setObject(4, obj.get("uid"));
@@ -144,7 +145,7 @@ public class CrmCompanyAssignTask implements ZZTask{
 				ps.setObject(33, buildData(obj.getString("gmtLogin")));
 				ps.setObject(34, buildData(obj.getString("gmtRegister")));
 				
-				ps.executeQuery();
+				ps.execute();
 			}
 		});
 	}
@@ -158,14 +159,14 @@ public class CrmCompanyAssignTask implements ZZTask{
 		sql.append("member_code,register_code,business_code,province_code,area_code,main_buy,"); //6
 		sql.append("main_product_buy,main_supply,main_product_supply,login_count,gmt_login,"); //5
 		sql.append("gmt_register,gmt_input,gmt_created,gmt_modified) ");  //1+3
-		sql.append("values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,now(),now(),now()) ");
+		sql.append("values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,now(),now(),now()) ");
 		
 		DBUtils.insertUpdate(DB, sql.toString(), new IInsertUpdateHandler() {
 			
 			@Override
 			public void handleInsertUpdate(PreparedStatement ps)
 					throws SQLException {
-				ps.setObject(1, obj.get("cid"));
+				ps.setObject(1, obj.get("id"));
 				ps.setObject(2, obj.get("cname"));
 				ps.setObject(3, obj.get("uid"));
 				ps.setObject(4, obj.get("account"));
@@ -203,7 +204,7 @@ public class CrmCompanyAssignTask implements ZZTask{
 				
 				ps.setObject(32, buildData(obj.getString("gmtRegister")));
 				
-				ps.executeQuery();
+				ps.execute();
 			}
 		});
 	}
@@ -291,9 +292,9 @@ public class CrmCompanyAssignTask implements ZZTask{
 				ps.setObject(28, obj.get("loginCount"));
 				ps.setObject(29, buildData(obj.getString("gmtLogin")));  //TODO 日期类型
 				
-				ps.setObject(30, obj.get("cid"));
+				ps.setObject(30, obj.get("id"));
 				
-				ps.executeQuery();
+				ps.execute();
 			}
 		});
 	}
@@ -348,4 +349,17 @@ public class CrmCompanyAssignTask implements ZZTask{
 		return false;
 	}
 
+	public static void main(String[] args) {
+		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+		CrmCompanyAssignTask task = new CrmCompanyAssignTask();
+		try {
+			task.exec(DateUtil.getDate("2012-08-20", "yyyy-MM-dd"));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+	}
 }
