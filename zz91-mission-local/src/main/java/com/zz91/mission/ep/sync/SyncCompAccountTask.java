@@ -159,6 +159,31 @@ String maxInfo=HttpUtils.getInstance().httpGet(SYNC_URL_SEED+"?table=comp_accoun
 					while(rs.next()){
 						user = new CompAccount();
 						user.setId(rs.getInt("id"));
+						user.setId(rs.getInt("id"));
+						user.setCid(rs.getInt("cid"));
+						user.setAccount(rs.getString("account"));
+						user.setEmail(rs.getString("email"));
+						user.setPassword(rs.getString("password"));
+						user.setPasswordClear(rs.getString("password_clear"));
+						user.setName(rs.getString("name"));
+						user.setSex(rs.getShort("sex"));
+						user.setMobile(rs.getString("moblie"));
+						user.setPhoneCountry(rs.getString("phone_country"));
+						user.setPhoneArea(rs.getString("phone_area"));
+						user.setPhone(rs.getString("phone"));
+						user.setFaxCountry(rs.getString("fax_country"));
+						user.setFaxArea(rs.getString("fax_area"));
+						user.setFax(rs.getString("fax"));
+						user.setDept(rs.getString("dept"));
+						user.setContact(rs.getString("contact"));
+						user.setPosition(rs.getString("position"));
+						user.setLoginCount(rs.getInt("login_count"));
+						user.setLoginIp(rs.getString("login_ip"));
+						user.setGmtLogin(getJavaDate(rs.getDate("gmt_login")));
+						user.setGmtRegister(getJavaDate(rs.getDate("gmt_register")));
+						user.setGmtCreated(getJavaDate(rs.getDate("gmt_created")));
+						user.setGmtModified(getJavaDate(rs.getDate("gmt_modified")));
+						list.add(user);
 					}
 					
 				}
