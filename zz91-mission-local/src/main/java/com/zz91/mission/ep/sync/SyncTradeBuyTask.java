@@ -30,7 +30,7 @@ public class SyncTradeBuyTask implements ZZTask {
 
 	final static String SYNC_TABLE = "trade_buy";
 
-	final static Integer LIMIT = 2;
+	final static Integer LIMIT = 50;
 
 	final static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
