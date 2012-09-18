@@ -35,8 +35,8 @@ public class SyncCompProfileTask implements ZZTask {
 	final static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	
 	
-	final static String SYNC_URL_SEED="http://221.12.127.195:8081/sync/seed";
-	final static String SYNC_URL_IMPT="http://221.12.127.195:8081/sync/imptCompProfile";
+	final  static String SYNC_URL_SEED="http://221.12.127.195:8081/sync/seed";
+	final  static String SYNC_URL_IMPT="http://221.12.127.195:8081/sync/imptCompProfile";
 	
 	@Override
 	public boolean init() throws Exception {
@@ -47,9 +47,9 @@ public class SyncCompProfileTask implements ZZTask {
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
 		
-		//取得最大的id号 和最大的更新时间
+				//取得最大的id号 和最大的更新时间
 				String maxInfo=HttpUtils.getInstance().httpGet(SYNC_URL_SEED+"?table=comp_profile", HttpUtils.CHARSET_UTF8);
-				
+				//String maxInfo="{maxId:9482982,maxGmtModified:1230}";
 				long now = new Date().getTime();
 				
 				JSONObject jobj=JSONObject.fromObject(maxInfo);
@@ -153,8 +153,8 @@ public class SyncCompProfileTask implements ZZTask {
 			sql.append("select ");
 			sql.append("id,name,details,industry_code,main_buy,main_product_buy,main_supply,main_product_supply,")
 				.append("member_code,member_code_block,register_code,business_code,area_code,province_code,")
-				.append("legal,funds,main_brand,address,address_zip,domain,domain_two,message_count,viwe_count,")
-				.append("tags,detail_query,gmt_created,gmt_modified,del_status,process_method,process,")
+				.append("legal,funds,main_brand,address,address_zip,domain,domain_two,message_count,view_count,")
+				.append("tags,details_query,gmt_created,gmt_modified,del_status,process_method,process,")
 				.append("employee_num,developer_num,plant_area,main_market,main_customer,")
 				.append("month_output,year_turnover,year_exports,quality_control,register_area,enterprise_type,")
 				.append("send_time,receive_time,oper_name");
@@ -170,7 +170,7 @@ public class SyncCompProfileTask implements ZZTask {
 					comp.setId(rs.getInt("id"));
 					comp.setName(rs.getString("name"));
 					comp.setDetails(rs.getString("details"));
-					comp.setIndustryCode(rs.getString("indutstry_code"));
+					comp.setIndustryCode(rs.getString("industry_code"));
 					comp.setMainBuy(rs.getShort("main_buy"));
 					comp.setMainProductBuy(rs.getString("main_product_buy"));
 					comp.setMainSupply(rs.getShort("main_supply"));
@@ -184,8 +184,8 @@ public class SyncCompProfileTask implements ZZTask {
 					comp.setLegal(rs.getString("legal"));
 					comp.setFunds(rs.getString("funds"));
 					comp.setMainBrand(rs.getString("main_brand"));
-					comp.setAddress(rs.getString("adress"));
-				    comp.setAddressZip(rs.getString("adress_zip"));
+					comp.setAddress(rs.getString("address"));
+				    comp.setAddressZip(rs.getString("address_zip"));
 				    comp.setDomain(rs.getString("domain"));
 				    comp.setDomainTwo(rs.getString("domain_two"));
 				    comp.setMessageCount(rs.getInt("message_count"));
@@ -278,5 +278,16 @@ public long buildShowTime(long seed){
 		
 		return false;
 	}
-
+	
+	public static void main(String[] args) {
+//		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+//		SyncCompProfileTask c = new SyncCompProfileTask();
+//		SyncCompProfileTask.SYNC_URL_IMPT = "http://127.0.0.1:8080/sync/imptCompProfile";
+//		try {
+//			c.exec(new Date());
+//		} catch (Exception e) {
+//			
+//			e.printStackTrace();
+//		}
+	}
 }

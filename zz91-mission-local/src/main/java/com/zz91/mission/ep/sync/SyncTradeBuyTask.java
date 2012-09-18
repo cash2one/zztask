@@ -30,12 +30,12 @@ public class SyncTradeBuyTask implements ZZTask {
 
 	final static String SYNC_TABLE = "trade_buy";
 
-	final static Integer LIMIT = 50;
+	final static Integer LIMIT = 2;
 
 	final static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-	final static String SYNC_URL_SEED = "http://221.12.127.195:8081/sync/seed";
-	final static String SYNC_URL_IMPT = "http://221.12.127.195:8081/sync/imptTradeBuy";
+	public static String SYNC_URL_SEED = "http://221.12.127.195:8081/sync/seed";
+	public static String SYNC_URL_IMPT = "http://221.12.127.195:8081/sync/imptTradeBuy";
 
 	@Override
 	public boolean init() throws Exception {
@@ -49,7 +49,7 @@ public class SyncTradeBuyTask implements ZZTask {
 		// 取得最大的id号 和最大的更新时间
 		String maxInfo = HttpUtils.getInstance().httpGet(
 				SYNC_URL_SEED + "?table=trade_buy", HttpUtils.CHARSET_UTF8);
-
+		//String maxInfo="{maxId:154421,maxGmtModified:1230}";
 		long now = new Date().getTime();
 
 		JSONObject jobj = JSONObject.fromObject(maxInfo);
@@ -156,9 +156,8 @@ public class SyncTradeBuyTask implements ZZTask {
 				.append("tags_sys,details_query,message_count,view_count,favorite_count,")
 				.append("plus_count,html_path,del_status,pause_status,check_status,check_admin,check_refuse,")
 				.append("gmt_check,gmt_created,gmt_modified");
-		sql.append(" from trade_supply where id>").append(maxId);
+		sql.append(" from trade_buy where id>").append(maxId);
 		sql.append(" order by id asc limit ").append(LIMIT);
-		// System.out.println(sql.toString());
 		DBUtils.select(DB_EP, sql.toString(), new IReadDataHandler() {
 
 			@Override
@@ -271,6 +270,19 @@ public class SyncTradeBuyTask implements ZZTask {
 	public boolean clear(Date baseDate) throws Exception {
 
 		return false;
+	}
+	
+	public static void main(String[] args) {
+//		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+//		SyncTradeBuyTask c = new SyncTradeBuyTask();
+//		SyncTradeBuyTask.SYNC_URL_IMPT = "http://127.0.0.1:8080/sync/imptTradeBuy";
+//		try {
+//			c.exec(new Date());
+//		} catch (Exception e) {
+//			
+//			e.printStackTrace();
+//		}
+//		
 	}
 
 }

@@ -25,7 +25,7 @@ import com.zz91.util.mail.MailUtil;
 
 public class SyncCompAccountTask implements ZZTask {
 	
-final static String DB_EP="ep";
+	final static String DB_EP="ep";
 	
 	final static String SYNC_TABLE="comp_account";
 	
@@ -46,8 +46,7 @@ final static String DB_EP="ep";
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
 		
-String maxInfo=HttpUtils.getInstance().httpGet(SYNC_URL_SEED+"?table=comp_account", HttpUtils.CHARSET_UTF8);
-		
+		String maxInfo=HttpUtils.getInstance().httpGet(SYNC_URL_SEED+"?table=comp_account", HttpUtils.CHARSET_UTF8);
 		long now = new Date().getTime();
 		JSONObject jobj=JSONObject.fromObject(maxInfo);
 		
@@ -98,6 +97,7 @@ String maxInfo=HttpUtils.getInstance().httpGet(SYNC_URL_SEED+"?table=comp_accoun
 					failure++;
 					logUnsync(account.getId(), baseDate.getTime());
 				}
+				
 			}
 			
 			JSONObject resultJson= JSONObject.fromObject(result);
@@ -147,7 +147,7 @@ String maxInfo=HttpUtils.getInstance().httpGet(SYNC_URL_SEED+"?table=comp_accoun
 				sql.append("select ");
 				sql.append(" id,cid,account,email,password,password_clear,name,")
 					.append("sex,mobile,phone_country,phone_area,phone,fax_country,fax_area,fax,")
-					.append("dept,contact,position,login_count,login_ip,gmt_login_gmt_register,gmt_created,")
+					.append("dept,contact,position,login_count,login_ip,gmt_login,gmt_register,gmt_created,")
 					.append("gmt_modified");
 				sql.append(" from comp_account where id>").append(maxId);
 				sql.append(" order by id asc limit ").append(LIMIT);
@@ -167,7 +167,7 @@ String maxInfo=HttpUtils.getInstance().httpGet(SYNC_URL_SEED+"?table=comp_accoun
 						user.setPasswordClear(rs.getString("password_clear"));
 						user.setName(rs.getString("name"));
 						user.setSex(rs.getShort("sex"));
-						user.setMobile(rs.getString("moblie"));
+						user.setMobile(rs.getString("mobile"));
 						user.setPhoneCountry(rs.getString("phone_country"));
 						user.setPhoneArea(rs.getString("phone_area"));
 						user.setPhone(rs.getString("phone"));
@@ -248,5 +248,18 @@ String maxInfo=HttpUtils.getInstance().httpGet(SYNC_URL_SEED+"?table=comp_accoun
 		
 		return false;
 	}
-
+	
+	public static void main(String[] args) {
+//		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+//		SyncCompAccountTask task = new SyncCompAccountTask();
+//		SyncCompAccountTask.SYNC_URL_IMPT="http://127.0.0.1:8080/sync/imptCompAccount";
+//		
+//		try {
+//			task.exec(new Date());
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		System.out.println(DateUtil.toString(new Date(1343804625000l), "yyyy-MM-dd HH:mm:ss"));
+	}
+	
 }
