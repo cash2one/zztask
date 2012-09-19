@@ -35,7 +35,7 @@ public class TradeSupplyNumTask implements ZZTask {
 		SolrServer server = SolrUtil.getInstance().getSolrServer("tradesupply");
 		map.put("code", "1000100"+i);
 		SolrQuery query = new SolrQuery();
-		query.setQuery("category16:"+map.get("code"));
+		query.setQuery("category8:"+map.get("code"));
 		QueryResponse rsp=server.query(query);
 		map.put("num",(int)rsp.getResults().getNumFound());
 		
