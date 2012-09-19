@@ -36,7 +36,7 @@ public class SyncCompProfileTask implements ZZTask {
 	
 	
 	final  static String SYNC_URL_SEED="http://221.12.127.195:8081/sync/seed";
-	final  static String SYNC_URL_IMPT="http://221.12.127.195:8081/sync/imptCompProfile";
+	final static String SYNC_URL_IMPT="http://221.12.127.195:8081/sync/imptCompProfile";
 	
 	@Override
 	public boolean init() throws Exception {
@@ -49,7 +49,7 @@ public class SyncCompProfileTask implements ZZTask {
 		
 				//取得最大的id号 和最大的更新时间
 				String maxInfo=HttpUtils.getInstance().httpGet(SYNC_URL_SEED+"?table=comp_profile", HttpUtils.CHARSET_UTF8);
-				//String maxInfo="{maxId:9482982,maxGmtModified:1230}";
+				//String maxInfo="{maxId:9482983,maxGmtModified:1230}";
 				long now = new Date().getTime();
 				
 				JSONObject jobj=JSONObject.fromObject(maxInfo);
@@ -142,7 +142,7 @@ public class SyncCompProfileTask implements ZZTask {
 						dataMap, MailUtil.PRIORITY_TASK);
 				
 		
-		return false;
+		return true;
 	}
 
 	
@@ -160,6 +160,7 @@ public class SyncCompProfileTask implements ZZTask {
 				.append("send_time,receive_time,oper_name");
 			sql.append(" from comp_profile where id>").append(maxId);
 			sql.append(" order by id asc limit ").append(LIMIT);
+			//System.out.println(sql.toString());
 		DBUtils.select(DB_EP, sql.toString(), new IReadDataHandler() {
 			
 			@Override
@@ -280,7 +281,7 @@ public long buildShowTime(long seed){
 	}
 	
 	public static void main(String[] args) {
-//		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+//		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc2.properties");
 //		SyncCompProfileTask c = new SyncCompProfileTask();
 //		SyncCompProfileTask.SYNC_URL_IMPT = "http://127.0.0.1:8080/sync/imptCompProfile";
 //		try {
