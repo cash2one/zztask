@@ -218,14 +218,22 @@ public class IndexTradeSupplyVipTask extends AbstractIdxTask {
 	private void parseComp(SolrInputDocument doc, Integer cid){
 		
 		final Map<String, Object> result=new HashMap<String, Object>();
-		DBUtils.select(DB, "select name, member_code, gmt_created from comp_profile where id="+cid,  new IReadDataHandler() {
+		StringBuffer sql = new StringBuffer();
+		sql.append("select name,(select QQ from comp_account where cid = ")
+		.append(cid)
+		.append(") as QQ,")
+		.append("member_code ,member_code_block, gmt_created from comp_profile where id= ")
+		.append(cid);
+		DBUtils.select(DB, sql.toString(),  new IReadDataHandler() {
 			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				while (rs.next()) {
-					result.put("name", rs.getObject(1));
-					result.put("memberCode", rs.getObject(2));
-					result.put("gmtRegister", rs.getObject(3));
+					result.put("name", rs.getObject("name"));
+					result.put("QQ",rs.getObject("QQ"));
+					result.put("memberCode", rs.getObject("member_code"));
+					result.put("memberCodeBlock", rs.getObject("member_code_block"));
+					result.put("gmtRegister", rs.getObject("gmt_created"));
 				}
 			}
 		});

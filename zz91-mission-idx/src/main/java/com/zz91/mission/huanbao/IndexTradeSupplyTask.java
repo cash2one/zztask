@@ -224,12 +224,20 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 	private void parseComp(SolrInputDocument doc, Integer cid){
 		
 		final Map<String, Object> result=new HashMap<String, Object>();
-		DBUtils.select(DB, "select name, member_code ,member_code_block, gmt_created from comp_profile where id="+cid,  new IReadDataHandler() {
+		StringBuffer sql = new StringBuffer();
+			sql.append("select name,(select QQ from comp_account where cid = ")
+			.append(cid)
+			.append(") as QQ,")
+			.append("member_code ,member_code_block, gmt_created from comp_profile where id= ")
+			.append(cid);
+			System.out.println(sql.toString());
+		DBUtils.select(DB, sql.toString() ,  new IReadDataHandler() {
 			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				while (rs.next()) {
 					result.put("name", rs.getObject("name"));
+					result.put("QQ",rs.getObject("QQ"));
 					result.put("memberCode", rs.getObject("member_code"));
 					result.put("memberCodeBlock", rs.getObject("member_code_block"));
 					result.put("gmtRegister", rs.getObject("gmt_created"));
@@ -287,23 +295,24 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 		
 //		String start="2011-11-29 15:13:20";
 //		String end="2011-11-29 15:13:21";
-		String start="2012-09-21 11:49:49";
-		String end ="2012-11-25 17:10:41";
+//		String start="2012-09-21 11:49:49";
+//		String end ="2012-11-25 17:10:41";
 //		
-		AbstractIdxTask task=new IndexTradeSupplyTask();
-		try {
-//			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
-			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
-//			task.optimize();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		AbstractIdxTask task=new IndexTradeSupplyTask();
+//		try {
+////			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
+//			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
+////			task.optimize();
+//		} catch (ParseException e) {
+//			e.printStackTrace();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		
 //		>>>>>1766683>>>>>>1700
 //		1761891
 //		java.lang.Exception: 共创建/更新1766683条索引
+		
 	}
 
 
