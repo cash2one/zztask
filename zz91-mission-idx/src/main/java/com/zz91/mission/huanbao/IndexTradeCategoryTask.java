@@ -141,11 +141,11 @@ public class IndexTradeCategoryTask extends AbstractIdxTask {
 	private void parseCategory(SolrInputDocument doc, Map<String, String> categoryMap){
 		String code=String.valueOf(doc.getFieldValue("code"));
 		if(StringUtils.isNotEmpty(code)){
-			doc.addField("category4", substringCode(code, 4));
-			doc.addField("category8", substringCode(code, 8));
-			doc.addField("category12", substringCode(code, 12));
-			doc.addField("category16", substringCode(code, 16));
-			doc.addField("category20", substringCode(code, 20));
+			doc.addField("code4", substringCode(code, 4));
+			doc.addField("code8", substringCode(code, 8));
+			doc.addField("code12", substringCode(code, 12));
+			doc.addField("code16", substringCode(code, 16));
+			doc.addField("code20", substringCode(code, 20));
 		}
 	}
 	
