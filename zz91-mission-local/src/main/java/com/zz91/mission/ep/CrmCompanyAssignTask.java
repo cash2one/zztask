@@ -45,8 +45,10 @@ public class CrmCompanyAssignTask implements ZZTask{
 
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
-		String from = DateUtil.toString(baseDate, DATE_FORMAT);
-		String to=DateUtil.toString(DateUtil.getDateAfterDays(baseDate, 1), DATE_FORMAT);
+		
+		Date yesterDate=DateUtil.getDateAfterDays(baseDate, -1);
+		String from = DateUtil.toString(yesterDate, DATE_FORMAT);
+		String to=DateUtil.toString(DateUtil.getDateAfterDays(yesterDate, 1), DATE_FORMAT);
 		
 		syncProfile(from, to);
 		

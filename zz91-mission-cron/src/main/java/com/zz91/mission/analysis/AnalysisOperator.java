@@ -264,6 +264,7 @@ public class AnalysisOperator implements ZZTask {
 				count = count + 1;
 			}
 			usermap.put(code+opertion, count);
+			map.put(user, usermap);
 		}while(false);
 	}
 
@@ -275,7 +276,7 @@ public class AnalysisOperator implements ZZTask {
 	public static void main(String[] args) throws Exception {
 		LogUtil.getInstance().init(WEB_PROP);
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
-		Date baseDate = DateUtil.getDate("2012-09-11", DATE_FORMAT);
+		Date baseDate = DateUtil.getDate("2012-09-13", DATE_FORMAT);
 		AnalysisOperator obj = new AnalysisOperator();
 		obj.clear(baseDate);
 		obj.exec(baseDate);
