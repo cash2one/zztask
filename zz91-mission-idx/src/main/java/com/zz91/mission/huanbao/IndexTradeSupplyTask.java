@@ -253,16 +253,17 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 		doc.addField("gcid", "g"+String.valueOf(cid));
 		
 		Date refresh=(Date) doc.getFieldValue("gmtRefresh");
-		
+		String memcode = result.get("memberCode").toString();
 		//parse sortMember
-		if(cid.intValue()>IMPORT_ID_SPLIT){
+		
+		if(cid.intValue()<IMPORT_ID_SPLIT && memcode!="10011001"){
+			doc.addField("sortMember", 0);
+		}else{
 			if((new Date().getTime()-refresh.getTime()) < 3*86400000){
-				doc.addField("sortMember", SORT_MEMBER.get(result.get("memberCode")));
+				doc.addField("sortMember", SORT_MEMBER.get(memcode));
 			}else{
 				doc.addField("sortMember", 100);
 			}
-		}else{
-			doc.addField("sortMember", 0);
 		}
 		
 		
