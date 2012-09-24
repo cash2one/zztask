@@ -28,7 +28,7 @@ public class CRMDataImport implements ZZTask {
 
 	private static final String DATE_FORMAT="yyyy-MM-dd";
 	private final static String DATE_FORMAT_DETAIL = "yyyy-MM-dd HH:mm:ss";
-	private static String API_HOST="http://www.kl91.com/";
+	private static String API_HOST="http://www.kl91.com";
 	final static String DB="klcrm";
 	static final Integer LIMIT = 10;
 	
