@@ -225,19 +225,18 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 		
 		final Map<String, Object> result=new HashMap<String, Object>();
 		StringBuffer sql = new StringBuffer();
-			sql.append("select name,(select QQ from comp_account where cid = ")
+			sql.append("select name,(select qq from comp_account where cid = ")
 			.append(cid)
-			.append(") as QQ,")
+			.append(") as qq,")
 			.append("member_code ,member_code_block, gmt_created from comp_profile where id= ")
 			.append(cid);
-			System.out.println(sql.toString());
 		DBUtils.select(DB, sql.toString() ,  new IReadDataHandler() {
 			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				while (rs.next()) {
 					result.put("name", rs.getObject("name"));
-					result.put("QQ",rs.getObject("QQ"));
+					result.put("qq",rs.getObject("qq"));
 					result.put("memberCode", rs.getObject("member_code"));
 					result.put("memberCodeBlock", rs.getObject("member_code_block"));
 					result.put("gmtRegister", rs.getObject("gmt_created"));
