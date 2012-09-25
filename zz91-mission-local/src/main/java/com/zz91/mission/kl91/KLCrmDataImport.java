@@ -20,29 +20,13 @@ import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.http.HttpUtils;
 import com.zz91.util.lang.StringUtils;
 
-/**
- * Author : kongsj 
- * Creation time : 上午11:53:53 - 2012-8-6 
- */
-public class CRMDataImport implements ZZTask {
+public class KLCrmDataImport implements ZZTask{
 
 	private static final String DATE_FORMAT="yyyy-MM-dd";
 	private final static String DATE_FORMAT_DETAIL = "yyyy-MM-dd HH:mm:ss";
 	private static String API_HOST="http://www.kl91.com";
 	final static String DB="klcrm";
 	static final Integer LIMIT = 10;
-	
-/**
- * {"account":"kl2012331171956996","address":"","areaCode":"","business":"","companyName":"",
- * "contact":"kl2012331171956996","department":"","domain":"","email":"","fax":"",
- * "gmtCreated":{"date":6,"day":1,"hours":17,"minutes":21,"month":7,"seconds":34,"time":1344244894000,"timezoneOffset":-480,"year":112},
- * "gmtLastLogin":{"date":3,"day":5,"hours":17,"minutes":21,"month":7,"seconds":34,"time":1343985694000,"timezoneOffset":-480,"year":112},
- * "gmtModified":{"date":3,"day":5,"hours":17,"minutes":21,"month":7,"seconds":34,"time":1343985694000,"timezoneOffset":-480,"year":112},
- * "id":9068,"industryCode":"1000","introduction":"","isActive":0,"membershipCode":"10051000",
- * "mobile":"","numLogin":1,"numPass":0,"password":"","position":"","qq":"","registFlag":0,"sex":0,
- * "showTime":{"date":3,"day":5,"hours":17,"minutes":21,"month":7,"seconds":34,"time":1343985694000,"timezoneOffset":-480,"year":112},
- * "tel":"","website":"","zip":""},
- */
 	
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
@@ -227,10 +211,36 @@ public class CRMDataImport implements ZZTask {
 		String sql = "";
 		details = details.replaceAll("'", "");
 		// 判断导入数据来源
-		if (registerCode == 1) {
-			cname +="(ZZ91)";
-		} else if(registerCode == 2) {
-			cname +="(其他网站)";
+		if (registerCode == 0) {
+			cname +="(客户注册)";
+		} else if(registerCode == 1) {
+			cname +="(kl91导入)";
+		}else if(registerCode == 2) {
+			cname +="(ZZ91导入的高会)";
+		}else if(registerCode == 4) {
+			cname +="(ZZ91导入的私海)";
+		}else if(registerCode == 3) {
+			cname +="(ZZ91导入的普会)";
+		}else if(registerCode == 6) {
+			cname +="(ZZ91电话激活)";
+		}else if(registerCode == 7) {
+			cname +="(阿里巴巴导入)";
+		}else if(registerCode == 8) {
+			cname +="(中国再生塑料网)";
+		}else if(registerCode == 9) {
+			cname +="(中国再生商圈)";
+		}else if(registerCode == 10) {
+			cname +="(马克波罗)";
+		}else if(registerCode == 11) {
+			cname +="(杏坛塑料网)";
+		}else if(registerCode == 12) {
+			cname +="(废旧网)";
+		}else if(registerCode == 13) {
+			cname +="(5R网)";
+		}else if(registerCode == 14) {
+			cname +="(中塑在线)";
+		}else if(registerCode == 15) {
+			cname +="(全球再生塑料网)";
 		}
 		if (!isExsitCompany(cid)) {
 			sql ="INSERT INTO crm_company ( "
@@ -244,7 +254,7 @@ public class CRMDataImport implements ZZTask {
 				+email+"','"+name+"',"+sex+",'"+mobile+"','"+phone+"','"
 				+fax+"','"+position+"','"+address+"','"+addressZip+"','"+details+"','"+industryCode+"','"
 				+memberCode+"','"+registerCode+"','"+businessCode+"','"+areaCode+"',"+"1"+",'"
-				+""+"',"+"1"+",'"+""+"',"+loginCount+",2,'"+gmtLogin+"','"
+				+""+"',"+"1"+",'"+""+"',"+loginCount+",5,'"+gmtLogin+"','"
 				+gmtRegister+"',now(),now(),now())";
 		} else {
 			sql="UPDATE crm_company SET "
@@ -336,9 +346,9 @@ public class CRMDataImport implements ZZTask {
 	
 	public static void main(String[] args) throws Exception {
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
-		CRMDataImport obj = new CRMDataImport();
+		KLCrmDataImport obj = new KLCrmDataImport();
 //		API_HOST = "http://localhost:8090/front";
-		Date date = DateUtil.getDate("2010-11-26", "yyyy-MM-dd");
+		Date date = DateUtil.getDate("2012-09-25", "yyyy-MM-dd");
 		obj.exec(date);
 	}
 
