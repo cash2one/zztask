@@ -1,7 +1,5 @@
 package com.zz91.mission.kl91;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -13,7 +11,6 @@ import net.sf.json.JSONObject;
 import com.zz91.task.common.ZZTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
-import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.http.HttpUtils;
 import com.zz91.util.lang.StringUtils;
@@ -30,6 +27,14 @@ public class KlCrmNumLoginImport implements ZZTask{
 	public boolean exec(Date baseDate) throws Exception {
 		boolean result=false;
 		String targetDate = DateUtil.toString(baseDate, DATE_FORMAT);
+		String from = DateUtil.toString(
+				DateUtil.getDateAfterDays(
+						DateUtil.getDate(baseDate, "yyyy-MM-dd"), -1),
+				"yyyy-MM-dd");
+		String to = DateUtil.toString(
+				DateUtil.getDateAfterDays(
+						DateUtil.getDate(baseDate, "yyyy-MM-dd"), 1),
+				"yyyy-MM-dd");
 		do{
 			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/list/queryYestodayCompanyCount.htm?gmtLogin="+targetDate, HttpUtils.CHARSET_UTF8);
 			JSONObject jb=JSONObject.fromObject(responseText);
@@ -64,14 +69,14 @@ public class KlCrmNumLoginImport implements ZZTask{
 						object.getString("membershipCode") , Short.valueOf(object.getString("registFlag")) , object.getString("business") ,
 						object.getString("areaCode") , 
 						object.getInt("numLogin") ,  gmtLogin, gmtRegister,object.getString("position"));
-				updateCtype();
+				updateCtype(from,to);
 			}
 			result=true;
 		}while(false);
 		return result;
 	}
-	private void updateCtype() {
-		String sql="update crm_company SET ctype=2 where ctype=5";
+	private void updateCtype(String from,String to) {
+		String sql="update crm_company SET ctype=2 where ctype=5 and gmt_login > '"+from+"' and '"+to+"'> gmt_login";
 		DBUtils.insertUpdate(DB, sql);
 	}
 	private void updateCompany(Integer cid, String cname,
