@@ -348,7 +348,7 @@ public class KLCrmDataImport implements ZZTask{
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		KLCrmDataImport obj = new KLCrmDataImport();
 //		API_HOST = "http://localhost:8090/front";
-		Date date = DateUtil.getDate("2012-09-27", "yyyy-MM-dd");
+		Date date = DateUtil.getDate("2012-09-26", "yyyy-MM-dd");
 		obj.exec(date);
 	}
 

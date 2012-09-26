@@ -17,11 +17,11 @@ import com.zz91.util.lang.StringUtils;
 
 public class KlCrmNumLoginImport implements ZZTask{
 
-	final static String DB="klcrm";
 	static final Integer LIMIT = 10;
 	private static final String DATE_FORMAT="yyyy-MM-dd";
 	private final static String DATE_FORMAT_DETAIL = "yyyy-MM-dd HH:mm:ss";
 	private static String API_HOST="http://www.kl91.com";
+	final static String DB="klcrm";
 	
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
