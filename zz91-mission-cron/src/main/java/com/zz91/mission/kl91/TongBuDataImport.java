@@ -100,7 +100,7 @@ public class TongBuDataImport implements ZZTask {
 			String contact, Integer sex, String name, String mobile,
 			String tel, Integer numLogin, String gmtLastLogin,
 			String industryCode, String domain, Integer isActive,
-			Integer registFlag, String password, Integer oldId,String regtime) {
+			Integer registFlag, String password, Integer oldId) {
 		String sql = "update company set email='" + email + "',account='"
 				+ account + "',introduction='" + introduction
 				+ "',membership_code='" + membershipCode + "',business='"
@@ -111,7 +111,6 @@ public class TongBuDataImport implements ZZTask {
 				+ gmtLastLogin + "',industry_code='" + industryCode
 				+ "',domain='" + domain + "',is_active=" + isActive
 				+ ",regist_flag=" + registFlag + "," + "password='" + password
-				+"',gmt_created='"+regtime+""
 				+ "' where old_id=" + oldId + "";
 		DBUtils.insertUpdate(DB_KL91, sql);
 	}
@@ -128,7 +127,7 @@ public class TongBuDataImport implements ZZTask {
 				}
 			}
 		});
-		sql = "select c.id,ca.email,ca.account,c.address,c.introduction,c.business,ca.contact,ca.sex,c.name,ca.mobile,ca.tel,c.old_id,ca.password,c.website,ca.num_login,ca.gmt_last_login,c.regtime from company c left join company_account ca on ca.company_id=c.id where c.id="
+		sql = "select c.id,ca.email,ca.account,c.address,c.introduction,c.business,ca.contact,ca.sex,c.name,ca.mobile,ca.tel,c.old_id,ca.password,c.website from company c left join company_account ca on ca.company_id=c.id where c.id="
 				+ companyId;
 		final Map<String, Object> map = new HashMap<String, Object>();
 		DBUtils.select(DB_AST, sql, new IReadDataHandler() {
@@ -149,9 +148,6 @@ public class TongBuDataImport implements ZZTask {
 					map.put("oldId", rs.getInt(12));
 					map.put("password", rs.getString(13));
 					map.put("website", rs.getString(14));
-					map.put("numLogin", rs.getInt(15));
-					map.put("gmtLastLogin", rs.getString(16));
-					map.put("regtime", rs.getString(17));
 				}
 			}
 		});
@@ -237,27 +233,15 @@ public class TongBuDataImport implements ZZTask {
 		if (website == null) {
 			website = "";
 		}
-		Integer numLogin = (Integer) map.get("numLogin");
-		if (numLogin == null) {
-			numLogin = 1;
-		}
-		String gmtLastLogin = (String) map.get("gmtLastLogin");
-		if (gmtLastLogin == null) {
-			gmtLastLogin = DateUtil.toString(new Date(), "yyyy-MM-dd HH:mm:ss");
-		}
-		String regtime = (String) map.get("regtime");
-		if (regtime == null) {
-			regtime = DateUtil.toString(new Date(), "yyyy-MM-dd HH:mm:ss");
-		}
-
+	
 		if (id[0] != 0) {
 			updateCompanyInsert(email, account, introduction, "10051000",
-					business, contact, sex, companyName, mobile, tel, numLogin,
-					gmtLastLogin,"1000", website, 0, 1, password, companyId,regtime);
+					business, contact, sex, companyName, mobile, tel, 0,
+					DateUtil.toString(new Date(), "yyyy-MM-dd HH:mm:ss"),"1000", website, 0, 1, password, companyId);
 		} else {
 			saveToKL(email, account, introduction, "10051000", business,
-					contact, sex, companyName, mobile, tel, numLogin,gmtLastLogin,
-					"1000", website, 0, 1, companyId, password,regtime);
+					contact, sex, companyName, mobile, tel, 0,DateUtil.toString(new Date(), "yyyy-MM-dd HH:mm:ss"),
+					"1000", website, 0, 1, companyId, password);
 		}
 	}
 
@@ -491,7 +475,7 @@ public class TongBuDataImport implements ZZTask {
 			Integer sex, String name, String mobile, String tel,
 			Integer numLogin, String gmtLastLogin, String industryCode,
 			String domain, Integer isActive, Integer registFlag, Integer oldId,
-			String password,String regtime) {
+			String password) {
 		String sql = "insert into company(account,password,company_name,membership_code,sex,contact,"
 				+ "mobile,email,tel,business,introduction,num_login,gmt_last_login,is_active,domain,industry_code,"
 				+ "regist_flag,show_time,gmt_created,gmt_modified,old_id)values('"
@@ -526,7 +510,7 @@ public class TongBuDataImport implements ZZTask {
 				+ domain
 				+ "','"
 				+ industryCode
-				+ "','" + registFlag + "',now(),'"+regtime+"',now()," + oldId + ")";
+				+ "','" + registFlag + "',now(),now(),now()," + oldId + ")";
 		DBUtils.insertUpdate(DB_KL91, sql);
 	}
 

@@ -76,7 +76,7 @@ public class KlCrmNumLoginImport implements ZZTask{
 		return result;
 	}
 	private void updateCtype(String from,String to) {
-		String sql="update crm_company SET ctype=2 where ctype=5 and gmt_login > '"+from+"' and '"+to+"'> gmt_login";
+		String sql="update crm_company SET ctype=2 where ctype=5 and login_count > 0 and gmt_login > '"+from+"' and '"+to+"'> gmt_login";
 		DBUtils.insertUpdate(DB, sql);
 	}
 	private void updateCompany(Integer cid, String cname,
