@@ -33,7 +33,7 @@ public class KLCrmDataImport implements ZZTask{
 		boolean result=false;
 		String targetDate = DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -1), DATE_FORMAT);
 		do{
-			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/list/todayDataCount.htm?today="+targetDate, HttpUtils.CHARSET_UTF8);
+			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/list/queryYestodayCompanyCount.htm?gmtLogin="+targetDate, HttpUtils.CHARSET_UTF8);
 			JSONObject jb=JSONObject.fromObject(responseText);
 			int count = jb.getInt("i");
 			int page = getSize(count);
@@ -42,7 +42,7 @@ public class KLCrmDataImport implements ZZTask{
 			// 循环获取所有数据
 			for(int i=1;i<=page;i++){
 				try {
-					responseText = HttpUtils.getInstance().httpGet(API_HOST+"/list/todayData.htm?today="+targetDate+"&start="+getStart(i), HttpUtils.CHARSET_UTF8);
+					responseText = HttpUtils.getInstance().httpGet(API_HOST+"/list/queryYestodayCompany.htm?gmtLogin="+targetDate+"&start="+getStart(i), HttpUtils.CHARSET_UTF8);
 				} catch (Exception e) {
 					throw new Exception(e.getMessage()+"   start:"+i);
 				}
@@ -348,7 +348,7 @@ public class KLCrmDataImport implements ZZTask{
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		KLCrmDataImport obj = new KLCrmDataImport();
 //		API_HOST = "http://localhost:8090/front";
-		Date date = DateUtil.getDate("2012-09-25", "yyyy-MM-dd");
+		Date date = DateUtil.getDate("2012-09-27", "yyyy-MM-dd");
 		obj.exec(date);
 	}
 

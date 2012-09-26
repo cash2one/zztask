@@ -27,14 +27,6 @@ public class KlCrmNumLoginImport implements ZZTask{
 	public boolean exec(Date baseDate) throws Exception {
 		boolean result=false;
 		String targetDate = DateUtil.toString(baseDate, DATE_FORMAT);
-		String from = DateUtil.toString(
-				DateUtil.getDateAfterDays(
-						DateUtil.getDate(baseDate, "yyyy-MM-dd"), -1),
-				"yyyy-MM-dd");
-		String to = DateUtil.toString(
-				DateUtil.getDateAfterDays(
-						DateUtil.getDate(baseDate, "yyyy-MM-dd"), 1),
-				"yyyy-MM-dd");
 		do{
 			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/list/queryYestodayCompanyCount.htm?gmtLogin="+targetDate, HttpUtils.CHARSET_UTF8);
 			JSONObject jb=JSONObject.fromObject(responseText);
@@ -69,14 +61,13 @@ public class KlCrmNumLoginImport implements ZZTask{
 						object.getString("membershipCode") , Short.valueOf(object.getString("registFlag")) , object.getString("business") ,
 						object.getString("areaCode") , 
 						object.getInt("numLogin") ,  gmtLogin, gmtRegister,object.getString("position"));
-				updateCtype(from,to);
 			}
 			result=true;
 		}while(false);
 		return result;
 	}
-	private void updateCtype(String from,String to) {
-		String sql="update crm_company SET ctype=2 where ctype=5 and login_count > 0 and gmt_login > '"+from+"' and '"+to+"'> gmt_login";
+	private void updateCtype(Integer cid) {
+		String sql="update crm_company SET ctype=2 where cid="+cid+"";
 		DBUtils.insertUpdate(DB, sql);
 	}
 	private void updateCompany(Integer cid, String cname,
@@ -110,6 +101,7 @@ public class KlCrmNumLoginImport implements ZZTask{
 				+"gmt_login = '" + gmtLogin + "'"
 				+"WHERE cid="+cid;
 		DBUtils.insertUpdate(DB, sql);
+		updateCtype(cid);
 	}
 	private int getSize(int count){
 		if(count%10==0){
@@ -131,57 +123,6 @@ public class KlCrmNumLoginImport implements ZZTask{
 		}
 		return date;
 	}
-
-////搜出昨天登录的客户
-//		String from=DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -1), "yyyy-MM-dd HH:mm:ss");
-//		String to=DateUtil.toString(baseDate, "yyyy-MM-dd HH:mm:ss");
-//		String sqlId = "select id from company where gmt_last_login > '"+from+"' and '"+to+"' > gmt_last_login";
-//		final List<Integer> companyId = new ArrayList<Integer>();
-//		DBUtils.select(DB_kl91, sqlId, new IReadDataHandler() {
-//			@Override
-//			public void handleRead(ResultSet rs) throws SQLException {
-//				while (rs.next()) {
-//					companyId.add(rs.getInt(1));
-//				}
-//			}
-//		});
-////根据id搜出公司的id，和numLogin登陆次数
-//		for (Integer cid : companyId) {
-//			selectCompany(cid);
-//		}
-//		return true;
-//		
-//	}
-//搜出kl91的公司登陆次数
-//	private void selectCompany(Integer cid) {
-//		String sql="select id,num_login,gmt_last_login from company where id="+cid+" ";
-//		DBUtils.select(DB_kl91, sql, new IReadDataHandler() {
-//			@Override
-//			public void handleRead(ResultSet rs) throws SQLException {
-//				while(rs.next()){
-//					Integer loginCount=rs.getInt(2);
-//					Integer companyId=rs.getInt(1);
-//					String gmtLastLogin=rs.getString(3);
-//					if(loginCount!=null){
-//						updateLoginCount(companyId,loginCount,gmtLastLogin);
-//					}
-//					selectCrmCompanyStatus();
-//				}
-//			}
-//		});
-//	}
-//	
-////搜索crm的未激活客户放到公海
-//	private void selectCrmCompanyStatus() {
-//		String sql="update crm_company set ctype = 2 where ctype=5";
-//		DBUtils.insertUpdate(DB, sql);
-//	}
-//	
-////更新crm的登录次数
-//	private void updateLoginCount(Integer companyId, Integer loginCount,String gmtLastLogin) {
-//		String sql="update crm_company set login_count="+loginCount+",gmt_login='"+gmtLastLogin+"' where cid="+companyId+"";
-//		DBUtils.insertUpdate(DB, sql);
-//	}
 
 	@Override
 	public boolean init() throws Exception {

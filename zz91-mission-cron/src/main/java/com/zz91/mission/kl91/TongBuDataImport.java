@@ -100,7 +100,7 @@ public class TongBuDataImport implements ZZTask {
 			String contact, Integer sex, String name, String mobile,
 			String tel, Integer numLogin, String gmtLastLogin,
 			String industryCode, String domain, Integer isActive,
-			Integer registFlag, String password, Integer oldId) {
+			Integer registFlag, String password, String regtime,Integer oldId) {
 		String sql = "update company set email='" + email + "',account='"
 				+ account + "',introduction='" + introduction
 				+ "',membership_code='" + membershipCode + "',business='"
@@ -111,7 +111,7 @@ public class TongBuDataImport implements ZZTask {
 				+ gmtLastLogin + "',industry_code='" + industryCode
 				+ "',domain='" + domain + "',is_active=" + isActive
 				+ ",regist_flag=" + registFlag + "," + "password='" + password
-				+ "' where old_id=" + oldId + "";
+				+ "',gmt_created='"+regtime+"' where old_id=" + oldId + "";
 		DBUtils.insertUpdate(DB_KL91, sql);
 	}
 
@@ -127,7 +127,7 @@ public class TongBuDataImport implements ZZTask {
 				}
 			}
 		});
-		sql = "select c.id,ca.email,ca.account,c.address,c.introduction,c.business,ca.contact,ca.sex,c.name,ca.mobile,ca.tel,c.old_id,ca.password,c.website from company c left join company_account ca on ca.company_id=c.id where c.id="
+		sql = "select c.id,ca.email,ca.account,c.address,c.introduction,c.business,ca.contact,ca.sex,c.name,ca.mobile,ca.tel,c.old_id,ca.password,c.website,c.regtime from company c left join company_account ca on ca.company_id=c.id where c.id="
 				+ companyId;
 		final Map<String, Object> map = new HashMap<String, Object>();
 		DBUtils.select(DB_AST, sql, new IReadDataHandler() {
@@ -148,6 +148,7 @@ public class TongBuDataImport implements ZZTask {
 					map.put("oldId", rs.getInt(12));
 					map.put("password", rs.getString(13));
 					map.put("website", rs.getString(14));
+					map.put("regtime", rs.getString(15));
 				}
 			}
 		});
@@ -233,15 +234,18 @@ public class TongBuDataImport implements ZZTask {
 		if (website == null) {
 			website = "";
 		}
-	
+		String regtime = (String) map.get("regtime");
+		if (regtime == null) {
+			regtime = "";
+		}
 		if (id[0] != 0) {
 			updateCompanyInsert(email, account, introduction, "10051000",
 					business, contact, sex, companyName, mobile, tel, 0,
-					DateUtil.toString(new Date(), "yyyy-MM-dd HH:mm:ss"),"1000", website, 0, 1, password, companyId);
+					regtime,"1000", website, 0, 1, password,regtime, companyId);
 		} else {
 			saveToKL(email, account, introduction, "10051000", business,
-					contact, sex, companyName, mobile, tel, 0,DateUtil.toString(new Date(), "yyyy-MM-dd HH:mm:ss"),
-					"1000", website, 0, 1, companyId, password);
+					contact, sex, companyName, mobile, tel, 0,regtime,
+					"1000", website, 0, 1, companyId, regtime,password);
 		}
 	}
 
@@ -474,7 +478,7 @@ public class TongBuDataImport implements ZZTask {
 			String membershipCode, String business, String contact,
 			Integer sex, String name, String mobile, String tel,
 			Integer numLogin, String gmtLastLogin, String industryCode,
-			String domain, Integer isActive, Integer registFlag, Integer oldId,
+			String domain, Integer isActive, Integer registFlag, Integer oldId,String regtime,
 			String password) {
 		String sql = "insert into company(account,password,company_name,membership_code,sex,contact,"
 				+ "mobile,email,tel,business,introduction,num_login,gmt_last_login,is_active,domain,industry_code,"
@@ -510,7 +514,7 @@ public class TongBuDataImport implements ZZTask {
 				+ domain
 				+ "','"
 				+ industryCode
-				+ "','" + registFlag + "',now(),now(),now()," + oldId + ")";
+				+ "','" + registFlag + "',now(),'"+regtime+"',now()," + oldId + ")";
 		DBUtils.insertUpdate(DB_KL91, sql);
 	}
 
@@ -523,7 +527,7 @@ public class TongBuDataImport implements ZZTask {
 		DBPoolFactory.getInstance().init(
 				"file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		TongBuDataImport obj = new TongBuDataImport();
-		Date date = DateUtil.getDate("2012-07-25", "yyyy-MM-dd");
+		Date date = DateUtil.getDate("2008-11-25", "yyyy-MM-dd");
 		obj.exec(date);
 	}
 
