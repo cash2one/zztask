@@ -267,11 +267,11 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 		
 		//parse sortRefresh
 		try {
-//			if(!MEMBER.equals(result.get("memberCode")) && (new Date().getTime()-refresh.getTime()) < 3*86400000){
-//				doc.addField("sortRefresh", DateUtil.getDate(DateUtil.getDateAfterDays(refresh, 3), "yyyy-MM-dd").getTime());
-//			}else{
+			if(!MEMBER.equals(result.get("memberCode")) && (new Date().getTime()-refresh.getTime()) < 3*86400000){
+				doc.addField("sortRefresh", DateUtil.getDate(DateUtil.getDateAfterDays(refresh, 3), "yyyy-MM-dd").getTime());
+			}else{
 				doc.addField("sortRefresh", DateUtil.getDate(refresh, "yyyy-MM-dd").getTime());
-//			}
+			}
 		} catch (ParseException e) {
 		}
 	}
