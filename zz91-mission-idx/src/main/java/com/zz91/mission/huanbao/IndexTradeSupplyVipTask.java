@@ -62,7 +62,7 @@ public class IndexTradeSupplyVipTask extends AbstractIdxTask {
 			}
 		});
 		
-		if(dealCount[0]!=null && dealCount[0]>4){
+		if(dealCount[0]!=null && dealCount[0] >0 ){
 			return true;
 		}
 		
@@ -98,7 +98,7 @@ public class IndexTradeSupplyVipTask extends AbstractIdxTask {
 				begin=0;
 			}
 			
-			System.out.println("vip>>>>>"+docsize+">>>>>>"+begin);
+//			System.out.println("vip>>>>>"+docsize+">>>>>>"+begin);
 			
 		} while (true);
 		
@@ -218,14 +218,22 @@ public class IndexTradeSupplyVipTask extends AbstractIdxTask {
 	private void parseComp(SolrInputDocument doc, Integer cid){
 		
 		final Map<String, Object> result=new HashMap<String, Object>();
-		DBUtils.select(DB, "select name, member_code, gmt_created from comp_profile where id="+cid,  new IReadDataHandler() {
+		StringBuffer sql = new StringBuffer();
+		sql.append("select name,(select qq from comp_account where cid = ")
+		.append(cid)
+		.append(") as qq,")
+		.append("member_code ,member_code_block, gmt_created from comp_profile where id= ")
+		.append(cid);
+		DBUtils.select(DB, sql.toString(),  new IReadDataHandler() {
 			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				while (rs.next()) {
-					result.put("name", rs.getObject(1));
-					result.put("memberCode", rs.getObject(2));
-					result.put("gmtRegister", rs.getObject(3));
+					result.put("name", rs.getObject("name"));
+					result.put("qq",rs.getObject("qq"));
+					result.put("memberCode", rs.getObject("member_code"));
+					result.put("memberCodeBlock", rs.getObject("member_code_block"));
+					result.put("gmtRegister", rs.getObject("gmt_created"));
 				}
 			}
 		});

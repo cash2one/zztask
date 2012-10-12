@@ -46,12 +46,13 @@ public class CrmCompanyTask implements ZZTask {
 	public boolean exec(Date baseDate) throws Exception {
 		boolean result=false;
 		String targetDate = DateUtil.toString(baseDate, DATE_FORMAT);
-		String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/todayUpdateCompanyCount.htm?date="+targetDate, HttpUtils.CHARSET_UTF8);
-		JSONObject object = JSONObject.fromObject(responseText);
-		Integer count = Integer.valueOf(object.getString("totals"));
+//		String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/todayUpdateCompanyCount.htm?date="+targetDate, HttpUtils.CHARSET_UTF8);
+//		JSONObject object = JSONObject.fromObject(responseText);
+//		Integer count = Integer.valueOf(object.getString("totals"));
+		int count=1000;
 		do{
 			Integer start=0;
-			Integer limit=10;
+			Integer limit=20;
 			Integer n=((count-1)/limit)+1;
 			for (int i = 0; i < n; i++) {
 				//插入
@@ -95,7 +96,6 @@ public class CrmCompanyTask implements ZZTask {
 		return result;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void tongji(String targetDate) {
 		//100110001010:浙江 100110001009:江苏  100110001008:上海 100110001018:广东 
 		//100110001014:山东 100110001000:北京 100110001002:河北
@@ -345,7 +345,7 @@ public class CrmCompanyTask implements ZZTask {
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		CrmCompanyTask comp = new CrmCompanyTask();
 		try {
-			comp.exec(DateUtil.getDate("2012-08-07", "yyyy-MM-dd"));
+			comp.exec(DateUtil.getDate("2012-09-13", "yyyy-MM-dd"));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		} catch (Exception e) {

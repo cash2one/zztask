@@ -1,5 +1,6 @@
 package com.zz91.mission.ep;
 
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,7 +13,9 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import com.zz91.task.common.ZZTask;
+import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
+import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.http.HttpUtils;
 /**
  * @author 黄怀清
@@ -25,7 +28,7 @@ public class CrmMessageLastTimeTask implements ZZTask {
 
 	final static String API_HOST="http://huanbaoadmin.zz91.com:8081/ep-admin/api";
 	
-	final static String CRMDB="crm-test";
+	final static String CRMDB="crm";
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
 		// TODO Auto-generated method stub
@@ -54,10 +57,11 @@ public class CrmMessageLastTimeTask implements ZZTask {
 
 				for (Iterator iter = jsonarray.iterator(); iter.hasNext();) {
 					JSONObject object = (JSONObject) iter.next();
+					String time =DateUtil.toString(new Date(new Long(object.getJSONObject("gmtCreated").getString("time"))), "yyyy-MM-dd HH:mm:ss");
 					
-					reMap.put(object.getString("targetCid"), object.getString("gmtCreated"));
+					reMap.put(object.getString("targetCid"), time);
 					
-					sendMap.put(object.getString("cid"), object.getString("gmtCreated"));
+					sendMap.put(object.getString("cid"), time);
 				}
 								
 				start+=limit;
@@ -75,11 +79,11 @@ public class CrmMessageLastTimeTask implements ZZTask {
 
 	
 	public void updateTime(Map<String, String> sendMap,Map<String, String> reMap){
-		Set<String> reKeys=sendMap.keySet();
+		Set<String> reKeys=reMap.keySet();
 		for(String key: reKeys){
 			//接收询盘
 			String reql="update crm_company set receive_time=date_format('"
-				+ reMap.get(key)+"','%Y-%m-%d %H:%i:%S') where id=" + key;
+				+ reMap.get(key)+"','%Y-%m-%d %H:%i:%S') where cid=" + key;
 			if(!DBUtils.insertUpdate(CRMDB, reql)){
 				LOG.info("更新接收询盘出错,id:"+key);
 			}
@@ -89,7 +93,7 @@ public class CrmMessageLastTimeTask implements ZZTask {
 		for(String key:sendKeys){
 			//发送询盘
 			String sendsql="update crm_company set send_time=date_format('"
-				+ sendMap.get(key)+"','%Y-%m-%d %H:%i:%S') where id=" + key;			
+				+ sendMap.get(key)+"','%Y-%m-%d %H:%i:%S') where cid=" + key;			
 			if(!DBUtils.insertUpdate(CRMDB, sendsql)){
 				LOG.info("更新接收询盘出错,cid:"+key);
 			}
@@ -104,14 +108,14 @@ public class CrmMessageLastTimeTask implements ZZTask {
 		return false;
 	}
 	
-//	public static void main(String[] args) {
-//		try {
-//			DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
-//			CrmMessageLastTimeTask et=new CrmMessageLastTimeTask();
-//			et.exec(null);
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//		}
-//	}
+	public static void main(String[] args) {
+		try {
+			DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+			CrmMessageLastTimeTask et=new CrmMessageLastTimeTask();
+			et.exec(null);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
 
 }

@@ -47,7 +47,7 @@
 			<dependency>
 				<groupId>com.zz91</groupId>
 				<artifactId>zz91-utils</artifactId>
-				<version>1.7.3-SNAPSHOT</version>
+				<version>1.7.7-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
