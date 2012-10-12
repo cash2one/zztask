@@ -33,38 +33,26 @@ public class KLCrmDataImportTask implements ZZTask{
 	private final static String DATE_FORMAT_DETAIL = "yyyy-MM-dd HH:mm:ss";
 	private static String API_HOST="http://admin1949.zz91.com:8311/kl91-admin";
 	final static String DB="klcrm";
-	static final Integer LIMIT = 10;
 	
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
-		boolean result=false;
 		String from = DateUtil.toString(
 				DateUtil.getDateAfterDays(baseDate, -1), "yyyy-MM-dd");
 		String to = DateUtil.toString(baseDate, "yyyy-MM-dd");
+		int i=0;
+		int docs=0;
+		
 		do{
-			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/queryYestodayCompanyCount.htm?from="+from+"&to="+to+"", HttpUtils.CHARSET_UTF8);
-			JSONObject jb=JSONObject.fromObject(responseText);
-			int count = jb.getInt("i");
-			int page = getSize(count);
 			List<JSONObject> list = new ArrayList<JSONObject>();
-			
-			// 循环获取所有数据
-			for(int i=1;i<=page;i++){
-				try {
-					responseText = HttpUtils.getInstance().httpGet(API_HOST+"/queryYestodayCompany.htm?from="+from+"&to="+to+"", HttpUtils.CHARSET_UTF8);
-				} catch (Exception e) {
-					throw new Exception(e.getMessage()+"   start:"+i);
-				}
-				JSONArray js=JSONArray.fromObject(responseText);
-				for (Iterator iter = js.iterator(); iter.hasNext();) {
-					JSONObject object = (JSONObject) iter.next();
-					list.add(object);
-				}
+			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/queryYestodayCompany.htm?from="+from+"&to="+to+"&i="+i*10+"", HttpUtils.CHARSET_UTF8);
+			JSONArray js=JSONArray.fromObject(responseText);
+			for (Iterator iter = js.iterator(); iter.hasNext();) {
+				JSONObject object = (JSONObject) iter.next();
+				list.add(object);
 			}
 			if(list.size()<=0){
 				break;
 			}
-			// 循环导入
 			for(JSONObject object:list){
 				String gmtLogin = buildData(object.getString("gmtLastLogin"));
 				String gmtRegister = buildData(object.getString("gmtCreated"));
@@ -77,24 +65,16 @@ public class KLCrmDataImportTask implements ZZTask{
 						object.getString("membershipCode") , Short.valueOf(object.getString("registFlag")) , object.getString("business") ,
 						object.getString("areaCode") , 
 						object.getInt("numLogin") ,  gmtLogin, gmtRegister,object.getString("position"));
-				if (!isExsitCompany(object.getInt("id"))) {
-//					LOG.info(">>>>>>>>>>>>>>>>>插入失败:数据ID:"+object.getInt("id")+";帐号:"+object.getString("account")
-//							+";公司:"+object.getString("companyName"));
-				}
 			}
-			//统计今天注册客户
-			result=true;
-		}while(false);
-		return result;
-	}
-	
-	private int getSize(int count){
-		if(count%10==0){
-			count = count/LIMIT;
-		}else{
-			count = count/LIMIT+1;
+			i++;
+			docs=docs+list.size();
+		}while(true);
+		
+		if(i>0){
+			throw new Exception("共更新数据"+docs+"条");
 		}
-		return count;
+		
+		return false;
 	}
 	
 	private boolean isExsitCompany(Integer cid) {
@@ -300,7 +280,7 @@ public class KLCrmDataImportTask implements ZZTask{
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		KLCrmDataImportTask obj = new KLCrmDataImportTask();
 		API_HOST = "http://test.kl91.zz91.com:8089";
-		Date date = DateUtil.getDate("2012-09-29", "yyyy-MM-dd");
+		Date date = DateUtil.getDate("2008-11-25", "yyyy-MM-dd");
 		obj.exec(date);
 	}
 
