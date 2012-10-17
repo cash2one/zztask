@@ -241,7 +241,7 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 					String codeBlock = rs.getString("member_code_block");
 					if(codeBlock==null || "".equals(codeBlock)){
 						
-						result.put("memberCodeBlock", "0");
+						result.put("memberCodeBlock", "-1");
 						
 					}else{
 						

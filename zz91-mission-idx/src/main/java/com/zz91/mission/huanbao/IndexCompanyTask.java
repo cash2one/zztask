@@ -114,7 +114,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 					
 					String codeBlock  = rs.getString("member_code_block");
 					if(codeBlock==null || "".equals(codeBlock)){
-						doc.addField("memberCodeBlock", "0");
+						doc.addField("memberCodeBlock", "-1");
 					}else{
 						doc.addField("memberCodeBlock",codeBlock );
 					}
