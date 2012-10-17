@@ -110,7 +110,15 @@ public class IndexCompanyTask extends AbstractIdxTask{
 					doc.addField("id", rs.getObject("id"));
 					doc.addField("name", rs.getObject("name"));
 					doc.addField("memberCode", rs.getObject("member_code"));
-					doc.addField("memberCodeBlock", rs.getObject("member_code_block"));
+					
+					
+					String codeBlock  = rs.getString("member_code_block");
+					if(codeBlock==null || "".equals(codeBlock)){
+						doc.addField("memberCodeBlock", "0");
+					}else{
+						doc.addField("memberCodeBlock",codeBlock );
+					}
+					
 					doc.addField("detailsQuery", rs.getObject("details_query"));
 					doc.addField("industryCode",rs.getObject("industry_code"));
 					doc.addField("businessCode", rs.getObject("business_code"));
@@ -162,7 +170,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		
-		String start="2012-09-10 11:49:49";
+		String start="2011-05-10 11:49:49";
 		String end ="2012-09-11 17:10:41";
 		
 		IndexCompanyTask task=new IndexCompanyTask();

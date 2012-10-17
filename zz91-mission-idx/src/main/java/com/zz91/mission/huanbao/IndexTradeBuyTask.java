@@ -144,8 +144,13 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 					result[0] = rs.getString("member_code_block");
 				}
 			}
-		});
-			 doc.addField("memberCodeBlock",result[0]);
+		});  
+		 	if(result[0]==null || "".equals(result[0])){
+		 		doc.addField("memberCodeBlock","0");
+		 	}else{
+		 		doc.addField("memberCodeBlock",result[0]);
+		 	}
+			 
 	 }
 	
 	public static void main(String[] args) {
