@@ -143,20 +143,42 @@ public class AnalysisOperator implements ZZTask {
 			Integer dianzidianqiY = 0;
 			Integer ershoushebeiN = 0;
 			Integer ershoushebeiY = 0;
-			Integer fangzhipinPigeN = 0;
-			Integer fangzhipinPigeY = 0;
+			Integer fangzhipinN = 0;
+			Integer fangzhipinY = 0;
 			Integer fuwuN = 0;
 			Integer fuwuY = 0;
 			Integer jinshuN = 0;
 			Integer jinshuY = 0;
-			Integer luntaiXiangjiaoN = 0;
-			Integer luntaiXiangjiaoY = 0;
+			Integer xiangjiaoN = 0;
+			Integer xiangjiaoY = 0;
 			Integer qitafeiliaoN = 0;
 			Integer qitafeiliaoY = 0;
 			Integer suliaoN = 0;
 			Integer suliaoY = 0;
 			Integer zhiN = 0;
 			Integer zhiY = 0;
+			Integer pigeN = 0;
+			Integer pigeY = 0;
+			Integer luntaiN = 0;
+			Integer luntaiY = 0;
+			/*
+			 * 1000	废金属
+			 * 1001	废塑料
+				1002	废橡胶
+				
+				1003	废纺织品
+				
+				1004	废纸
+				1005	废电子电器
+				1006	废玻璃
+				
+				1007	废旧二手设备
+				
+				1008	其他废料
+				1009	服务
+				1010	废皮革
+				1011	废轮胎
+			 * */
 			for(String name:usermap.keySet()){
 				if("1000check_products_failure".equals(name)&&usermap.get(name)!=null){
 					jinshuN = usermap.get(name);
@@ -171,16 +193,16 @@ public class AnalysisOperator implements ZZTask {
 					suliaoY = usermap.get(name);
 				}
 				if("1002check_products_failure".equals(name)&&usermap.get(name)!=null){
-					luntaiXiangjiaoN = usermap.get(name);
+					xiangjiaoN = usermap.get(name);
 				}
 				if("1002check_products_success".equals(name)&&usermap.get(name)!=null){
-					luntaiXiangjiaoY = usermap.get(name);
+					xiangjiaoY = usermap.get(name);
 				}
 				if("1003check_products_failure".equals(name)&&usermap.get(name)!=null){
-					fangzhipinPigeN = usermap.get(name);
+					fangzhipinN = usermap.get(name);
 				}
 				if("1003check_products_success".equals(name)&&usermap.get(name)!=null){
-					fangzhipinPigeY = usermap.get(name);
+					fangzhipinY = usermap.get(name);
 				}
 				if("1004check_products_failure".equals(name)&&usermap.get(name)!=null){
 					zhiN = usermap.get(name);
@@ -218,14 +240,26 @@ public class AnalysisOperator implements ZZTask {
 				if("1009check_products_success".equals(name)&&usermap.get(name)!=null){
 					fuwuY = usermap.get(name);
 				}
-				String sql = "INSERT INTO `ast`.`analysis_product_type_code`(`boli_N`,`boli_Y`,`dianzidianqi_N`,`dianzidianqi_Y`,`ershoushebei_N`,"
-					+"`ershoushebei_Y`,`fangzhipin_pige_Y`,`fangzhipin_pige_N`,`fuwu_N`,`fuwu_Y`,`gmt_created`,`gmt_modified`,`jinshu_N`,"
-					+"`jinshu_Y`,`luntai_xiangjiao_N`,`luntai_xiangjiao_Y`,`operator`,`qitafeiliao_N`,`qitafeiliao_Y`,`suliao_N`,`suliao_Y`,`zhi_N`,`zhi_Y`)"
-					+"VALUES("+boliN+","+boliY+","+dianzidianqiN+","+dianzidianqiY+","+ershoushebeiN+","+ershoushebeiY
-					+","+fangzhipinPigeY+","+fangzhipinPigeN+","+fuwuN+","+fuwuY+",'"+date+"','"+date+"',"+jinshuN+","
-					+jinshuY+","+luntaiXiangjiaoN+","+luntaiXiangjiaoY+",'"+key+"',"+qitafeiliaoN+","+qitafeiliaoY+","+suliaoN+","+suliaoY+","+zhiN+","+zhiY+")";
-				DBUtils.insertUpdate(DB, sql);
+				if("1010check_products_failure".equals(name)&&usermap.get(name)!=null){
+					pigeN = usermap.get(name);
+				}
+				if("1010check_products_success".equals(name)&&usermap.get(name)!=null){
+					pigeY = usermap.get(name);
+				}
+				if("1011check_products_failure".equals(name)&&usermap.get(name)!=null){
+					luntaiN = usermap.get(name);
+				}
+				if("1011check_products_success".equals(name)&&usermap.get(name)!=null){
+					luntaiY = usermap.get(name);
+				}
 			}
+			String sql = "INSERT INTO `ast`.`analysis_product_type_code`(`boli_N`,`boli_Y`,`dianzidianqi_N`,`dianzidianqi_Y`,`ershoushebei_N`,"
+				+"`ershoushebei_Y`,`fangzhipin_Y`,`fangzhipin_N`,`fuwu_N`,`fuwu_Y`,`gmt_created`,`gmt_modified`,`jinshu_N`,"
+				+"`jinshu_Y`,`xiangjiao_N`,`xiangjiao_Y`,`operator`,`qitafeiliao_N`,`qitafeiliao_Y`,`suliao_N`,`suliao_Y`,`zhi_N`,`zhi_Y`,`pige_N`,`pige_Y`,`luntai_N`,`luntai_Y`)"
+				+"VALUES("+boliN+","+boliY+","+dianzidianqiN+","+dianzidianqiY+","+ershoushebeiN+","+ershoushebeiY
+				+","+fangzhipinY+","+fangzhipinN+","+fuwuN+","+fuwuY+",'"+date+"','"+date+"',"+jinshuN+","
+				+jinshuY+","+xiangjiaoN+","+xiangjiaoY+",'"+key+"',"+qitafeiliaoN+","+qitafeiliaoY+","+suliaoN+","+suliaoY+","+zhiN+","+zhiY+","+pigeN+","+pigeY+","+luntaiN+","+luntaiY+")";
+			DBUtils.insertUpdate(DB, sql);
 		}
 	}
 
@@ -276,7 +310,7 @@ public class AnalysisOperator implements ZZTask {
 	public static void main(String[] args) throws Exception {
 		LogUtil.getInstance().init(WEB_PROP);
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
-		Date baseDate = DateUtil.getDate("2012-09-13", DATE_FORMAT);
+		Date baseDate = DateUtil.getDate("2012-10-23", DATE_FORMAT);
 		AnalysisOperator obj = new AnalysisOperator();
 		obj.clear(baseDate);
 		obj.exec(baseDate);
