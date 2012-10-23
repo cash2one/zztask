@@ -232,7 +232,16 @@ public class IndexTradeSupplyVipTask extends AbstractIdxTask {
 					result.put("name", rs.getObject("name"));
 					result.put("qq",rs.getObject("qq"));
 					result.put("memberCode", rs.getObject("member_code"));
-					result.put("memberCodeBlock", rs.getObject("member_code_block"));
+					
+					
+					String codeBlock = rs.getString("member_code_block");
+					if(codeBlock==null || "".equals(codeBlock)){
+						result.put("memberCodeBlock", "-1");
+					}else{
+						result.put("memberCodeBlock", codeBlock);
+					}
+					
+					
 					result.put("gmtRegister", rs.getObject("gmt_created"));
 				}
 			}

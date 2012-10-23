@@ -238,7 +238,16 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 					result.put("name", rs.getObject("name"));
 					result.put("qq",rs.getObject("qq"));
 					result.put("memberCode", rs.getObject("member_code"));
-					result.put("memberCodeBlock", rs.getObject("member_code_block"));
+					String codeBlock = rs.getString("member_code_block");
+					if(codeBlock==null || "".equals(codeBlock)){
+						
+						result.put("memberCodeBlock", "-1");
+						
+					}else{
+						
+						result.put("memberCodeBlock", codeBlock);
+					
+					}
 					result.put("gmtRegister", rs.getObject("gmt_created"));
 				}
 			}
@@ -294,19 +303,19 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 		
 //		String start="2011-11-29 15:13:20";
 //		String end="2011-11-29 15:13:21";
-//		String start="2012-09-21 11:49:49";
-//		String end ="2012-11-25 17:10:41";
-//		
-//		AbstractIdxTask task=new IndexTradeSupplyTask();
-//		try {
-////			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
-//			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
-////			task.optimize();
-//		} catch (ParseException e) {
-//			e.printStackTrace();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		String start="2012-07-21 11:49:49";
+		String end ="2012-11-25 17:10:41";
+		
+		AbstractIdxTask task=new IndexTradeSupplyTask();
+		try {
+//			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
+			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
+//			task.optimize();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 //		>>>>>1766683>>>>>>1700
 //		1761891

@@ -1,13 +1,11 @@
-package com.zz91.mission.huanbao;
+package com.zz91.mission.kl91;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.common.SolrInputDocument;
@@ -19,27 +17,22 @@ import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.lang.StringUtils;
 import com.zz91.util.search.SolrUtil;
-
+/**
+ * @author 伍金成：kl91 solr更新公司任务
+ * 
+ *
+ */
 public class IndexCompanyTask extends AbstractIdxTask{
-	
-	final static String DB="ep";
+	final static String DB="kl91";
 	final static int LIMIT=25;
 	
-	final static String MODEL="company";
-	final static int IMPORT_ID_SPLIT=50000000;
+	final static String MODEL="kl91Companys";
 	final static int RESET_LIMIT=5000;
-	
-	final static Map<String, Integer> SORT_MEMBER = new HashMap<String, Integer>();
-	
-	static{
-		SORT_MEMBER.put("10011000", 100);
-		SORT_MEMBER.put("10011001", 200);
-	}
 	
 	@Override
 	public Boolean idxReq(Long start, Long end) throws Exception {
 		StringBuffer sql = new StringBuffer();
-		sql.append("select count(*) from comp_profile ");
+		sql.append("select count(*) from company ");
 		sqlwhere(sql, start, end);
 		final Integer[] dealCount=new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
@@ -94,10 +87,10 @@ public class IndexCompanyTask extends AbstractIdxTask{
 		
 		StringBuffer sql=new StringBuffer();
 		sql.append("select ");
-		sql.append("comp.id,comp.name,comp.member_code,comp.details_query,comp.industry_code,comp.business_code,comp.main_buy,")
-			.append("comp.main_product_buy,comp.main_supply,comp.main_product_supply,comp.address,comp.province_code,comp.area_code,comp.del_status,comp.gmt_modified,")
-			.append("comp.tags,comp.view_count,comp.message_count,comp.main_brand,comp.gmt_created,comp.member_code_block ");
-		sql.append("from comp_profile comp");
+		sql.append("id,account,company_name,industry_code,membership_code,sex,contact,mobile,")
+			.append("is_active,qq,email,tel,fax,area_code,zip,address,")
+			.append("position,department,introduction,business,domain,website,num_login,regist_flag,show_time,gmt_last_login,gmt_created,gmt_modified,num_pass,old_id ");
+		sql.append("from company");
 		sqlwhere(sql, start, end);
 		sql.append(" order by gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
@@ -108,70 +101,85 @@ public class IndexCompanyTask extends AbstractIdxTask{
 				while(rs.next()){
 					doc = new SolrInputDocument();
 					doc.addField("id", rs.getObject("id"));
-					doc.addField("name", rs.getObject("name"));
-					doc.addField("memberCode", rs.getObject("member_code"));
-					
-					
-					String codeBlock  = rs.getString("member_code_block");
-					if(codeBlock==null || "".equals(codeBlock)){
-						doc.addField("memberCodeBlock", "-1");
-					}else{
-						doc.addField("memberCodeBlock",codeBlock );
-					}
-					
-					doc.addField("detailsQuery", rs.getObject("details_query"));
-					doc.addField("industryCode",rs.getObject("industry_code"));
-					doc.addField("businessCode", rs.getObject("business_code"));
-					doc.addField("mainBuy", rs.getObject("main_buy"));
-					doc.addField("mainProductBuy", rs.getObject("main_product_buy"));
-					doc.addField("mainSupply", rs.getObject("main_supply"));
-					doc.addField("mainProductSupply", rs.getObject("main_product_supply"));
-					doc.addField("address", rs.getObject("address"));
-					doc.addField("provinceCode", rs.getObject("province_code"));
+					doc.addField("account", rs.getObject("account"));
+					doc.addField("companyName", rs.getObject("company_name"));
+					doc.addField("industryCode", rs.getObject("industry_code"));
+					doc.addField("membershipCode", rs.getObject("membership_code"));
+					doc.addField("sex",rs.getObject("sex"));
+					doc.addField("contact", rs.getObject("contact"));
+					doc.addField("mobile", rs.getObject("mobile"));
+					doc.addField("isActive", rs.getObject("is_active"));
+					doc.addField("qq", rs.getObject("qq"));
+					doc.addField("email", rs.getObject("email"));
+					doc.addField("tel", rs.getObject("tel"));
+					doc.addField("fax", rs.getObject("fax"));
 					doc.addField("areaCode", rs.getObject("area_code"));
-					doc.addField("delStatus", rs.getObject("del_status"));
-					doc.addField("gmtModified", rs.getObject("gmt_modified"));
-					doc.addField("tags", rs.getObject("tags"));
-					doc.addField("viewCount", rs.getObject("view_count"));
-					doc.addField("messageCount", rs.getObject("message_count"));
-					doc.addField("mainBrand", rs.getObject("main_brand"));
+					doc.addField("zip", rs.getObject("zip"));
+					doc.addField("address", rs.getObject("address"));
+					doc.addField("position", rs.getObject("position"));
+					doc.addField("department", rs.getObject("department"));
+					doc.addField("introduction", rs.getObject("introduction"));
+					doc.addField("business", rs.getObject("business"));
+					doc.addField("domain", rs.getObject("domain"));
+					doc.addField("website", rs.getObject("website"));
+					doc.addField("numLogin", rs.getObject("num_login"));
+					doc.addField("registFlag", rs.getObject("regist_flag"));
+					doc.addField("showTime", rs.getObject("show_time"));
+					doc.addField("gmtLastLogin", rs.getObject("gmt_last_login"));
 					doc.addField("gmtCreated", rs.getObject("gmt_created"));
+					doc.addField("gmtModified", rs.getObject("gmt_modified"));
+					doc.addField("numPass", rs.getObject("num_pass"));
 					docs.add(doc);
 				}
 				
 			}
 		});
 		for(SolrInputDocument doc:docs){
-			parseMember(doc,(Integer) doc.getFieldValue("id"));
+			parseAreaCode(doc);
+			parseIndustryCode(doc);
 		}
 		return docs;
 	}
 	
+	private void parseIndustryCode(SolrInputDocument doc) {
+		String code=String.valueOf(doc.getFieldValue("industryCode"));
+		if(StringUtils.isNotEmpty(code)){
+			doc.addField("industryCode4", substringCode(code, 4));
+			doc.addField("industryCode8", substringCode(code, 8));
+			doc.addField("industryCode12", substringCode(code, 12));
+		}
+	}
+
+	private void parseAreaCode(SolrInputDocument doc) {
+		String code=String.valueOf(doc.getFieldValue("areaCode"));
+		if(StringUtils.isNotEmpty(code)){
+			doc.addField("areaCodeGJ", substringCode(code, 4));
+			doc.addField("areaCodeSF", substringCode(code, 8));
+			doc.addField("areaCodeCS", substringCode(code, 12));
+			doc.addField("areaCodeQX", substringCode(code, 16));
+		}
+	}
+	
+	private String substringCode(String code, int length){
+		if(code.length()>=length){
+			return  code.substring(0, length);
+		}
+		return code;
+	}
+
 	private Long resetStart(SolrInputDocument doc){
 		Date d=(Date) doc.getFieldValue("gmtModified");
 		return d.getTime();
 	}
 	
-	private void parseMember(SolrInputDocument doc,Integer id){
-		if(id>IMPORT_ID_SPLIT){
-			String memberCode = doc.get("memberCode").toString();
-			if(StringUtils.isNotEmpty(memberCode)){
-				doc.addField("sortMemberCode", SORT_MEMBER.get(memberCode));
-			}else{
-				doc.addField("sortMemberCode", -100);
-			}
-		}else{
-			//导入的公司信息
-			doc.addField("sortMemberCode",0);
-		}
-	}
+
 	
 	public static void main(String[] args) {
 		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		
-		String start="2011-05-10 11:49:49";
-		String end ="2012-09-11 17:10:41";
+		String start="2012-07-01 00:00:00";
+		String end ="2012-10-10 00:00:00";
 		
 		IndexCompanyTask task=new IndexCompanyTask();
 		try {
@@ -185,4 +193,5 @@ public class IndexCompanyTask extends AbstractIdxTask{
 		}
 		
 	}
+
 }
