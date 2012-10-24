@@ -154,7 +154,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 	
 	private void parseMember(SolrInputDocument doc,Integer id){
 		if(id>IMPORT_ID_SPLIT){
-			String memberCode = doc.get("memberCode").toString();
+			String memberCode = doc.getFieldValue("memberCode").toString();
 			if(StringUtils.isNotEmpty(memberCode)){
 				doc.addField("sortMemberCode", SORT_MEMBER.get(memberCode));
 			}else{
