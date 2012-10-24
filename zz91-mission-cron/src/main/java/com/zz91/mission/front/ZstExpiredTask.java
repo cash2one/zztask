@@ -222,7 +222,7 @@ public class ZstExpiredTask implements ZZTask {
 	}
 	
 	private void queryProductIdForExpired(Integer companyId){
-		String sql = "select id from products where company_id = "+companyId;
+		String sql = "select id from products where check_status = '1' and company_id = "+companyId;
 		final Set<Integer> set = new HashSet<Integer>();
 		DBUtils.select(DB, sql, new IReadDataHandler() {
 			@Override
@@ -247,7 +247,7 @@ public class ZstExpiredTask implements ZZTask {
 	}
 	
 	private void updateProductToNoCheckStatus(Integer productId){
-		DBUtils.insertUpdate(DB, "update products set unchecked_check_status ='0',gmt_modified = now() where id ="+productId);
+		DBUtils.insertUpdate(DB, "update products set unchecked_check_status ='0',gmt_modified = now() where unchecked_check_status='1' and id ="+productId);
 	}
 
 	@Override
