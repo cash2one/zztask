@@ -5,7 +5,6 @@
  */
 package com.zz91.mission.ep;
 
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,8 +16,6 @@ import java.util.Map;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-
-import org.apache.commons.httpclient.HttpException;
 
 import com.zz91.task.common.ZZTask;
 import com.zz91.util.datetime.DateUtil;
@@ -56,19 +53,26 @@ public class CrmCompanyAssignTask implements ZZTask{
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void syncProfile(String from, String to) throws HttpException, IOException{
+	private void syncProfile(String from, String to) throws Exception{
 		JSONArray list=null;
 		int start=0;
 		do{
-			String responseText = HttpUtils.getInstance().httpGet(API_HOST+"/crm/syncProfile.htm?from="+from+"&to="+to+"&start="+start+"&limit="+LIMIT, HttpUtils.CHARSET_UTF8);
+			String responseText = "";
+			String url=API_HOST+"/crm/syncProfile.htm?from="+from+"&to="+to+"&start="+start+"&limit="+LIMIT;
+			try {
+				responseText = HttpUtils.getInstance().httpGet(url, HttpUtils.CHARSET_UTF8);
+			} catch (Exception e) {
+				throw new Exception(e.getMessage()+" URL:"+url);
+			}
+			
 			if(StringUtils.isEmpty(responseText) || !responseText.startsWith("[")){
-				break;
+				throw new Exception("break 1, url:"+url);
 			}
 			
 			list=JSONArray.fromObject(responseText);
 			
 			if(list.size()<=0){
-				break;
+				throw new Exception("break 2, url:"+url);
 			}
 			
 			Integer cid=0;
@@ -355,7 +359,7 @@ public class CrmCompanyAssignTask implements ZZTask{
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		CrmCompanyAssignTask task = new CrmCompanyAssignTask();
 		try {
-			task.exec(DateUtil.getDate("2012-08-20", "yyyy-MM-dd"));
+			task.exec(DateUtil.getDate("2012-08-23", "yyyy-MM-dd"));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
