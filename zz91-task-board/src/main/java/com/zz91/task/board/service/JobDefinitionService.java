@@ -33,9 +33,9 @@ public interface JobDefinitionService {
 
 	public List<JobDefinition> queryAllJobDefinition(Boolean isUse);
 	
-	public Integer stopTask(Integer id);
+	public Integer stopTask(Integer id, String jobName);
 	
-	public Integer startTask(Integer id);
+	public Integer startTask(Integer id, String jobName);
 	
 	public Integer updateStartDateById(Date startDate, Integer id);
 	

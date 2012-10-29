@@ -48,10 +48,10 @@
 	</bean>
 
 	<bean id="initDbJob" class="com.zz91.task.board.init.InitDbJob"
-		init-method="initJob" />
+		init-method="initJob" destroy-method="shutdown"/>
 		
 	<bean id="initSystem" class="com.zz91.task.board.init.InitSystem"
-		init-method="init" >
+		init-method="init" destroy-method="shutdown">
 	</bean>
 
 	<bean id="messageSource"

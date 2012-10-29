@@ -46,18 +46,18 @@
 	</insert>
 	
 	<sql id="fullColumn">
-		`id`,
-		`gmt_created`,
-		`gmt_modified`,
-		`job_name`,
-		`job_group`,
-		`job_classpath`,
-		`job_class_name`,
-		`description`,
-		`cron`,
-		`is_in_use`,
-		`start_time`,
-		`end_time`
+		jd.`id`,
+		jd.`gmt_created`,
+		jd.`gmt_modified`,
+		jd.`job_name`,
+		jd.`job_group`,
+		jd.`job_classpath`,
+		jd.`job_class_name`,
+		jd.`description`,
+		jd.`cron`,
+		jd.`is_in_use`,
+		jd.`start_time`,
+		jd.`end_time`
 	</sql>
 	
 	<sql id="dynamicIsInUse">
@@ -71,14 +71,18 @@
 		</dynamic>
 	</sql>
 	
-	<select id="queryAllJobDefinition" parameterClass="java.lang.String" 
+	<select id="queryAllJobDefinition" parameterClass="java.util.HashMap" 
 		resultMap="definitionResultMap" >
 		select
 			<include refid="fullColumn" />
-		from `job_definition`
+		from `job_definition` jd
+		inner join job_node_running jnr on jd.job_name=jnr.job_id
 		<dynamic prepend="where">
-			<isNotEmpty property="value" >
-				is_in_use=#value#
+			<isNotEmpty property="isinuse" prepend="and">
+				jd.is_in_use=#isinuse#
+			</isNotEmpty>
+			<isNotEmpty property="nodeKey" prepend="and">
+				jnr.node_key=#nodeKey#
 			</isNotEmpty>
 		</dynamic>
 		limit 500
@@ -88,7 +92,7 @@
 		resultMap="definitionResultMap" >
 		select
 			<include refid="fullColumn" />
-		from `job_definition`
+		from `job_definition` jd
 		<include refid="dynamicIsInUse"/>
 		<include refid="common.pageOrderBy" />
 		<include refid="common.pageLimit" />
@@ -102,7 +106,7 @@
 	<select id="queryJobDefinitionById" parameterClass="java.lang.Integer" resultMap="definitionResultMap">
 	    select 
 			<include refid="fullColumn" />
-	    from job_definition
+	    from job_definition jd
 	    where id = #value#
 	</select>
 	
@@ -110,7 +114,7 @@
 	<select id="queryJobDefinitionByName" parameterClass="java.lang.String" resultMap="definitionResultMap">
     select 
 			<include refid="fullColumn" />
-    from job_definition
+    from job_definition jd
     where job_name=#value#
 	</select>
 	

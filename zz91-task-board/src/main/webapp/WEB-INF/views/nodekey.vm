@@ -1,0 +1,7 @@
+<div style="padding:10px;">
+	<br />本任务系统未配置节信息！
+	<br />增加配置文件：/usr/data/task/node.properties
+	<br />内容：node=<span style="color:red;" >192.168.110.180</span>
+	<br />红色部分为节点key，建议配置成该task系统所在机器的IP地址
+	<br /><span style="color:red;" >注意：节点key不要与其他节点重复，否则可能造成严重的问题！！配置成功后请重启任务系统！！</span>
+</div>

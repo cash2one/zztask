@@ -12,4 +12,8 @@
 	<!-- job -->
 	<sqlMap resource="com/zz91/task/board/job_definition.xml"/>
 	<sqlMap resource="com/zz91/task/board/job_status.xml"/>
+	
+	<!-- job node -->
+	<sqlMap resource="com/zz91/task/board/job_node.xml"/>
+	<sqlMap resource="com/zz91/task/board/job_node_running.xml"/>
 </sqlMapConfig>

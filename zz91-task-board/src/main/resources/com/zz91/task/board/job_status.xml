@@ -10,7 +10,7 @@
 
 	<resultMap id="statusResultMap" class="jobStatus">
 		<result property="id" column="id"/>
-		<result property="JobName" column="job_name"/>
+		<result property="jobName" column="job_name"/>
 		<result property="gmtBasetime" column="gmt_basetime"/>
 		<result property="result" column="result"/>
 		<result property="gmtTrigger" column="gmt_trigger"/>
@@ -20,15 +20,15 @@
 		<result property="gmtCreated" column="gmt_created"/>
 		<result property="gmtModified" column="gmt_modified"/>
 		<result property="runtime" column="runtime"/>
-		
+		<result property="nodeKey" column="node_key"/>
 	</resultMap>
 	
 	<insert id="insertJobStatus" parameterClass="jobStatus" >
 		insert into `job_status` ( `job_name`, `gmt_basetime`, `result`,
 			`runtime`, `gmt_trigger`, `error_msg`, `category`, `num_retry`,
-			`gmt_created`, `gmt_modified`) 
+			`gmt_created`, `gmt_modified`, `node_key`) 
 		values ( #jobName#, #gmtBasetime#, #result#, #runtime#, #gmtTrigger#,
-			 #errorMsg#, #category#, #numRetry# , now(), now() )
+			 #errorMsg#, #category#, #numRetry# , now(), now(), #nodeKey# )
 		<selectKey resultClass="java.lang.Integer" keyProperty="id" >
       		SELECT LAST_INSERT_ID()
 		</selectKey>
@@ -45,7 +45,8 @@
 		`category`,
 		`num_retry`,
 		`gmt_created`,
-		`gmt_modified`
+		`gmt_modified`, 
+		`node_key`
 	</sql>
 	
 	<sql id="dynamicJobName">

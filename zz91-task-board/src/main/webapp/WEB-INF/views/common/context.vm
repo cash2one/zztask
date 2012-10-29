@@ -10,6 +10,7 @@
 		this.ROOT_IMAGE="http://img1.zz91.com/zztask";
 		this.PAGE_SIZE = 20;
 		this.LOGIN_USER="$!{staffName}";
+		this.NODEKEY="$!{nodekey}";
 	}
 	
 	function timestamp(){

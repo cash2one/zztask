@@ -1,7 +1,9 @@
 package com.zz91.task.board.init;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -15,7 +17,9 @@ import com.zz91.task.board.thread.TaskControlThread;
 import com.zz91.task.board.thread.idx.LastBuildThread;
 import com.zz91.task.board.thread.idx.ListenIdxChangeThread;
 import com.zz91.task.board.util.ClassHelper;
+import com.zz91.task.board.util.TaskConst;
 import com.zz91.task.common.AbstractIdxTask;
+import com.zz91.util.file.FileUtils;
 
 /**
  * 系统启动时加载数据库中的任务信息
@@ -37,6 +41,9 @@ public class InitDbJob {
 	JobStatusService jobStatusService;
 
 	public void initJob() {
+		
+		//获取node key，并放入内存
+		initNodeKey();
 
 		TaskControlThread.runSwitch = true;
 
@@ -95,5 +102,18 @@ public class InitDbJob {
 		}
 
 	}
+	
+	public void shutdown(){
+		
+	}
 
+	@SuppressWarnings("unchecked")
+	public void initNodeKey(){
+		try {
+			Map<String, String> prop =FileUtils.readPropertyFile("file:/usr/data/task/node.properties", "utf-8");
+			TaskConst.NODE_KEY=prop.get("node");
+		} catch (IOException e) {
+			LOG.error("Error loading NODE KEY config... "+e.getMessage());
+		}
+	}
 }

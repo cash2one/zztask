@@ -15,4 +15,6 @@ public class TaskConst {
 	public final static String PROJECT_CODE="d561d16e-b64f-46ba-b08f-74029fccafe5";
 	public final static String PROJECT_PASSWORD="4msy30a4dn4wxma0";
 	
+	public static String NODE_KEY = null;
+
 }

@@ -13,7 +13,7 @@ public class JobStatus implements java.io.Serializable{
 	public static final String FAILED="failed";
 	
 	private Integer id;
-	private String JobName;
+	private String jobName;
 	private Date gmtBasetime;
 	private String result;
 	private Long runtime;
@@ -23,6 +23,7 @@ public class JobStatus implements java.io.Serializable{
 	private Integer numRetry;
 	private Date gmtCreated;
 	private Date gmtModified;
+	private String nodeKey;
 	
 	/**
 	 * 
@@ -46,7 +47,7 @@ public class JobStatus implements java.io.Serializable{
 			Long runtime, Date gmtTrigger, String errorMsg, String category,
 			Integer numRetry, Date gmtCreated, Date gmtModified) {
 		super();
-		JobName = jobName;
+		this.jobName = jobName;
 		this.gmtBasetime = gmtBasetime;
 		this.result = result;
 		this.runtime = runtime;
@@ -70,18 +71,6 @@ public class JobStatus implements java.io.Serializable{
 	 */
 	public void setId(Integer id) {
 		this.id = id;
-	}
-	/**
-	 * @return the jobName
-	 */
-	public String getJobName() {
-		return JobName;
-	}
-	/**
-	 * @param jobName the jobName to set
-	 */
-	public void setJobName(String jobName) {
-		JobName = jobName;
 	}
 	/**
 	 * @return the gmtBasetime
@@ -191,7 +180,21 @@ public class JobStatus implements java.io.Serializable{
 	public void setGmtModified(Date gmtModified) {
 		this.gmtModified = gmtModified;
 	}
-	
-	
+
+	public String getJobName() {
+		return jobName;
+	}
+
+	public void setJobName(String jobName) {
+		this.jobName = jobName;
+	}
+
+	public String getNodeKey() {
+		return nodeKey;
+	}
+
+	public void setNodeKey(String nodeKey) {
+		this.nodeKey = nodeKey;
+	}
 	
 }

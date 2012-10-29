@@ -11,10 +11,14 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import com.zz91.task.board.dao.JobDefinitionDao;
+import com.zz91.task.board.dao.JobNodeRunningDao;
 import com.zz91.task.board.domain.JobDefinition;
+import com.zz91.task.board.domain.JobNodeRunning;
 import com.zz91.task.board.dto.Pager;
 import com.zz91.task.board.service.JobDefinitionService;
+import com.zz91.task.board.util.TaskConst;
 import com.zz91.util.Assert;
+import com.zz91.util.file.FileUtils;
 import com.zz91.util.lang.StringUtils;
 
 /**
@@ -26,6 +30,8 @@ public class JobDefinitionServiceImpl implements JobDefinitionService{
 	
 	@Resource
 	private JobDefinitionDao jobDefinitionDao;
+	@Resource
+	private JobNodeRunningDao jobNodeRunningDao;
 	
 	@Override
 	public Pager<JobDefinition> pageJobDefinition(Boolean isuse, String jobGroup,
@@ -42,8 +48,28 @@ public class JobDefinitionServiceImpl implements JobDefinitionService{
 			jobGroup = JobDefinitionService.GROUP;
 		}
 		
+		List<String> list=jobNodeRunningDao.queryByNode(TaskConst.NODE_KEY);
+		
+		List<JobDefinition> definitionsList=jobDefinitionDao.queryJobDefinition(isinuse, jobGroup, page);
+		
+		for(JobDefinition definition : definitionsList){
+			if(list.contains(definition.getJobName())){
+				definition.setIsInUse(JobDefinitionDao.ISUSE_TRUE);
+			}else{
+				if(JobDefinitionDao.ISUSE_TRUE.equals(definition.getIsInUse())){
+					definition.setIsInUse(JobDefinitionDao.ISUSE_NODE_FALSE);
+				}
+			}
+//			else {
+//			}
+			//文件检查
+			if(!FileUtils.exists(definition.getJobClasspath())){
+				definition.setJobClasspath("");
+			}
+		}
+		
 		page.setTotals(jobDefinitionDao.queryJobDefinitionCount(isinuse, jobGroup));
-		page.setRecords(jobDefinitionDao.queryJobDefinition(isinuse, jobGroup, page));
+		page.setRecords(definitionsList);
 		return page;
 	}
 
@@ -90,18 +116,27 @@ public class JobDefinitionServiceImpl implements JobDefinitionService{
 			flag=JobDefinitionDao.ISUSE_FALSE;
 		}
 		
-		return jobDefinitionDao.queryAllJobDefinition(flag);
+		return jobDefinitionDao.queryAllJobDefinition(flag, TaskConst.NODE_KEY);
 	}
 
 	@Override
-	public Integer startTask(Integer id) {
+	public Integer startTask(Integer id, String jobName) {
 		Assert.notNull(id, "id can not be null");
+
+		JobNodeRunning running = new JobNodeRunning();
+		running.setJobId(jobName);
+		running.setNodeKey(TaskConst.NODE_KEY);
+		jobNodeRunningDao.insertNodeRunning(running);
+		
 		return jobDefinitionDao.updateIsInUseById(id, JobDefinitionDao.ISUSE_TRUE);
 	}
-
+	
 	@Override
-	public Integer stopTask(Integer id) {
+	public Integer stopTask(Integer id, String jobName) {
 		Assert.notNull(id, "id can not be null");
+		
+		jobNodeRunningDao.deleteByJob(jobName, TaskConst.NODE_KEY);
+		
 		return jobDefinitionDao.updateIsInUseById(id, JobDefinitionDao.ISUSE_FALSE);
 	}
 
@@ -113,7 +148,10 @@ public class JobDefinitionServiceImpl implements JobDefinitionService{
 
 	@Override
 	public Integer updateEndTime(String jobName, Long endTime) {
-		
+		if(endTime==null){
+			return null;
+		}
 		return jobDefinitionDao.updateEndTime(jobName, new Date(endTime));
 	}
+	
 }

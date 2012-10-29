@@ -13,6 +13,7 @@ import com.zz91.task.board.dao.JobStatusDao;
 import com.zz91.task.board.domain.JobStatus;
 import com.zz91.task.board.dto.Pager;
 import com.zz91.task.board.service.JobStatusService;
+import com.zz91.task.board.util.TaskConst;
 import com.zz91.util.Assert;
 import com.zz91.util.lang.StringUtils;
 
@@ -28,6 +29,7 @@ public class JobStatusServiceImpl implements JobStatusService {
 	@Override
 	public Integer insertJobStatus(JobStatus jobStatus) {
 		Assert.notNull(jobStatus, "the jobStatus can not be null");
+		jobStatus.setNodeKey(TaskConst.NODE_KEY);
 		return jobStatusDao.insertJobStatus(jobStatus);
 	}
 
@@ -53,7 +55,6 @@ public class JobStatusServiceImpl implements JobStatusService {
 		if(jobStatus.getErrorMsg()!=null && jobStatus.getErrorMsg().length()>2000){
 			jobStatus.setErrorMsg(jobStatus.getErrorMsg().substring(0, 2000));
 		}
-		
 		return jobStatusDao.updateJobStatus(jobStatus);
 	}
 

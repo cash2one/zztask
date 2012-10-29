@@ -45,7 +45,7 @@ Ext.onReady(function(){
         var north={
                 region:'north',
                 height:0,
-                bbar:['->',{ //new Ext.ux.ThemeChange(),
+                bbar:['Node Key:'+Context.NODEKEY,'->',{ //new Ext.ux.ThemeChange(),
                         iconCls:'userid16',
                         text:'<b>'+Context.LOGIN_USER+'</b>',
                         handler:function(btn){

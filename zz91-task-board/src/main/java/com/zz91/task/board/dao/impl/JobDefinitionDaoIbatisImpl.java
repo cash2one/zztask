@@ -32,9 +32,12 @@ public class JobDefinitionDaoIbatisImpl extends SqlMapClientDaoSupport
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<JobDefinition> queryAllJobDefinition(String isinuse) {
+	public List<JobDefinition> queryAllJobDefinition(String isinuse, String nodeKey) {
+		Map<String, Object> root=new HashMap<String, Object>();
+		root.put("isinuse", isinuse);
+		root.put("nodeKey", nodeKey);
 		return getSqlMapClientTemplate().queryForList(
-				SQL_PREFIX + "queryAllJobDefinition", isinuse);
+				SQL_PREFIX + "queryAllJobDefinition", root);
 	}
 
 	@SuppressWarnings("unchecked")

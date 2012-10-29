@@ -56,6 +56,9 @@ com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
 				if(value==1){
 					return "<div class='accept16'>&nbsp;</div>";
 				}
+				if(value==2){
+					return "<div class='lock16'>&nbsp;</div>";
+				}
 				return "<div class='stop16'>&nbsp;</div>";
 			}
     	},{
@@ -87,7 +90,13 @@ com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
     	},{
     		header : "jar包",
     		sortable : false,
-    		dataIndex : 'jobClasspath'
+    		dataIndex : 'jobClasspath',
+    		renderer:function(value, metadata, record, rowIndex,colIndex, store) {
+				if(value==null || value==""){
+					return "<div class='help16' >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本节点jar包未上传！</div>";
+				} 
+				return value;
+			}
     	},{
     		header : "任务Class",
     		sortable : false,

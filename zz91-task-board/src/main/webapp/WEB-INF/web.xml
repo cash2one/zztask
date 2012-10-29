@@ -43,7 +43,7 @@
 		</init-param>
 		<init-param>
 			<param-name>noAuthPage</param-name>
-			<param-value>/|/index.htm|/welcome.htm|/mymenu.htm|/monitor.htm</param-value>
+			<param-value>/|/index.htm|/welcome.htm|/mymenu.htm|/monitor.htm|/nodekey.htm*</param-value>
 		</init-param>
 		<init-param>
 			<param-name>noLoginPage</param-name>

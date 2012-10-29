@@ -11,6 +11,8 @@ public interface JobDefinitionDao {
 	final static String ISUSE_TRUE = "1";
 
 	final static String ISUSE_FALSE = "0";
+	
+	final static String ISUSE_NODE_FALSE = "2";
 
 	public Integer queryJobDefinitionCount(String isinuse, String jobGroup);
 
@@ -20,7 +22,7 @@ public interface JobDefinitionDao {
 	public Integer deleteJobDefinition(Integer id);
 	public Integer insertJobDefinition(JobDefinition jobDefinition);
 	
-	public List<JobDefinition> queryAllJobDefinition(String isinuse);
+	public List<JobDefinition> queryAllJobDefinition(String isinuse, String nodeKey);
 
 	public Integer updateJobDefinition(JobDefinition jobDefinition);
 	public JobDefinition queryJobDefinitionByName(String paramName);

@@ -1,6 +1,6 @@
 Ext.namespace("com.zz91.task.board.job.status");
 
-com.zz91.task.board.job.status.StatusRecord=Ext.data.Record.create(["id","jobName","gmtBasetime","result","runtime","gmtTrigger","errorMsg","numRetry"]);
+com.zz91.task.board.job.status.StatusRecord=Ext.data.Record.create(["id","jobName","gmtBasetime","result","runtime","gmtTrigger","errorMsg","numRetry", "nodeKey"]);
 
 com.zz91.task.board.job.status.StatusOfDefinitionGrid=Ext.extend(Ext.grid.GridPanel,{
 	hideTaskName:true,
@@ -75,9 +75,9 @@ com.zz91.task.board.job.status.StatusOfDefinitionGrid=Ext.extend(Ext.grid.GridPa
     		sortable : false,
     		dataIndex : 'errorMsg'
     	},{
-    		header : "分类",
+    		header : "node key",
     		sortable : false,
-    		dataIndex : 'category'
+    		dataIndex : 'nodeKey'
     	},{
     		header : "重试情况",
     		sortable : false,

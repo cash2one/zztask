@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.zz91.task.board.dto.ExtResult;
 import com.zz91.task.board.thread.TaskControlThread;
@@ -39,7 +40,11 @@ public class RootController extends BaseController {
 	@RequestMapping
 	public ModelAndView index(HttpServletRequest request,
 			Map<String, Object> out) {
+		if(TaskConst.NODE_KEY==null){
+			return new ModelAndView("redirect:nodekey.htm");
+		}
 		out.put("staffName", AuthUtils.getInstance().queryStaffNameOfAccount(getCachedUser(request).getAccount()));
+		out.put("nodekey", TaskConst.NODE_KEY);
 		return null;
 	}
 
@@ -96,6 +101,12 @@ public class RootController extends BaseController {
 				+ "','nowDate':'"
 				+ DateUtil.toString(new Date(), "yyyy-MM-dd hh:mm:ss") + "'}",
 				out);
+	}
+	
+	@RequestMapping
+	public ModelAndView nodekey(Map<String, Object> out, HttpServletRequest request){
+		
+		return null;
 	}
 	
 }

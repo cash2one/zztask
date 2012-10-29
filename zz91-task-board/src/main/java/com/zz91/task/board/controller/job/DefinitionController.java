@@ -25,6 +25,7 @@ import com.zz91.task.board.domain.JobStatus;
 import com.zz91.task.board.dto.ExtResult;
 import com.zz91.task.board.dto.Pager;
 import com.zz91.task.board.service.JobDefinitionService;
+import com.zz91.task.board.service.JobNodeRunningService;
 import com.zz91.task.board.service.JobStatusService;
 import com.zz91.task.board.thread.TaskControlThread;
 import com.zz91.task.board.thread.TaskRunThread;
@@ -45,6 +46,8 @@ public class DefinitionController extends BaseController {
 	private JobDefinitionService jobDefinitionService;
 	@Resource
 	private JobStatusService jobStatusService;
+	@Resource
+	private JobNodeRunningService jobNodeRunningService;
 
 	@RequestMapping
 	public ModelAndView index() {
@@ -135,7 +138,7 @@ public class DefinitionController extends BaseController {
 		ExtResult result = new ExtResult();
 		// schedulerService.stopJob(jobName, jobGroup);
 		TaskControlThread.removeRunningTask(jobName);
-		Integer i = jobDefinitionService.stopTask(id);
+		Integer i = jobDefinitionService.stopTask(id, jobName);
 		if (i != null && i.intValue() > 0) {
 			result.setSuccess(true);
 		}
@@ -167,7 +170,7 @@ public class DefinitionController extends BaseController {
 		if (definition != null && definition.getCron() != null
 				&& CronExpression.isValidExpression(definition.getCron())) {
 			TaskControlThread.addRunTask(definition);
-			jobDefinitionService.startTask(id);
+			jobDefinitionService.startTask(id, definition.getJobName());
 			result.setSuccess(true);
 		}
 		return printJson(result, out);
@@ -209,6 +212,8 @@ public class DefinitionController extends BaseController {
 				.queryJobDefinitionById(id);
 		TaskControlThread.removeRunningTask(definition.getJobName());
 
+		jobNodeRunningService.removeRunning(definition.getJobName());
+		
 		Integer impact = jobDefinitionService.deleteJobDefinition(id);
 		if (impact!=null && impact > 0) {
 			result.setSuccess(true);
@@ -313,7 +318,7 @@ public class DefinitionController extends BaseController {
 		TaskControlThread.LAST_BUILD_TIME_MAP.remove(jobName);
 		TaskControlThread.BUILD_TASK_MAP.remove(jobName);
 		
-		Integer i = jobDefinitionService.stopTask(id);
+		Integer i = jobDefinitionService.stopTask(id, jobName);
 		ExtResult result = new ExtResult();
 		if (i != null && i.intValue() > 0) {
 			result.setSuccess(true);
@@ -339,7 +344,7 @@ public class DefinitionController extends BaseController {
 				TaskControlThread.LAST_BUILD_TIME_MAP.put(jobDefinition.getJobName(), jobDefinition.getEndTime().getTime());
 				TaskControlThread.BUILD_TASK_MAP.put(jobDefinition.getJobName(), jobInstance);
 				
-				jobDefinitionService.startTask(id);
+				jobDefinitionService.startTask(id, jobDefinition.getJobName());
 				
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
@@ -364,6 +369,8 @@ public class DefinitionController extends BaseController {
 			Integer id, String jobName){
 		TaskControlThread.LAST_BUILD_TIME_MAP.remove(jobName);
 		TaskControlThread.BUILD_TASK_MAP.remove(jobName);
+		
+		jobNodeRunningService.removeRunning(jobName);
 		
 		Integer impact = jobDefinitionService.deleteJobDefinition(id);
 		ExtResult result = new ExtResult();

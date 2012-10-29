@@ -21,4 +21,6 @@ public class InitSystem {
 		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 	}
 
+	public void shutdown(){
+	}
 }
