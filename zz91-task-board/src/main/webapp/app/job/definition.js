@@ -172,7 +172,7 @@ com.zz91.task.board.job.definition.SimpleGrid=Ext.extend(Ext.grid.GridPanel,{
 	            	var row = sm.getSelections();
 	                var _ids = new Array();
 	                for (var i=0,len = row.length;i<len;i++){
-	                	if(row[i].get("isInUse")==0 || row[i].get("isInUse")==""){
+	                	if(row[i].get("isInUse")==0 || row[i].get("isInUse")==2 || row[i].get("isInUse")==""){
 		                    com.zz91.task.board.job.definition.resumeTask(row[i].get("id"),row[i].get("jobName"),row[i].get("jobGroup"));
 	                	}
 	                }
