@@ -142,7 +142,9 @@ public class IndexCompanyTask extends AbstractIdxTask{
 			}
 		});
 		for(SolrInputDocument doc:docs){
-			parseMember(doc,(Integer) doc.getFieldValue("id"));
+			Integer id = (Integer) doc.getFieldValue("id");
+			parseMember(doc,id);
+			parseChainId(doc,id);
 		}
 		return docs;
 	}
@@ -164,6 +166,26 @@ public class IndexCompanyTask extends AbstractIdxTask{
 			//导入的公司信息
 			doc.addField("sortMemberCode",0);
 		}
+	}
+	
+	
+	private void parseChainId(SolrInputDocument doc,Integer id){
+		final StringBuffer s = new StringBuffer();
+		StringBuffer sb = new StringBuffer();
+		sb.append("select chain_id from company_industry_chain where cid = ").append(id);
+		DBUtils.select(DB, sb.toString(), new IReadDataHandler() {
+			
+			@Override
+			public void handleRead(ResultSet rs) throws SQLException {
+				 
+				while(rs.next()){
+					s.append(rs.getString("chain_id"));
+					s.append(" ");
+				}
+				
+			}
+		});
+		doc.addField("chainId", sb.toString());
 	}
 	
 	public static void main(String[] args) {
