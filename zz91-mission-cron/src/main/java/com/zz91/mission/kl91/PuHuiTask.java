@@ -21,7 +21,7 @@ import com.zz91.util.lang.StringUtils;
 public class PuHuiTask implements ZZTask{
 	
 
-	private final static String DB_AST = "astoback";
+	private final static String DB_AST = "ast";
 	private final static String DB_KL91 = "kl91";
 
 	@Override
@@ -31,7 +31,8 @@ public class PuHuiTask implements ZZTask{
 
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
-		String sql="select count(*) from products where check_status = 1 and is_del = 0 and is_pause = 0 and category_products_main_code like '1001%'";
+		String sql="select count(*) from company c where c.membership_code = '10051000' and c.industry_code='10001000'";
+		//String sql="select count(*) from products where title like '%塑料%'";
 		final Integer[] count=new Integer[1];
 		count[0]=0;
 		DBUtils.select(DB_AST, sql, new IReadDataHandler() {
@@ -44,15 +45,17 @@ public class PuHuiTask implements ZZTask{
 		});
 		Integer total=count[0]/100;	
 		for(Integer i=1;i<=total;i++){
-			String sqlId = "select company_id,id from products where check_status=1 and is_del=0 and is_pause=0 and category_products_main_code like '1001%' limit "+100*(i-1) +"," + 100;
+			String sqlId="select c.id from company c where c.membership_code = '10051000' and c.industry_code='10001000' limit "+100*(i-1) +"," + 100;
+			//String sqlId = "select company_id,id from products where title like '%塑料%' limit "+100*(i-1) +"," + 100;
+//			String sqlId = "select company_id,id from products where check_status=1 and is_del=0 and is_pause=0 and category_products_main_code like '1001%' limit "+100*(i-1) +"," + 100;
 			final List<Integer> companyIdlist = new ArrayList<Integer>();
-			final List<Integer> productIdlist = new ArrayList<Integer>();
+//			final List<Integer> productIdlist = new ArrayList<Integer>();
 			DBUtils.select(DB_AST, sqlId, new IReadDataHandler() {
 				@Override
 				public void handleRead(ResultSet rs) throws SQLException {
 					while (rs.next()) {
 						companyIdlist.add(rs.getInt(1));
-						productIdlist.add(rs.getInt(2));
+						//productIdlist.add(rs.getInt(2));
 					}
 				}
 			});
@@ -60,33 +63,15 @@ public class PuHuiTask implements ZZTask{
 			for (Integer companyId : companyIdlist) {
 				selectKLCompanyIdAndImport(companyId);
 			}
-			//导入供求
-			for (Integer productId:productIdlist){
-				selectProducts(productId);
-			}
+//			//导入供求
+//			for (Integer productId:productIdlist){
+//				selectProducts(productId);
+//				System.out.println(productId);
+//			}
 		}
 		return true;
 	}
 
-	private void updateCompanyInsert(String email, String account,
-			String introduction, String membershipCode, String business,
-			String contact, Integer sex, String name, String mobile,
-			String tel, Integer numLogin, String gmtLastLogin,
-			String industryCode, String domain, Integer isActive,
-			Integer registFlag, String password, Integer oldId) {
-		String sql = "update company set email='" + email + "',account='"
-				+ account + "',introduction='" + introduction
-				+ "',membership_code='" + membershipCode + "',business='"
-				+ business + "'" + ",contact='" + contact + "',sex=" + sex
-				+ ",company_name='" + name + "',mobile='" + mobile + "',tel='"
-				+ tel + "',num_login=" + numLogin + "," + "gmt_last_login='"
-				+ gmtLastLogin + "',industry_code='" + industryCode
-				+ "',domain='" + domain + "',is_active=" + isActive
-				+ ",regist_flag=" + registFlag + "," + "password='" + password
-				+ "' where old_id=" + oldId + "";
-		DBUtils.insertUpdate(DB_KL91, sql);
-	}
-	
 	//搜索公司，并且判断ast表old_id是死海表中,如果存在就更新，如果不存在就插入新公司
 	private void selectKLCompanyIdAndImport(Integer companyId) {
 		//判断ast表old_id是否存在私海
@@ -240,243 +225,23 @@ public class PuHuiTask implements ZZTask{
 					DateUtil.toString(new Date(),"yyyy-MM-dd HH:mm:ss"),"1000", website,0,regesiterFlag,companyId, password);
 		}
 	}
-
-	private void updateProducts(Integer klcid, String productCategoryCode,
-			String typeCode, String title, String details, String detailsQuery,
-			Integer checkedFlag, Integer deletedFlag, Integer imptFlag,
-			Integer publishFlag, String location, String useful,
-			String gmtPost, String gmtRefresh, String gmtExpired, String color,
-			String priceUnit, String quantityUnit, Integer quantity,
-			Integer minPrice, Integer maxPrice, Integer productId) {
-		String sql = "update products set cid=" + klcid
-				+ ",products_category_code='" + productCategoryCode
-				+ "',type_code='" + typeCode + "',title='" + title
-				+ "',details='" + details + "'," + "details_query='"
-				+ detailsQuery + "',checked_flag=" + checkedFlag
-				+ ",deleted_flag=" + deletedFlag + ",impt_flag=" + imptFlag
-				+ ",publish_flag=" + publishFlag + ",location='" + location
-				+ "',useful='" + useful + "',gmt_post='" + gmtPost + "',"
-				+ "gmt_refresh='" + gmtRefresh + "',gmt_expired='" + gmtExpired
-				+ "',color='" + color + "',price_unit='" + priceUnit
-				+ "',quantity_unit='" + quantityUnit + "',quantity=" + quantity
-				+ "," + "min_price=" + minPrice + ",max_price=" + maxPrice
-				+ " where old_id=" + productId + "";
-		DBUtils.insertUpdate(DB_KL91, sql);
-	}
-
-	private Integer getCompanyId(Integer cid) {
-		final Integer[] ids = new Integer[1];
-		ids[0] = 0;
-		String sql = "select id from company where old_id=" + cid;
-		DBUtils.select(DB_KL91, sql, new IReadDataHandler() {
-			@Override
-			public void handleRead(ResultSet rs) throws SQLException {
-				while (rs.next()) {
-					ids[0] = rs.getInt(1);
-				}
-			}
-		});
-		return ids[0];
-	}
-
-	private void selectProducts(Integer productId) throws Exception {
-		// 循环遍历得到供求id并且根据id搜出供求信息
-		String sql = "select products_type_code,title,details,location,price_unit,quantity_unit,quantity,color,useful," +
-				"min_price,max_price,company_id,right(p.products_type_code,1) as pdt_kind,c.label AS label0, " +
-				"c1.label AS label1, c2.label AS label2, c3.label AS label3,c4.label AS label4 FROM ast.products AS p LEFT OUTER JOIN " +
-				"ast.category_products AS c on p.category_products_main_code = c.code LEFT OUTER JOIN ast.category_products" +
-				" AS c1 on LEFT(p.category_products_main_code, 4) = c1.code LEFT OUTER JOIN ast.category_products AS c2 on" +
-				" LEFT(p.category_products_main_code, 8) = c2.code LEFT OUTER JOIN ast.category_products AS c3 ON LEFT" +
-				"(p.category_products_main_code, 12) = c3.code " +
-				"LEFT OUTER JOIN ast.category_products AS c4 ON LEFT(p.category_products_main_code, 16) = c4.code where p.id= " + productId;
-			final Map<String, Object> map = new HashMap<String, Object>();
-			DBUtils.select(DB_AST, sql, new IReadDataHandler() {
-				@Override
-				public void handleRead(ResultSet rs) throws SQLException {
-					while (rs.next()) {
-						map.put("productsTypeCode", rs.getString(1));
-						map.put("title", rs.getString(2));
-						map.put("details", rs.getString(3));
-						map.put("location", rs.getString(4));
-						map.put("priceUnit", rs.getString(5));
-						map.put("quantityUnit", rs.getString(6));
-						map.put("quantity", rs.getString(7));
-						map.put("color", rs.getString(8));
-						map.put("useful", rs.getString(9));
-						map.put("minPrice", rs.getFloat(10));
-						map.put("maxPrice", rs.getFloat(11));
-						map.put("companyId", rs.getInt(12));
-						map.put("label0", rs.getString(14));
-						map.put("label1", rs.getString(15));
-						map.put("label2", rs.getString(16));
-						map.put("label3", rs.getString(17));
-						map.put("label4", rs.getString(18));
-					}
-				}
-			});
-			// 默认时间为当前
-			String gmtPost = DateUtil.toString(new Date(),
-					"yyyy-MM-dd HH:mm:ss");
-			// ast表里面供求类型复杂所以这里指定供求类型为了匹配kl91表
-			String typeCode = (String) map.get("productsTypeCode");
-			if (typeCode.equals("10331001")) {
-				typeCode = "0";
-			}
-			if (typeCode.equals("10331000")) {
-				typeCode = "1";
-			}
-			String label1=(String) map.get("label1");
-		
-			String label2=(String) map.get("label2");
-			
-			String label3=(String) map.get("label3");
-			
-			String label4=(String) map.get("label4");
-			
-			String productsCategoryCode=label1+">"+label2+">"+label3+">"+label4;
-			// 标题
-			String title = (String) map.get("title");
-			if (title == null) {
-				title = "";
-			}
-			// 产品详情
-			String details=StringUtils.controlLength((String) map.get("details"), 3000);
-			if (details == null) {
-				details = "";
-			}
-			// 发货地址
-			String location = (String) map.get("location");
-			if (location == null) {
-				location = "";
-			}
-			// 供求用处
-			String useful = (String) map.get("useful");
-			if (useful == null) {
-				useful = "";
-			}
-			// 价格单位
-			String priceUnit = (String) map.get("priceUnit");
-			if (priceUnit == null) {
-				priceUnit = "";
-			}
-			// 产品颜色
-			String color = (String) map.get("color");
-			if (color == null) {
-				color = "";
-			}
-			// 数量单位
-			String quantityUnit = (String) map.get("quantityUnit");
-			if (quantityUnit == null) {
-				quantityUnit = "";
-			}
-			// 数量
-			Integer quantitys = (Integer) map.get("quantitys");
-			Integer quantity = 0;
-			if (quantitys == null) {
-				quantity = 0;
-			}
-
-			// 最大价格和最小价格强制转换成int匹配kl91表
-			Float minPrices = (Float) map.get("minPrice");
-			String i = minPrices.toString();
-			i = i.substring(0, i.indexOf("."));
-			Integer minPrice = Integer.valueOf(i);
-			if (minPrice == null) {
-				minPrice = 0;
-			}
-
-			Float maxPrices = (Float) map.get("maxPrices");
-			Integer maxPrice = 0;
-			if (maxPrices == null) {
-				maxPrice = 0;
-			} else {
-				i = maxPrices.toString();
-				i = i.substring(0, i.indexOf("."));
-				maxPrice = Integer.valueOf(i);
-			}
-			Integer cid = getCompanyId(Integer.valueOf(map.get("companyId").toString()));
-			//判断ast表的old_id是否存在kl91_test和死海表里面
-			
-			
-			
-			sql = "select count(0) from products where old_id="+productId;
-			final Integer[] count=new Integer[1];
-			count[0]=0;
-			DBUtils.select(DB_KL91, sql, new IReadDataHandler() {
-				@Override
-				public void handleRead(ResultSet rs) throws SQLException {
-					while(rs.next()){
-						count[0]=rs.getInt(1);
-					}
-				}
-			});
-			
-			if(count[0]>0){
-				updateProducts(cid, productsCategoryCode, typeCode, title, details,"", 1, 0, 5, 1, location, useful, gmtPost, gmtPost, 
-						DateUtil.toString(DateUtil.getDateAfterMonths(new Date(), +6), "yyyy-MM-dd HH:mm:ss"), color,
-						priceUnit, quantityUnit, quantity, minPrice, maxPrice, productId);
-			}else{
-				insertProducts(cid, productsCategoryCode, typeCode, title, details,"", 1, 0, 5,1, location, useful, gmtPost, gmtPost,
-					DateUtil.toString(DateUtil.getDateAfterMonths(new Date(), +6), "yyyy-MM-dd HH:mm:ss"), 
-					color, priceUnit, quantityUnit, quantity,minPrice, maxPrice, productId);
-			}
-			
-		}
-
-	private void insertProducts(Integer cid, String productCategoryCode,
-			String typeCode, String title, String details, String detailsQuery,
-			Integer checkedFlag, Integer deletedFlag, Integer imptFlag,
-			Integer publishFlag, String location, String useful,
-			String gmtPost, String gmtRefresh, String gmtExpired, String color,
-			String priceUnit, String quantityUnit, Integer quantity,
-			Integer minPrice, Integer maxPrice, Integer oldId) {
-		String sql = "insert into products(cid,products_category_code,type_code,title,details,details_query,checked_flag,"
-				+ "deleted_flag,impt_flag,publish_flag,location,useful,gmt_post,gmt_refresh,gmt_expired,color,price_unit,quantity_unit,quantity,min_price,max_price,old_id,show_time,gmt_created,gmt_modified,gmt_check)"
-				+ "values('"
-				+ cid
-				+ "','"
-				+ productCategoryCode
-				+ "','"
-				+ typeCode
-				+ "','"
-				+ title
-				+ "','"
-				+ details
-				+ "','"
-				+ detailsQuery
-				+ "','"
-				+ checkedFlag
-				+ "','"
-				+ deletedFlag
-				+ "',"
-				+ "'"
-				+ imptFlag
-				+ "','"
-				+ publishFlag
-				+ "','"
-				+ location
-				+ "','"
-				+ useful
-				+ "','"
-				+ gmtPost
-				+ "','"
-				+ gmtRefresh
-				+ "','"
-				+ gmtExpired
-				+ "','"
-				+ color
-				+ "','"
-				+ priceUnit
-				+ "','"
-				+ quantityUnit
-				+ "','"
-				+ quantity
-				+ "','"
-				+ minPrice
-				+ "','"
-				+ maxPrice
-				+ "',"
-				+ oldId + ",now(),now(),now(),now())";
+	
+	private void updateCompanyInsert(String email, String account,
+			String introduction, String membershipCode, String business,
+			String contact, Integer sex, String name, String mobile,
+			String tel, Integer numLogin, String gmtLastLogin,
+			String industryCode, String domain, Integer isActive,
+			Integer registFlag, String password, Integer oldId) {
+		String sql = "update company set email='" + email + "',account='"
+				+ account + "',introduction='" + introduction
+				+ "',membership_code='" + membershipCode + "',business='"
+				+ business + "'" + ",contact='" + contact + "',sex=" + sex
+				+ ",company_name='" + name + "',mobile='" + mobile + "',tel='"
+				+ tel + "',num_login=" + numLogin + "," + "gmt_last_login='"
+				+ gmtLastLogin + "',industry_code='" + industryCode
+				+ "',domain='" + domain + "',is_active=" + isActive
+				+ ",regist_flag=" + registFlag + "," + "password='" + password
+				+ "' where old_id=" + oldId + "";
 		DBUtils.insertUpdate(DB_KL91, sql);
 	}
 	
@@ -523,6 +288,255 @@ public class PuHuiTask implements ZZTask{
 				+ "','" + registFlag + "',now(),now(),now()," + oldId + ")";
 		DBUtils.insertUpdate(DB_KL91, sql);
 	}
+
+//	private void updateProducts(Integer klcid, String productCategoryCode,
+//			String typeCode, String title, String details, String detailsQuery,
+//			Integer checkedFlag, Integer deletedFlag, Integer imptFlag,
+//			Integer publishFlag, String location, String useful,
+//			String gmtPost, String gmtRefresh, String gmtExpired, String color,
+//			String priceUnit, String quantityUnit, Integer quantity,
+//			Integer minPrice, Integer maxPrice, Integer productId,String searchKey) {
+//		String sql = "update products set cid=" + klcid
+//				+ ",products_category_code='" + productCategoryCode
+//				+ "',type_code='" + typeCode + "',title='" + title
+//				+ "',details='" + details + "'," + "details_query='"
+//				+ detailsQuery + "',checked_flag=" + checkedFlag
+//				+ ",deleted_flag=" + deletedFlag + ",impt_flag=" + imptFlag
+//				+ ",publish_flag=" + publishFlag + ",location='" + location
+//				+ "',useful='" + useful + "',gmt_post='" + gmtPost + "',"
+//				+ "gmt_refresh='" + gmtRefresh + "',gmt_expired='" + gmtExpired
+//				+ "',color='" + color + "',price_unit='" + priceUnit
+//				+ "',quantity_unit='" + quantityUnit + "',quantity=" + quantity
+//				+ "," + "min_price=" + minPrice + ",max_price=" + maxPrice+",search_key='" + searchKey
+//				+ "' where old_id=" + productId + "";
+//		DBUtils.insertUpdate(DB_KL91, sql);
+//	}
+
+//	private Integer getCompanyId(Integer cid) {
+//		final Integer[] ids = new Integer[1];
+//		ids[0] = 0;
+//		String sql = "select id from company where old_id=" + cid;
+//		DBUtils.select(DB_KL91, sql, new IReadDataHandler() {
+//			@Override
+//			public void handleRead(ResultSet rs) throws SQLException {
+//				while (rs.next()) {
+//					ids[0] = rs.getInt(1);
+//				}
+//			}
+//		});
+//		return ids[0];
+//	}
+
+//	private void selectProducts(Integer productId) throws Exception {
+//		// 循环遍历得到供求id并且根据id搜出供求信息
+//		String sql = "select products_type_code,title,details,location,price_unit,quantity_unit,quantity,color,useful," +
+//				"min_price,max_price,company_id,right(p.products_type_code,1) as pdt_kind,c.label AS label0, " +
+//				"c1.label AS label1, c2.label AS label2, c3.label AS label3,c4.label AS label4 FROM ast.products AS p LEFT OUTER JOIN " +
+//				"ast.category_products AS c on p.category_products_main_code = c.code LEFT OUTER JOIN ast.category_products" +
+//				" AS c1 on LEFT(p.category_products_main_code, 4) = c1.code LEFT OUTER JOIN ast.category_products AS c2 on" +
+//				" LEFT(p.category_products_main_code, 8) = c2.code LEFT OUTER JOIN ast.category_products AS c3 ON LEFT" +
+//				"(p.category_products_main_code, 12) = c3.code " +
+//				"LEFT OUTER JOIN ast.category_products AS c4 ON LEFT(p.category_products_main_code, 16) = c4.code where p.id= " + productId;
+//			final Map<String, Object> map = new HashMap<String, Object>();
+//			DBUtils.select(DB_AST, sql, new IReadDataHandler() {
+//				@Override
+//				public void handleRead(ResultSet rs) throws SQLException {
+//					while (rs.next()) {
+//						map.put("productsTypeCode", rs.getString(1));
+//						map.put("title", rs.getString(2));
+//						map.put("details", rs.getString(3));
+//						map.put("location", rs.getString(4));
+//						map.put("priceUnit", rs.getString(5));
+//						map.put("quantityUnit", rs.getString(6));
+//						map.put("quantity", rs.getString(7));
+//						map.put("color", rs.getString(8));
+//						map.put("useful", rs.getString(9));
+//						map.put("minPrice", rs.getFloat(10));
+//						map.put("maxPrice", rs.getFloat(11));
+//						map.put("companyId", rs.getInt(12));
+//						map.put("label0", rs.getString(14));
+//						map.put("label1", rs.getString(15));
+//						map.put("label2", rs.getString(16));
+//						map.put("label3", rs.getString(17));
+//						map.put("label4", rs.getString(18));
+//					}
+//				}
+//			});
+//			// 默认时间为当前
+//			String gmtPost = DateUtil.toString(new Date(),
+//					"yyyy-MM-dd HH:mm:ss");
+//			// ast表里面供求类型复杂所以这里指定供求类型为了匹配kl91表
+//			String typeCode = (String) map.get("productsTypeCode");
+//			if (typeCode.equals("10331001")) {
+//				typeCode = "0";
+//			}
+//			if (typeCode.equals("10331000")) {
+//				typeCode = "1";
+//			}
+//			String searchKey = "";
+//			
+//			String label1=(String) map.get("label1");
+//			if(label1 !=null){
+//				searchKey +=label1;
+//			}
+//			String label2=(String) map.get("label2");
+//			if(label2 !=null){
+//				searchKey += ">"+label2;
+//			}
+//			String label3=(String) map.get("label3");
+//			if(label3!=null){
+//				searchKey += ">"+label3;
+//			}
+//			String label4=(String) map.get("label4");
+//			if(label4!=null){
+//				searchKey +=  ">"+label4;
+//			}
+//			String label0=(String) map.get("label0");
+//			if(label0!=null){
+//				searchKey +=  ">"+label0;
+//			}
+//			// 标题
+//			String title = (String) map.get("title");
+//			if (title == null) {
+//				title = "";
+//			}
+//			// 产品详情
+//			String details=StringUtils.controlLength((String) map.get("details"), 3000);
+//			if (details == null) {
+//				details = "";
+//			}
+//			// 发货地址
+//			String location = (String) map.get("location");
+//			if (location == null) {
+//				location = "";
+//			}
+//			// 供求用处
+//			String useful = (String) map.get("useful");
+//			if (useful == null) {
+//				useful = "";
+//			}
+//			// 价格单位
+//			String priceUnit = (String) map.get("priceUnit");
+//			if (priceUnit == null) {
+//				priceUnit = "";
+//			}
+//			// 产品颜色
+//			String color = (String) map.get("color");
+//			if (color == null) {
+//				color = "";
+//			}
+//			// 数量单位
+//			String quantityUnit = (String) map.get("quantityUnit");
+//			if (quantityUnit == null) {
+//				quantityUnit = "";
+//			}
+//			// 数量
+//			Integer quantitys = (Integer) map.get("quantitys");
+//			Integer quantity = 0;
+//			if (quantitys == null) {
+//				quantity = 0;
+//			}
+//
+//			// 最大价格和最小价格强制转换成int匹配kl91表
+//			Float minPrices = (Float) map.get("minPrice");
+//			String i = minPrices.toString();
+//			i = i.substring(0, i.indexOf("."));
+//			Integer minPrice = Integer.valueOf(i);
+//			if (minPrice == null) {
+//				minPrice = 0;
+//			}
+//
+//			Float maxPrices = (Float) map.get("maxPrices");
+//			Integer maxPrice = 0;
+//			if (maxPrices == null) {
+//				maxPrice = 0;
+//			} else {
+//				i = maxPrices.toString();
+//				i = i.substring(0, i.indexOf("."));
+//				maxPrice = Integer.valueOf(i);
+//			}
+//			Integer cid = getCompanyId(Integer.valueOf(map.get("companyId").toString()));
+//			//判断ast表的old_id是否存在kl91_test和死海表里面
+//			
+//			
+//			
+//			sql = "select count(0) from products where old_id="+productId;
+//			final Integer[] count=new Integer[1];
+//			count[0]=0;
+//			DBUtils.select(DB_KL91, sql, new IReadDataHandler() {
+//				@Override
+//				public void handleRead(ResultSet rs) throws SQLException {
+//					while(rs.next()){
+//						count[0]=rs.getInt(1);
+//					}
+//				}
+//			});
+//			System.out.println(searchKey);
+//			if(count[0]>0){
+//				updateProducts(cid, "1000", typeCode, title, details,"", 1, 0, 5, 1, location, useful, gmtPost, gmtPost, 
+//						DateUtil.toString(DateUtil.getDateAfterMonths(new Date(), +6), "yyyy-MM-dd HH:mm:ss"), color,
+//						priceUnit, quantityUnit, quantity, minPrice, maxPrice, productId,searchKey);
+//			}else{
+//				insertProducts(cid, "1000", typeCode, title, details,"", 1, 0, 5,1, location, useful, gmtPost, gmtPost,
+//					DateUtil.toString(DateUtil.getDateAfterMonths(new Date(), +6), "yyyy-MM-dd HH:mm:ss"), 
+//					color, priceUnit, quantityUnit, quantity,minPrice, maxPrice, productId,searchKey);
+//			}
+//			
+//		}
+
+//	private void insertProducts(Integer cid, String productCategoryCode,
+//			String typeCode, String title, String details, String detailsQuery,
+//			Integer checkedFlag, Integer deletedFlag, Integer imptFlag,
+//			Integer publishFlag, String location, String useful,
+//			String gmtPost, String gmtRefresh, String gmtExpired, String color,
+//			String priceUnit, String quantityUnit, Integer quantity,
+//			Integer minPrice, Integer maxPrice, Integer oldId,String searchKey) {
+//		String sql = "insert into products(cid,products_category_code,type_code,title,details,details_query,checked_flag,"
+//				+ "deleted_flag,impt_flag,publish_flag,location,useful,gmt_post,gmt_refresh,gmt_expired,color,price_unit,quantity_unit,quantity,min_price,max_price,old_id,show_time,gmt_created,gmt_modified,gmt_check,search_key)"
+//				+ "values('"
+//				+ cid
+//				+ "','"
+//				+ productCategoryCode
+//				+ "','"
+//				+ typeCode
+//				+ "','"
+//				+ title
+//				+ "','"
+//				+ details
+//				+ "','"
+//				+ detailsQuery
+//				+ "','"
+//				+ checkedFlag
+//				+ "','"
+//				+ deletedFlag
+//				+ "',"
+//				+ "'"
+//				+ imptFlag
+//				+ "','"
+//				+ publishFlag
+//				+ "','"
+//				+ location
+//				+ "','"
+//				+ useful
+//				+ "','"
+//				+ gmtPost
+//				+ "','"
+//				+ gmtRefresh
+//				+ "','"
+//				+ gmtExpired
+//				+ "','"
+//				+ color
+//				+ "','"
+//				+ priceUnit
+//				+ "','"
+//				+ quantityUnit
+//				+ "','"
+//				+ quantity
+//				+ "','"
+//				+ minPrice+ "','"+ maxPrice+ "',"
+//				+ oldId + ",now(),now(),now(),now(),'"+searchKey+"')";
+//		DBUtils.insertUpdate(DB_KL91, sql);
+//	}
 
 	@Override
 	public boolean init() throws Exception {

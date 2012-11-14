@@ -222,7 +222,7 @@ public class ZstExpiredTask implements ZZTask {
 	}
 	
 	private void queryProductIdForExpired(Integer companyId){
-		String sql = "select id from products where company_id = "+companyId;
+		String sql = "select id from products where check_status = '1' and company_id = "+companyId;
 		final Set<Integer> set = new HashSet<Integer>();
 		DBUtils.select(DB, sql, new IReadDataHandler() {
 			@Override
@@ -232,14 +232,22 @@ public class ZstExpiredTask implements ZZTask {
 				}
 			}
 		});
+		// insert入 products_zst_expired 表
 		for(Integer id:set){
 			insertProductIdToExpiredTable(id);
+		}
+		// 更新 products 表中 高会审核 的标志
+		for(Integer id:set){
+			updateProductToNoCheckStatus(id);
 		}
 	}
 	
 	private void insertProductIdToExpiredTable(Integer productId){
-		// insert入 products_zst_expired 表
 		DBUtils.insertUpdate(DB, "INSERT INTO products_zst_expired(gmt_created,gmt_modified,product_id) VALUES(now(),now(),"+productId+")");
+	}
+	
+	private void updateProductToNoCheckStatus(Integer productId){
+		DBUtils.insertUpdate(DB, "update products set unchecked_check_status ='0',gmt_modified = now() where unchecked_check_status='1' and id ="+productId);
 	}
 
 	@Override

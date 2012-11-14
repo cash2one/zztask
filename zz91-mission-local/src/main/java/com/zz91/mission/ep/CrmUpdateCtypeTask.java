@@ -8,6 +8,10 @@ import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.lang.StringUtils;
 
+/**
+ * @author qizj
+ * 更改高会ctype=3(对应crm表示高级客户库),更新crm_sale_comp表sale_type字段为1(1代表客服类型);
+ */
 public class CrmUpdateCtypeTask implements ZZTask {
 
 	final static String DATE_FORMAT = "yyyy-MM-dd";
