@@ -170,7 +170,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 	
 	
 	private void parseChainId(SolrInputDocument doc,Integer id){
-		final StringBuffer chainId = new StringBuffer();
+		final StringBuffer chainId = new StringBuffer("|");
 		StringBuffer sql = new StringBuffer();
 		sql.append("select chain_id from company_industry_chain where cid = ").append(id);
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
@@ -180,13 +180,14 @@ public class IndexCompanyTask extends AbstractIdxTask{
 				 
 				while(rs.next()){
 					chainId.append(rs.getString("chain_id"));
-					chainId.append(" ");
+					chainId.append("|");
 				}
 				
 			}
 		});
-		if("".equals(chainId.toString())){
-			doc.addField("chainId", "-1");
+		if("|".equals(chainId.toString())){
+			doc.addField("chainId", "|-1|");
+			
 		}else{
 			doc.addField("chainId", chainId.toString());
 		}
