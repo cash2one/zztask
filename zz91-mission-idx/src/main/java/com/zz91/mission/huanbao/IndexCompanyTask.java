@@ -170,22 +170,27 @@ public class IndexCompanyTask extends AbstractIdxTask{
 	
 	
 	private void parseChainId(SolrInputDocument doc,Integer id){
-		final StringBuffer s = new StringBuffer();
-		StringBuffer sb = new StringBuffer();
-		sb.append("select chain_id from company_industry_chain where cid = ").append(id);
-		DBUtils.select(DB, sb.toString(), new IReadDataHandler() {
+		final StringBuffer chainId = new StringBuffer();
+		StringBuffer sql = new StringBuffer();
+		sql.append("select chain_id from company_industry_chain where cid = ").append(id);
+		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				 
 				while(rs.next()){
-					s.append(rs.getString("chain_id"));
-					s.append(" ");
+					chainId.append(rs.getString("chain_id"));
+					chainId.append(" ");
 				}
 				
 			}
 		});
-		doc.addField("chainId", sb.toString());
+		if("".equals(chainId.toString())){
+			doc.addField("chainId", "-1");
+		}else{
+			doc.addField("chainId", chainId.toString());
+		}
+		
 	}
 	
 	public static void main(String[] args) {
