@@ -1,36 +1,36 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <parent>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
 		<artifactId>task-parent</artifactId>
 		<groupId>com.zz91</groupId>
 		<version>1.0.0-SNAPSHOT</version>
-  </parent>
+	</parent>
 
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.zz91</groupId>
-  <artifactId>zz91-mission-cron</artifactId>
-  <packaging>jar</packaging>
-  <version>1.0.4-SNAPSHOT</version>
-  <name>zz91-mission-cron</name>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.zz91</groupId>
+	<artifactId>zz91-mission-cron</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0.5</version>
+	<name>zz91-mission-cron</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
-		<groupId>com.zz91</groupId>
-		<artifactId>zz91-task-common</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>com.zz91</groupId>
-		<artifactId>zz91-utils</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>net.sf.json-lib</groupId>
-		<artifactId>json-lib</artifactId>
-		<classifier>jdk15</classifier>
-     </dependency>
-  </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.zz91</groupId>
+			<artifactId>zz91-task-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.zz91</groupId>
+			<artifactId>zz91-utils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.json-lib</groupId>
+			<artifactId>json-lib</artifactId>
+			<classifier>jdk15</classifier>
+		</dependency>
+	</dependencies>
 
 </project>

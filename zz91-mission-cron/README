@@ -1,0 +1,4 @@
+UPDATE
+
+2012-11-17 v1.0.5 kongsj
+1.修改过期高会供求处理，暂不发布、客户自行删除的供求不用导入products_zst_expired表
