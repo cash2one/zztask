@@ -310,7 +310,7 @@ public class AnalysisOperator implements ZZTask {
 	public static void main(String[] args) throws Exception {
 		LogUtil.getInstance().init(WEB_PROP);
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
-		Date baseDate = DateUtil.getDate("2012-10-23", DATE_FORMAT);
+		Date baseDate = DateUtil.getDate("2012-11-13", DATE_FORMAT);
 		AnalysisOperator obj = new AnalysisOperator();
 		obj.clear(baseDate);
 		obj.exec(baseDate);
