@@ -222,7 +222,7 @@ public class ZstExpiredTask implements ZZTask {
 	}
 	
 	private void queryProductIdForExpired(Integer companyId){
-		String sql = "select id from products where check_status = '1' and company_id = "+companyId;
+		String sql = "select id from products where check_status = '1' and is_pause='0' and is_del = '0' and company_id = "+companyId;
 		final Set<Integer> set = new HashSet<Integer>();
 		DBUtils.select(DB, sql, new IReadDataHandler() {
 			@Override
@@ -260,6 +260,6 @@ public class ZstExpiredTask implements ZZTask {
 
 		ZstExpiredTask task=new ZstExpiredTask();
 		ZstExpiredTask.DB="ast";
-		task.exec(DateUtil.getDate("2012-11-01", "yyyy-MM-dd"));
+		task.exec(DateUtil.getDate("2012-11-02", "yyyy-MM-dd"));
 	}
 }
