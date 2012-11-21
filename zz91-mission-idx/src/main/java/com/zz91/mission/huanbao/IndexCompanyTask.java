@@ -186,7 +186,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 			}
 		});
 		if("|".equals(chainId.toString())){
-			doc.addField("chainId", "|-1|");
+			doc.addField("chainId", "|0|");
 			
 		}else{
 			doc.addField("chainId", chainId.toString());
