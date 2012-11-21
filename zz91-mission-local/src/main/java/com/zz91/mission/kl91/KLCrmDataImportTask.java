@@ -31,7 +31,7 @@ import com.zz91.util.lang.StringUtils;
 public class KLCrmDataImportTask implements ZZTask{
 
 	private final static String DATE_FORMAT_DETAIL = "yyyy-MM-dd HH:mm:ss";
-	private static String API_HOST="http://admin1949.zz91.com:8311/kl91-admin";
+	private static String API_HOST="http://admin1949.zz91.com:7130/kl91-admin";
 	final static String DB="klcrm";
 	
 	@Override

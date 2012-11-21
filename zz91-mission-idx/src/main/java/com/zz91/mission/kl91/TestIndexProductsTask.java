@@ -23,11 +23,11 @@ import com.zz91.util.search.SolrUtil;
  * @author 伍金成,更新kl91公司solr
  *
  */
-public class IndexProductsTask extends AbstractIdxTask{
+public class TestIndexProductsTask extends AbstractIdxTask{
 	
 	final static String DB="kl91";
 	final static int LIMIT=25;
-	final static String MODEL="oldkl91Pro";
+	final static String MODEL="testkl91pro";
 	final static int RESET_LIMIT=5000;
 	
 	@Override
@@ -172,6 +172,17 @@ public class IndexProductsTask extends AbstractIdxTask{
 		for(String k:result.keySet()){
 			doc.addField(k, result.get(k));
 		}
+		parseAreaCode(doc, (String) doc.getFieldValue("careaCode"));
+	}
+
+	private void parseAreaCode(SolrInputDocument doc, String code) {
+		if(StringUtils.isNotEmpty(code)){
+			doc.addField("areaCode4", substringCode(code, 4));
+			doc.addField("areaCode8", substringCode(code, 8));
+			doc.addField("areaCode12", substringCode(code, 12));
+			doc.addField("areaCode16", substringCode(code, 16));
+			doc.addField("areaCode20", substringCode(code, 20));
+		}
 	}
 
 	private void parseCategory(SolrInputDocument doc) {
@@ -204,7 +215,7 @@ public class IndexProductsTask extends AbstractIdxTask{
 		String start="2012-07-01 00:00:00";
 		String end ="2012-10-16 00:00:00";
 		
-		IndexProductsTask task=new IndexProductsTask();
+		TestIndexProductsTask task=new TestIndexProductsTask();
 		try {
 //			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
 			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());

@@ -21,7 +21,7 @@ import com.zz91.util.http.HttpUtils;
  */
 public class KlCrmNumLoginImportTask implements ZZTask{
 
-	private static String API_HOST="http://admin1949.zz91.com:8311/kl91-admin";
+	private static String API_HOST="http://admin1949.zz91.com:7130/kl91-admin";
 	final static String DB="klcrm";
 	
 	@Override
