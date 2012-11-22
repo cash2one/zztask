@@ -13,24 +13,28 @@
 	<version>1.0.5</version>
 	<name>zz91-mission-cron</name>
 
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.zz91</groupId>
-			<artifactId>zz91-task-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.zz91</groupId>
-			<artifactId>zz91-utils</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.json-lib</groupId>
-			<artifactId>json-lib</artifactId>
-			<classifier>jdk15</classifier>
-		</dependency>
-	</dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+		<groupId>com.zz91</groupId>
+		<artifactId>zz91-task-common</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>com.zz91</groupId>
+		<artifactId>zz91-utils</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>com.zz91</groupId>
+		<artifactId>zz91-search-utils</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>net.sf.json-lib</groupId>
+		<artifactId>json-lib</artifactId>
+		<classifier>jdk15</classifier>
+     </dependency>
+  </dependencies>
 
 </project>

@@ -27,6 +27,10 @@
 		<artifactId>zz91-utils</artifactId>
 	</dependency>
 	<dependency>
+		<groupId>com.zz91</groupId>
+		<artifactId>zz91-search-utils</artifactId>
+	</dependency>
+	<dependency>
 		<groupId>net.sf.json-lib</groupId>
 		<artifactId>json-lib</artifactId>
 		<classifier>jdk15</classifier>
