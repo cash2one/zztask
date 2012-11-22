@@ -38,5 +38,11 @@
 		limit 1000
 	</select>
 	
+	<select id="countRunningNode" parameterClass="java.lang.String" resultClass="java.lang.Integer" >
+	    select count(*) 
+	    from job_node_running
+	    where job_id=#value#
+	</select>
+	
 </sqlMap>		
  

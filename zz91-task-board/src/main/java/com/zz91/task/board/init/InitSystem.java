@@ -3,7 +3,7 @@ package com.zz91.task.board.init;
 import org.apache.log4j.Logger;
 
 import com.zz91.util.db.pool.DBPoolFactory;
-import com.zz91.util.search.SolrUtil;
+import com.zz91.util.search.solr.SolrUpdateUtil;
 
 /**
  * 系统启动时加载数据库中的任务信息
@@ -18,9 +18,11 @@ public class InitSystem {
 	
 	public void init() {
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
-		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+//		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		SolrUpdateUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 	}
 
 	public void shutdown(){
+		SolrUpdateUtil.getInstance().shutdown();
 	}
 }

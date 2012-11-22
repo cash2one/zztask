@@ -11,4 +11,7 @@ public interface JobNodeRunningDao {
 	public Integer insertNodeRunning(JobNodeRunning running);
 	
 	public Integer deleteByJob(String jobName, String nodeKey);
+	
+	public Integer countRunningNode(String jobName);
+	
 }

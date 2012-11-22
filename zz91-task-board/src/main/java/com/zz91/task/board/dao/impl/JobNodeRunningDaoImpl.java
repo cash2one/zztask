@@ -43,4 +43,10 @@ public class JobNodeRunningDaoImpl extends SqlMapClientDaoSupport implements Job
 		return getSqlMapClientTemplate().delete(SQL_PREFIX+"deleteByJob", root);
 	}
 
+	@Override
+	public Integer countRunningNode(String jobName) {
+		
+		return (Integer) getSqlMapClientTemplate().queryForObject(SQL_PREFIX+"countRunningNode", jobName);
+	}
+
 }

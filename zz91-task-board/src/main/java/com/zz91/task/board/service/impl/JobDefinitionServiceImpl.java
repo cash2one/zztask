@@ -137,7 +137,13 @@ public class JobDefinitionServiceImpl implements JobDefinitionService{
 		
 		jobNodeRunningDao.deleteByJob(jobName, TaskConst.NODE_KEY);
 		
-		return jobDefinitionDao.updateIsInUseById(id, JobDefinitionDao.ISUSE_FALSE);
+		//判断是否有node仍然在跑任务
+		Integer running = jobNodeRunningDao.countRunningNode(jobName);
+		if(running!=null && running>0){
+			return 1;
+		}else{
+			return jobDefinitionDao.updateIsInUseById(id, JobDefinitionDao.ISUSE_FALSE);
+		}
 	}
 
 	@Override

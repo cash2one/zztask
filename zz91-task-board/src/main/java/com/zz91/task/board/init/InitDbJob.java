@@ -64,7 +64,7 @@ public class InitDbJob {
 		lastBuildThread.start();
 
 		List<JobDefinition> jobList = jobDefinitionService
-				.queryAllJobDefinition(true);
+				.queryAllJobDefinition(null);
 
 		for (JobDefinition def : jobList) {
 			
