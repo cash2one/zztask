@@ -15,21 +15,21 @@ import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
-import com.zz91.util.search.SolrUtil;
+import com.zz91.util.search.solr.SolrUpdateUtil;
 
 public class IndexExhibitTask extends AbstractIdxTask {
 
 
 	final static String DB="ep";
 	final static int LIMIT=25;
-	final static int RESET_LIMIT=5000;
-	final static String MODEL="exhibit";
+	//final static int RESET_LIMIT=5000;
+	final static String MODEL="hbexhibit";
 	
 	@Override
 	public Boolean idxReq(Long start, Long end) throws Exception {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select count(*) from exhibit");
-		sqlwhere(sql, start, end);
+		sqlwhere(sql, start, end,0);
 		final Integer[] dealCount=new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			@Override
@@ -49,50 +49,56 @@ public class IndexExhibitTask extends AbstractIdxTask {
 
 	@Override
 	public void idxPost(Long start, Long end) throws Exception {
-		SolrServer server=SolrUtil.getInstance().getSolrServer(MODEL);
-		int begin=0;
+		SolrServer server=SolrUpdateUtil.getInstance().getSolrServer(MODEL);
+		int resetId=0;
 		int docsize=0;
 		do {
-			List<SolrInputDocument> docs = queryDocs(start, end, begin);
+			List<SolrInputDocument> docs = queryDocs(start, end, resetId);
 			if(docs.size()<=0){
 				break;
 			}
 			server.add(docs);
 			docsize=docsize+docs.size();
-			begin=begin+LIMIT;	
-			if(begin>=RESET_LIMIT){
-				start = resetStart(docs.get(docs.size()-1));
-				begin=0;
-			}
+				
 			
+				//start = resetStart(docs.get(docs.size()-1));
+				resetId=resetId(docs.get(docs.size()-1));
+					
 		} while (true);	
 		throw new Exception("共创建/更新"+docsize+"条索引");	
 	}
 
 	@Override
 	public void optimize() throws Exception {
-		SolrUtil.getInstance().getSolrServer(MODEL).optimize();
+		
 	}
 	
-	private void sqlwhere(StringBuffer sb, Long start, Long end){
+	private void sqlwhere(StringBuffer sb, Long start, Long end,Integer resetId){
 		sb.append(" where gmt_modified >='").append(DateUtil.toString(new Date(start), FORMATE)).append("' ");
 		sb.append(" and gmt_modified <='").append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
+		sb.append(" and id > ").append(resetId);
 	}
 	
-	private Long resetStart(SolrInputDocument doc){
-		Date d=(Date) doc.getFieldValue("gmtModified");
-		return d.getTime();
+//	private Long resetStart(SolrInputDocument doc){
+//		Date d=(Date) doc.getFieldValue("gmtModified");
+//		return d.getTime();
+//	}
+	
+	private Integer resetId(SolrInputDocument doc){
+		Integer resetId =(Integer) doc.getFieldValue("id");
+		return resetId;
 	}
 	
-	private List<SolrInputDocument> queryDocs(Long start, Long end, int begin){
+	
+	private List<SolrInputDocument> queryDocs(Long start, Long end, int resetId){
 		final List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
 		StringBuffer sql=new StringBuffer();
 		sql.append("select ");
-		sql.append("ex.id,ex.name,ex.plate_category_code,ex.industry_code,ex.show_name,ex.organizers,ex.province_code,ex.area_code,ex.pause_status,")
-			.append("ex.gmt_start,ex.gmt_end,ex.gmt_publish,ex.gmt_sort,ex.gmt_modified ");
+		sql.append("ex.id,ex.name,ex.plate_category_code,ex.industry_code,ex.province_code,ex.area_code,ex.pause_status,")
+			.append("ex.gmt_start,ex.gmt_end,ex.gmt_publish,ex.gmt_sort ");
 		sql.append("from exhibit ex");
-		sqlwhere(sql, start, end);
-		sql.append(" order by gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
+		sqlwhere(sql, start, end,resetId);
+		sql.append(" order by ex.id asc limit ").append(LIMIT);
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 	
 			@Override
@@ -104,16 +110,16 @@ public class IndexExhibitTask extends AbstractIdxTask {
 					doc.addField("name", rs.getObject("name"));
 					doc.addField("plateCategoryCode", rs.getObject("plate_category_code"));
 					doc.addField("industryCode", rs.getObject("industry_code"));
-					doc.addField("showName", rs.getObject("show_name"));
-					doc.addField("organizers", rs.getObject("organizers"));
+					//doc.addField("showName", rs.getObject("show_name"));
+					//doc.addField("organizers", rs.getObject("organizers"));
 					doc.addField("provinceCode", rs.getObject("province_code"));
 					doc.addField("areaCode", rs.getObject("area_code"));
 					doc.addField("pauseStatus", rs.getObject("pause_status"));
-					doc.addField("gmtStart", rs.getObject("gmt_start"));
-					doc.addField("gmtEnd", rs.getObject("gmt_end"));
-					doc.addField("gmtPublish", rs.getObject("gmt_publish"));
-					doc.addField("gmtSort", rs.getObject("gmt_sort"));
-					doc.addField("gmtModified", rs.getObject("gmt_modified"));
+					doc.addField("gmtStart", rs.getDate("gmt_start").getTime());
+					doc.addField("gmtEnd", rs.getDate("gmt_end").getTime());
+					doc.addField("gmtPublish", rs.getDate("gmt_publish").getTime());
+					doc.addField("gmtSort", rs.getDate("gmt_sort").getTime());
+					//doc.addField("gmtModified", rs.getObject("gmt_modified"));
 					docs.add(doc);
 				}
 				
@@ -123,11 +129,11 @@ public class IndexExhibitTask extends AbstractIdxTask {
 	}
 	
 	public static void main(String[] args) {
-		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		SolrUpdateUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		
-		String start="2011-09-10 11:49:49";
-		String end ="2012-09-11 17:10:41";
+		String start="2012-10-19 09:40:48";
+		String end ="2012-11-19 15:34:15";
 		
 		IndexExhibitTask task=new IndexExhibitTask();
 		try {

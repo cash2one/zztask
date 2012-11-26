@@ -18,7 +18,7 @@ import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.lang.StringUtils;
-import com.zz91.util.search.SolrUtil;
+import com.zz91.util.search.solr.SolrUpdateUtil;
 
 public class IndexCategoryProductsTask extends AbstractIdxTask{
 
@@ -52,7 +52,7 @@ public class IndexCategoryProductsTask extends AbstractIdxTask{
 
 	@Override
 	public void idxPost(Long start, Long end) throws Exception {
-		SolrServer server = SolrUtil.getInstance().getSolrServer(MODEL);
+		SolrServer server = SolrUpdateUtil.getInstance().getSolrServer(MODEL);
 
 		int begin = 0;
 		int docsize = 0;
@@ -83,7 +83,7 @@ public class IndexCategoryProductsTask extends AbstractIdxTask{
 
 	@Override
 	public void optimize() throws Exception {
-		SolrUtil.getInstance().getSolrServer(MODEL).optimize();
+		SolrUpdateUtil.getInstance().getSolrServer(MODEL).optimize();
 	}
 
 	private void sqlwhere(StringBuffer sql, Long start, Long end) {
@@ -163,7 +163,7 @@ public class IndexCategoryProductsTask extends AbstractIdxTask{
 	}
 	
 	public static void main(String[] args) {
-		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		SolrUpdateUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		
 		String start="2010-09-10 11:49:49";

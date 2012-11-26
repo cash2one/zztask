@@ -18,16 +18,16 @@ import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.lang.StringUtils;
-import com.zz91.util.search.SolrUtil;
+import com.zz91.util.search.solr.SolrUpdateUtil;
 
 public class IndexCompanyTask extends AbstractIdxTask{
 	
 	final static String DB="ep";
 	final static int LIMIT=25;
 	
-	final static String MODEL="company";
+	final static String MODEL="hbcompany";
 	final static int IMPORT_ID_SPLIT=50000000;
-	final static int RESET_LIMIT=5000;
+//	final static int RESET_LIMIT=5000;
 	
 	final static Map<String, Integer> SORT_MEMBER = new HashMap<String, Integer>();
 	
@@ -40,7 +40,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 	public Boolean idxReq(Long start, Long end) throws Exception {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select count(*) from comp_profile ");
-		sqlwhere(sql, start, end);
+		sqlwhere(sql, start, end,0);
 		final Integer[] dealCount=new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			
@@ -59,47 +59,52 @@ public class IndexCompanyTask extends AbstractIdxTask{
 
 	@Override
 	public void idxPost(Long start, Long end) throws Exception {
-		SolrServer server=SolrUtil.getInstance().getSolrServer(MODEL);
-		int begin = 0;
+		SolrServer server=SolrUpdateUtil.getInstance().getSolrServer(MODEL);
+		int id = 0;
 		int docsize = 0;
 		do{
-			List<SolrInputDocument> docs = queryDocs(start, end, begin);
+			List<SolrInputDocument> docs = queryDocs(start, end, id);
 			if(docs.size()==0){
 				break;
 			}
 			server.add(docs);
 			docsize=docsize+docs.size();
-			begin=begin+LIMIT;
-			if(begin>=RESET_LIMIT){
-				start = resetStart(docs.get(docs.size()-1));
-				begin=0;
-			}
+			
+			//start  = resetStart(docs.get(docs.size()-1));
+			
+			id =resetId(docs.get(docs.size()-1));
+			
 		}while(true);
 		throw new Exception("共创建/更新"+docsize+"条索引");
 	}
 
 	@Override
 	public void optimize() throws Exception {
-		SolrUtil.getInstance().getSolrServer(MODEL).optimize();
+		SolrUpdateUtil.getInstance().getSolrServer(MODEL).optimize();
 	}
 	
-	private void sqlwhere(StringBuffer sql, Long start, Long end){
+	private void sqlwhere(StringBuffer sql, Long start, Long end, Integer resetId){
 		sql.append(" where gmt_modified >='").append(DateUtil.toString(new Date(start), FORMATE)).append("' ");
 		sql.append(" and gmt_modified <='").append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
+		sql.append(" and id > ").append(resetId);
 	}
 	
-	private List<SolrInputDocument> queryDocs(Long start, Long end, int begin){
+	private List<SolrInputDocument> queryDocs(Long start, Long end, int resetId){
 		
 		final List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
 		
 		StringBuffer sql=new StringBuffer();
 		sql.append("select ");
 		sql.append("comp.id,comp.name,comp.member_code,comp.details_query,comp.industry_code,comp.business_code,comp.main_buy,")
-			.append("comp.main_product_buy,comp.main_supply,comp.main_product_supply,comp.address,comp.province_code,comp.area_code,comp.del_status,comp.gmt_modified,")
+			.append("comp.main_product_buy,comp.main_supply,comp.main_product_supply,comp.address,comp.province_code,comp.area_code,comp.del_status, ")
 			.append("comp.tags,comp.view_count,comp.message_count,comp.main_brand,comp.gmt_created,comp.member_code_block ");
 		sql.append("from comp_profile comp");
-		sqlwhere(sql, start, end);
-		sql.append(" order by gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
+		sqlwhere(sql, start, end,resetId);
+		
+		sql.append(" order by comp.id asc limit ").append(LIMIT);
+		
+		sql.toString();
+		
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			
 			@Override
@@ -130,12 +135,12 @@ public class IndexCompanyTask extends AbstractIdxTask{
 					doc.addField("provinceCode", rs.getObject("province_code"));
 					doc.addField("areaCode", rs.getObject("area_code"));
 					doc.addField("delStatus", rs.getObject("del_status"));
-					doc.addField("gmtModified", rs.getObject("gmt_modified"));
+					//doc.addField("gmtModified", rs.getObject("gmt_modified"));
 					doc.addField("tags", rs.getObject("tags"));
 					doc.addField("viewCount", rs.getObject("view_count"));
 					doc.addField("messageCount", rs.getObject("message_count"));
 					doc.addField("mainBrand", rs.getObject("main_brand"));
-					doc.addField("gmtCreated", rs.getObject("gmt_created"));
+					doc.addField("gmtCreated", rs.getDate("gmt_created").getTime());
 					docs.add(doc);
 				}
 				
@@ -149,9 +154,14 @@ public class IndexCompanyTask extends AbstractIdxTask{
 		return docs;
 	}
 	
-	private Long resetStart(SolrInputDocument doc){
-		Date d=(Date) doc.getFieldValue("gmtModified");
-		return d.getTime();
+//	private Long resetStart(SolrInputDocument doc){
+//		Date d=(Date) doc.getFieldValue("gmtModified");
+//		return d.getTime();
+//	}
+	
+	private Integer resetId(SolrInputDocument doc){
+		Integer resetId =(Integer) doc.getFieldValue("id");
+		return resetId;
 	}
 	
 	private void parseMember(SolrInputDocument doc,Integer id){
@@ -195,11 +205,11 @@ public class IndexCompanyTask extends AbstractIdxTask{
 	}
 	
 	public static void main(String[] args) {
-		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		SolrUpdateUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		
-		String start="2011-05-10 11:49:49";
-		String end ="2012-09-11 17:10:41";
+		String start="2011-11-29 17:07:23";
+		String end ="2011-11-29 17:14:18";
 		
 		IndexCompanyTask task=new IndexCompanyTask();
 		try {

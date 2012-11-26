@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -16,20 +15,20 @@ import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
-import com.zz91.util.search.SolrUtil;
+import com.zz91.util.search.solr.SolrUpdateUtil;
 
 public class IndexTradeBuyTask extends AbstractIdxTask{
 	
 	final static String DB="ep";
 	final static int LIMIT=25;
 	final static int RESET_LIMIT=5000;
-	final static String MODEL="tradebuy";
+	final static String MODEL="hbtradebuy";
 	
 	@Override
 	public Boolean idxReq(Long start, Long end) throws Exception {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select count(*) from trade_buy ");
-		sqlwhere(sql, start, end);
+		sqlwhere(sql, start, end,0);
 		final Integer[] dealCount=new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			@Override
@@ -49,21 +48,19 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 
 	@Override
 	public void idxPost(Long start, Long end) throws Exception {
-		SolrServer server=SolrUtil.getInstance().getSolrServer(MODEL);
-		int begin=0;
+		SolrServer server=SolrUpdateUtil.getInstance().getSolrServer(MODEL);
+		int id=0;
 		int docsize=0;
 		do {
-			List<SolrInputDocument> docs = queryDocs(start, end, begin);
+			List<SolrInputDocument> docs = queryDocs(start, end, id);
 			if(docs.size()<=0){
 				break;
 			}
 			server.add(docs);
 			docsize=docsize+docs.size();
-			begin=begin+LIMIT;	
-			if(begin>=RESET_LIMIT){
-				start = resetStart(docs.get(docs.size()-1));
-				begin=0;
-			}
+			
+//			start = resetStart(docs.get(docs.size()-1));
+			id = resetId(docs.get(docs.size()-1));
 			
 		} while (true);	
 		throw new Exception("共创建/更新"+docsize+"条索引");	
@@ -71,28 +68,34 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 
 	@Override
 	public void optimize() throws Exception {
-		SolrUtil.getInstance().getSolrServer(MODEL).optimize();
+		SolrUpdateUtil.getInstance().getSolrServer(MODEL).optimize();
 	}
 	
-	private void sqlwhere(StringBuffer sb, Long start, Long end){
+	private void sqlwhere(StringBuffer sb, Long start, Long end,int resetId){
 		sb.append(" where gmt_modified >='").append(DateUtil.toString(new Date(start), FORMATE)).append("' ");
 		sb.append(" and gmt_modified <='").append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
+		sb.append(" and id > ").append(resetId);
 	}
 	
-	private Long resetStart(SolrInputDocument doc){
-		Date d=(Date) doc.getFieldValue("gmtModified");
-		return d.getTime();
+//	private Long resetStart(SolrInputDocument doc){
+//		Date d=(Date) doc.getFieldValue("gmtModified");
+//		return d.getTime();
+//	}
+	
+	private Integer resetId(SolrInputDocument doc){
+		Integer  id=(Integer) doc.getFieldValue("id");
+		return id;
 	}
 	
-	private List<SolrInputDocument> queryDocs(Long start, Long end, int begin){
+	private List<SolrInputDocument> queryDocs(Long start, Long end, int resetId){
 		final List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
 		StringBuffer sql=new StringBuffer();
 		sql.append("select ");
-		sql.append("tb.id,tb.cid,tb.title,tb.province_code,tb.area_code,tb.quantity,tb.message_count,tb.quantity_year,tb.quantity_untis,")
-			.append("tb.details_query,tb.valid_days,tb.gmt_refresh,tb.gmt_expired,tb.pause_status,tb.check_status,tb.del_status,tb.view_count,tb.favorite_count,tb.plus_count,tb.gmt_modified,tb.tags_sys");
+		sql.append("tb.id,tb.cid,tb.title,tb.province_code,tb.area_code,tb.quantity,tb.message_count, ")
+			.append("tb.valid_days,tb.gmt_refresh,tb.gmt_expired,tb.pause_status,tb.check_status,tb.del_status,tb.view_count,tb.favorite_count,tb.plus_count,tb.tags_sys");
 		sql.append(" from trade_buy tb");
-		sqlwhere(sql, start, end);
-		sql.append(" order by gmt_modified asc limit ").append(begin).append(",").append(LIMIT);
+		sqlwhere(sql, start, end,resetId);
+		sql.append(" order by tb.id asc limit ").append(LIMIT);
 		
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			
@@ -108,9 +111,9 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 					doc.addField("areaCode", rs.getObject("area_code"));
 					doc.addField("quantity", rs.getObject("quantity"));
 					doc.addField("messageCount", rs.getObject("message_count"));
-					doc.addField("quantityYear",rs.getObject("quantity_year"));
-					doc.addField("quantityUntis", rs.getObject("quantity_untis"));
-					doc.addField("detailsQuery", rs.getObject("details_query"));
+//					doc.addField("quantityYear",rs.getObject("quantity_year"));
+//					doc.addField("quantityUntis", rs.getObject("quantity_untis"));
+//					doc.addField("detailsQuery", rs.getObject("details_query"));
 					doc.addField("validDays", rs.getObject("valid_days"));
 					doc.addField("gmtRefresh",rs.getObject("gmt_refresh"));
 					doc.addField("gmtExpired", rs.getObject("gmt_expired"));
@@ -120,7 +123,7 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 					doc.addField("viewCount", rs.getObject("view_count"));
 					doc.addField("favoriteCount", rs.getObject("favorite_count"));
 					doc.addField("plusCount", rs.getObject("plus_count"));
-					doc.addField("gmtModified", rs.getObject("gmt_modified"));
+//					doc.addField("gmtModified", rs.getObject("gmt_modified"));
 					doc.addField("tagsSys", rs.getObject("tags_sys"));
 					docs.add(doc);
 				}
@@ -154,11 +157,11 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 	 }
 	
 	public static void main(String[] args) {
-		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		SolrUpdateUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		
-		String start="2012-05-21 11:49:49";
-		String end ="2012-11-25 17:10:41";
+		String start="2012-11-23 17:23:08";
+		String end ="2012-11-23 17:39:12";
 		
 		IndexTradeBuyTask task=new IndexTradeBuyTask();
 		try {
