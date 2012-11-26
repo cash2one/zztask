@@ -163,7 +163,7 @@ public class IndexTradeCategoryTask extends AbstractIdxTask {
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		
 		String start="2012-07-30 18:10:09";
-		String end ="2012-02-03 16:39:48";
+		String end ="2012-11-03 16:39:48";
 		
 		IndexTradeCategoryTask task=new IndexTradeCategoryTask();
 		try {

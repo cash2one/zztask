@@ -21,7 +21,7 @@ public class IndexTradeBuyTask extends AbstractIdxTask{
 	
 	final static String DB="ep";
 	final static int LIMIT=25;
-	final static int RESET_LIMIT=5000;
+	//final static int RESET_LIMIT=5000;
 	final static String MODEL="hbtradebuy";
 	
 	@Override

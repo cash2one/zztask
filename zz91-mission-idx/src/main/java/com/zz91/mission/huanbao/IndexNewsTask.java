@@ -83,7 +83,7 @@ public class IndexNewsTask extends AbstractIdxTask {
 				.append("' ");
 		sql.append(" and gmt_modified <='")
 				.append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
-		sql.append("and where id > ").append(resetId);
+		sql.append("and id > ").append(resetId);
 	}
 
 //	private Long resetStart(SolrInputDocument doc) {
@@ -101,7 +101,7 @@ public class IndexNewsTask extends AbstractIdxTask {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select ")
 			.append("n.id,n.title,n.title_index,n.category_code,n.description,n.tags,n.news_source,")
-			.append("n.view_count,n.pause_status,n.gmt_publish");
+			.append("n.view_count,n.pause_status,n.gmt_publish  ");
 		sql.append("from news n");
 		sqlwhere(sql, start, end,resetId);
 		sql.append(" order by n.id asc limit ").append(LIMIT);
