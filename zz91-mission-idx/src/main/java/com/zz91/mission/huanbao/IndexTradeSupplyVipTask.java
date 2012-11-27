@@ -143,7 +143,7 @@ public class IndexTradeSupplyVipTask extends AbstractIdxTask {
 					doc.addField("title", rs.getObject("title"));
 					doc.addField("provinceCode", rs.getObject("province_code"));
 					doc.addField("areaCode", rs.getObject("area_code"));
-					doc.addField("priceNum", rs.getObject("priceNum"));
+					doc.addField("priceNum", rs.getObject("price_num"));
 //					doc.addField("priceUnits", rs.getObject(8));
 					doc.addField("propertyQuery", rs.getObject("property_query"));
 //					doc.addField("detailsQuery", rs.getObject(10));
@@ -264,7 +264,7 @@ public class IndexTradeSupplyVipTask extends AbstractIdxTask {
 		
 		
 		//parse sortRefresh
-		Date refresh=(Date) doc.getFieldValue("gmtRefresh");
+		Date refresh= new Date((Long) doc.getFieldValue("gmtRefresh"));
 		try {
 			doc.addField("sortRefresh", DateUtil.getDate(refresh, "yyyy-MM-dd").getTime());
 		} catch (ParseException e) {
