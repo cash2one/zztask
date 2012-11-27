@@ -74,11 +74,7 @@ public class CompfileDataUpdateTask implements ZZTask {
 								try {
 									m.put(rsmd.getColumnLabel(i+1), rs.getObject(rsmd.getColumnLabel(i+1)));
 								} catch (Exception e) {
-									if(i!=41&&i!=42){
-										new Exception(e.getMessage());
-									}else{
-										m.put(rsmd.getColumnLabel(i+1),null);
-									}
+									new Exception(e.getMessage());
 								}
 							}							
 							list.add(m);
