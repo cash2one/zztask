@@ -10,7 +10,7 @@
 	<groupId>com.zz91</groupId>
 	<artifactId>zz91-task-board</artifactId>
 	<packaging>war</packaging>
-	<version>2.4.0</version>
+	<version>2.4.1</version>
 	<name>zz91-task-board</name>
 
 	<dependencies>

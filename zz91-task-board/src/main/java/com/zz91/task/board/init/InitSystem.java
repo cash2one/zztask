@@ -19,7 +19,7 @@ public class InitSystem {
 	public void init() {
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 //		SolrUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
-		SolrUpdateUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
+		SolrUpdateUtil.getInstance().init("file:/usr/tools/config/search/search.solr4.properties");
 	}
 
 	public void shutdown(){
