@@ -20,17 +20,14 @@
 		<developer>
 			<id>mays</id>
 			<name>mays</name>
-			<email>mays@zz91.net</email>
-		</developer>
-		<developer>
-			<id>liuwb</id>
-			<name>liuwb</name>
-			<email>liuwb@zz91.net</email>
+			<email>mays@asto.com.cn</email>
 		</developer>
 	</developers>
 	<modules>
+		<!--
 		<module>zz91-task-common</module>
 		<module>zz91-task-board</module>
+	-->
 		<module>zz91-mission-cron</module>
 		<module>zz91-mission-local</module>
 		<module>zz91-mission-jx</module>

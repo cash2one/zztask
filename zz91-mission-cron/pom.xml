@@ -10,7 +10,7 @@
 	<groupId>com.zz91</groupId>
 	<artifactId>zz91-mission-cron</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.5</version>
+	<version>1.1.0</version>
 	<name>zz91-mission-cron</name>
 
   <dependencies>

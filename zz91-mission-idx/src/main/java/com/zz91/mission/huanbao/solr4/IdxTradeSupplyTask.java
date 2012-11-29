@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.zz91.mission.huanbao;
+package com.zz91.mission.huanbao.solr4;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -26,13 +26,15 @@ import com.zz91.util.lang.StringUtils;
 import com.zz91.util.search.solr.SolrUpdateUtil;
 
 /**
+ * 供应信息索引任务
+ * 
  * 导入会员：0
  * 普通会员：100
  * 付费会员：200
  * @author mays
  *
  */
-public class IndexTradeSupplyTask extends AbstractIdxTask {
+public class IdxTradeSupplyTask extends AbstractIdxTask {
 
 	final static String DB="ep";
 	final static int LIMIT=25;
@@ -93,18 +95,9 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 			
 			
 			
-//			start = resetStart(docs.get(docs.size()-1));
 			id=resetId(docs.get(docs.size()-1));
-//				Long resetStart = resetStart(docs.get(docs.size()-1));
-//				if(start.intValue() == resetStart.longValue()){
-//					System.out.println("<<<<<<<<<<<<<<<<<<<<<"+resetStart.longValue());
-//					break;
-//				}else {	
-//					start = resetStart;
-//				}
 			
-			
-//			System.out.println(">>>>>"+docsize+">>>>>>"+begin);
+//			System.out.println(">>>>>"+docsize);
 			
 		} while (true);
 		
@@ -115,11 +108,6 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 	public void optimize() throws Exception{
 		SolrUpdateUtil.getInstance().getSolrServer(MODEL).optimize();
 	}
-	
-	/*private Long resetStart(SolrInputDocument doc){
-		Date d=(Date) doc.getFieldValue("gmtModified");
-		return d.getTime();
-	}*/
 	
 	private Integer resetId(SolrInputDocument doc){
 		Integer id =(Integer) doc.getFieldValue("id");
@@ -310,7 +298,7 @@ public class IndexTradeSupplyTask extends AbstractIdxTask {
 		String start="2011-11-21 11:49:49";
 		String end ="2011-11-21 11:51:10";
 		
-		AbstractIdxTask task=new IndexTradeSupplyTask();
+		AbstractIdxTask task=new IdxTradeSupplyTask();
 		try {
 //			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
 			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());

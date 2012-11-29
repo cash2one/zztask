@@ -1,4 +1,4 @@
-package com.zz91.mission.huanbao;
+package com.zz91.mission.huanbao.solr4;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +20,7 @@ import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.lang.StringUtils;
 import com.zz91.util.search.solr.SolrUpdateUtil;
 
-public class IndexTradeCategoryTask extends AbstractIdxTask {
+public class IdxTradeCategoryTask extends AbstractIdxTask {
 
 
 	final static String DB = "ep";
@@ -71,6 +71,8 @@ public class IndexTradeCategoryTask extends AbstractIdxTask {
 			
 //			start = resetStart(docs.get(docs.size()-1));
 			id=resetId(docs.get(docs.size()-1));
+			
+//			System.out.println("tradecategory>>>>>"+docsize);
 			
 		} while (true);
 		
@@ -165,7 +167,7 @@ public class IndexTradeCategoryTask extends AbstractIdxTask {
 		String start="2012-07-30 18:10:09";
 		String end ="2012-11-03 16:39:48";
 		
-		IndexTradeCategoryTask task=new IndexTradeCategoryTask();
+		IdxTradeCategoryTask task=new IdxTradeCategoryTask();
 		try {
 //			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
 			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
