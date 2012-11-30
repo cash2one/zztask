@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -14,12 +13,13 @@ import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
+import com.zz91.util.lang.StringUtils;
 import com.zz91.util.mail.MailUtil;
 
 public class SendSmsPriceForMyrcTask implements ZZTask{
 	
 	final static String DATE_FORMAT_ZH_CN = "yyyy年MM月dd日";
-	private final static String DB_ZZ91 = "zz91";
+	private final static String DB_ZZ91 = "ast";
 	private final static String DB_REBORN = "reborn";
 	/**
 	 * 1,搜索需要发送邮件的客户
@@ -38,8 +38,6 @@ public class SendSmsPriceForMyrcTask implements ZZTask{
 		String to = DateUtil.toString(baseDate, "yyyy-MM-dd");
 		//搜索订阅的类别表总数进行分批搜索公司id
 		String sql="select count(*) from subscribe_sms_price ";
-//		final List<Map<String, Object>> list=new ArrayList<Map<String,Object>>();
-//		final List<Map<String, Object>> list1=new ArrayList<Map<String,Object>>();
 		final Integer[] count=new Integer[1];
 		count[0]=0;
 		DBUtils.select(DB_ZZ91, sql, new IReadDataHandler() {
@@ -62,7 +60,6 @@ public class SendSmsPriceForMyrcTask implements ZZTask{
 			public void handleRead(ResultSet rs) throws SQLException {
 				while(rs.next()){
 					map.put(String.valueOf(rs.getInt(1)), 1);
-					//list.add(map);
 				}
 			}
 		});	
@@ -78,7 +75,6 @@ public class SendSmsPriceForMyrcTask implements ZZTask{
 				}
 			}
 		});
-		final Map<String, Object> map2=new HashMap<String, Object>();
 		for(Object obj:map1.keySet()){
 			map.remove(obj);
 		}
@@ -91,10 +87,8 @@ public class SendSmsPriceForMyrcTask implements ZZTask{
 	}
 	
 	private void selectSubscribeById(Integer companyId,String from,String to) throws Exception {
-		Integer i=0;
+		String cont="";
 		final List<Map<String, Object>> list=new ArrayList<Map<String,Object>>();
-		Map<String, Object> map=new HashMap<String, Object>();
-		List<Map<String, Object>> list1=new ArrayList<Map<String,Object>>();
 		//根据id搜索这个公司订阅的类别
 		String sql="select area_code,category_code from subscribe_sms_price where company_id="+companyId+"";
 		DBUtils.select(DB_ZZ91, sql, new IReadDataHandler() {
@@ -108,37 +102,35 @@ public class SendSmsPriceForMyrcTask implements ZZTask{
 				}
 			}
 		});
-		//得到的类别可能不止一个所以组装个list
-		for(Map<String, Object> obj:list){
-			//没循环搜索一次i加一为了区分key，避免最终得到的还是一个key
-			i++;
-			Integer areaCode=(Integer)obj.get("areaCode");
-			String categoryCode=(String)obj.get("categoryCode");
-			//根据类别，地区和时间搜索报价
-			map=selectSmsPrice(areaCode,categoryCode,i,from,to);
-			list1.add(map);
-		}
-		//如果组装的有报价内容才发送，每个客户订阅的短信报价内容组装成list来发送
-		if(list1.isEmpty()){
-			throw new Exception("报价没更新");
-		}else {
-			sendEmailForMyrc(companyId,list1);
-		}
-		
+		do {
+			//得到的类别可能不止一个所以组装个list
+			for(Map<String, Object> obj:list){
+				Integer areaCode=(Integer)obj.get("areaCode");
+				String categoryCode=(String)obj.get("categoryCode");
+				//根据类别，地区和时间搜索报价
+				String str=selectSmsPrice(areaCode,categoryCode,from,to);
+				cont+=str;
+			}
+			if(StringUtils.isEmpty(cont)){
+				break;
+			}else {
+				//如果组装的有报价内容才发送，每个客户订阅的短信报价内容组装成list来发送
+				sendEmailForMyrc(companyId,cont);
+			}
+		} while (false);
 	}
-	private Map<String, Object> selectSmsPrice(Integer areaCode, String categoryCode,Integer i,String from,String to) {
+	private String selectSmsPrice(Integer areaCode, String categoryCode,String from,String to) {
 		String sql="";String sql1="";String str="";
 		//考虑到有的没有地区有的有地区所以根据地区的有或无来搜索，因为要对比报价得出涨还是跌所以第一次搜索最新的一条，第二次搜索最新的第二条
 		if(areaCode==null || areaCode==0){
 			sql="select sp.max_price, sp.min_price,sc.name as category_name from sms_price sp inner join sms_category sc on sc.code=sp.category_code where sp.gmt_post>='"+from+"'  and '"+to+"'>sp.gmt_post and sp.min_price is not null and sp.max_price is not null and category_code="+categoryCode+" order by sp.gmt_post desc limit 0,1";
-			sql1="select sp.max_price, sp.min_price,sc.name as category_name from sms_price sp inner join sms_category sc on sc.code=sp.category_code where sp.min_price is not null and sp.max_price is not null and category_code="+categoryCode+" order by sp.gmt_post desc limit 1,2";
+			sql1="select sp.max_price, sp.min_price,sc.name as category_name from sms_price sp inner join sms_category sc on sc.code=sp.category_code where sp.min_price is not null and sp.max_price is not null and category_code="+categoryCode+" order by sp.gmt_post desc limit 1,1";
 		}else {
 			sql="select sp.max_price, sp.min_price,sc.name as category_name from sms_price sp inner join sms_category sc on sc.code=sp.category_code where sp.gmt_post>='"+from+"'  and '"+to+"'>sp.gmt_post and sp.min_price is not null and sp.max_price is not null and category_code="+categoryCode+" and area_node_id="+areaCode+" order by sp.gmt_post desc limit 0,1";
-			sql1="select sp.max_price, sp.min_price,sc.name as category_name from sms_price sp inner join sms_category sc on sc.code=sp.category_code where sp.min_price is not null and sp.max_price is not null and category_code="+categoryCode+" and area_node_id="+areaCode+" order by sp.gmt_post desc limit 1,2";
+			sql1="select sp.max_price, sp.min_price,sc.name as category_name from sms_price sp inner join sms_category sc on sc.code=sp.category_code where sp.min_price is not null and sp.max_price is not null and category_code="+categoryCode+" and area_node_id="+areaCode+" order by sp.gmt_post desc limit 1,1";
 		}
 		final Map<String, Object> map=new HashMap<String, Object>();
 		final Map<String, Object> map1=new HashMap<String, Object>();
-		final Map<String, Object> map2=new HashMap<String, Object>();
 		DBUtils.select(DB_REBORN, sql, new IReadDataHandler() {
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
@@ -181,25 +173,21 @@ public class SendSmsPriceForMyrcTask implements ZZTask{
 			}
 			//组装报价内容地区+类别名称+报价
 			if(result>result2){
-				str=INDEX_MAP.get(areaCode)+areaName+":今日报价"+minPrice+"-"+maxPrice+"涨"+(result-result2);
+				str=INDEX_MAP.get(areaCode)+areaName+":今日报价"+minPrice+"-"+maxPrice+"涨"+(result-result2)+";";
 			}
 			if(result==result2){
-				str=INDEX_MAP.get(areaCode)+areaName+":今日报价"+minPrice+"-"+maxPrice+"持平";
+				str=INDEX_MAP.get(areaCode)+areaName+":今日报价"+minPrice+"-"+maxPrice+"持平;";
 			}
 			if(result<result2){
-				str=INDEX_MAP.get(areaCode)+areaName+":今日报价"+minPrice+"-"+maxPrice+"跌"+(result2-result);
+				str=INDEX_MAP.get(areaCode)+areaName+":今日报价"+minPrice+"-"+maxPrice+"跌"+(result2-result)+";";
 			}
-			//没搜索一次key的值增加一
-			map2.put("str"+i, str);
 		}while(false);
-		return map2;
+		return str;
 	}
 	
-	private void sendEmailForMyrc(Integer companyId,List<Map<String, Object>> list) {
-		Integer i=0;
+	private void sendEmailForMyrc(Integer companyId,String content) {
 		//根据公司id搜索邮箱和备用邮箱和是否启用备用邮箱
 		String sql="select is_use_back_email,back_email,email from company_account where company_id="+companyId+"";
-		List<String> list2=new ArrayList<String>();
 		final Map<String, Object> map=new HashMap<String, Object>();
 		final Map<String, Object> map1=new HashMap<String, Object>();
 		DBUtils.select(DB_ZZ91, sql, new IReadDataHandler(){
@@ -213,28 +201,10 @@ public class SendSmsPriceForMyrcTask implements ZZTask{
 				}
 			}
 		});
-		//因为短信的内容不应该存在（key，value）我们只要value就好了，所以我这边没循环一次获取其value值然后组装发送
-		for(Map<String, Object> obj:list){
-			i++;
-			String content=(String) obj.get("str"+i);
-			list2.add(content);
-		}
-		if(list2.size()>0){
-			String content=list2.toString();
-			if(content.contains("[")){
-				content=content.replace("[", "");
-			}
-			if(content.contains("]")){
-				content=content.replace("]", "");
-			}
-			if(content.contains(",")){
-				content=content.replace(",", ";");
-			}
-			map1.put("list", content);
-		}
 		String isBackEmail=(String) map.get("isBackEmail");
 		String backEmail=(String) map.get("backEmail");
 		String email=(String)map.get("email");
+		map1.put("list", content);
 		//如果客户选中备用邮箱接收，就发送到备用邮箱，相反就发送到注册邮箱
 		if("1".equals(isBackEmail)){
 			MailUtil.getInstance().sendMail("ZZ91生意管家报价定制", 
@@ -273,3 +243,4 @@ public class SendSmsPriceForMyrcTask implements ZZTask{
 	}
 
 }
+
