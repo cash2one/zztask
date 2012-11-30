@@ -1,4 +1,4 @@
-package com.zz91.mission.huanbao;
+package com.zz91.mission.huanbao.solr4;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +20,7 @@ import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.lang.StringUtils;
 import com.zz91.util.search.solr.SolrUpdateUtil;
 
-public class IndexCompanyTask extends AbstractIdxTask{
+public class IdxCompanyTask extends AbstractIdxTask{
 	
 	final static String DB="ep";
 	final static int LIMIT=25;
@@ -73,6 +73,8 @@ public class IndexCompanyTask extends AbstractIdxTask{
 			//start  = resetStart(docs.get(docs.size()-1));
 			
 			id =resetId(docs.get(docs.size()-1));
+			
+//			System.out.println("comp>>>>>"+docsize);
 			
 		}while(true);
 		throw new Exception("共创建/更新"+docsize+"条索引");
@@ -211,7 +213,7 @@ public class IndexCompanyTask extends AbstractIdxTask{
 		String start="2011-11-29 17:07:23";
 		String end ="2011-11-29 17:14:18";
 		
-		IndexCompanyTask task=new IndexCompanyTask();
+		IdxCompanyTask task=new IdxCompanyTask();
 		try {
 //			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
 			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());

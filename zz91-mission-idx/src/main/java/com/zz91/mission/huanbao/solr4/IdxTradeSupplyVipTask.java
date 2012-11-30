@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.zz91.mission.huanbao;
+package com.zz91.mission.huanbao.solr4;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -32,7 +32,7 @@ import com.zz91.util.search.solr.SolrUpdateUtil;
  * @author mays
  *
  */
-public class IndexTradeSupplyVipTask extends AbstractIdxTask {
+public class IdxTradeSupplyVipTask extends AbstractIdxTask {
 
 	final static String DB="ep";
 	final static int LIMIT=25;
@@ -95,7 +95,7 @@ public class IndexTradeSupplyVipTask extends AbstractIdxTask {
 			id = resetId(docs.get(docs.size()-1));
 			
 			
-//			System.out.println("vip>>>>>"+docsize+">>>>>>"+begin);
+//			System.out.println("tradesupply>>>>vip>>>>>"+docsize);
 			
 		} while (true);
 		
@@ -278,7 +278,7 @@ public class IndexTradeSupplyVipTask extends AbstractIdxTask {
 		String start="2012-01-25 08:46:57";
 		String end ="2012-03-25 08:46:59";
 //		
-		AbstractIdxTask task=new IndexTradeSupplyVipTask();
+		AbstractIdxTask task=new IdxTradeSupplyVipTask();
 		try {
 //			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
 			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());

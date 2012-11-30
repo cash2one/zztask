@@ -1,4 +1,4 @@
-package com.zz91.mission.huanbao;
+package com.zz91.mission.huanbao.solr4;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,18 +17,17 @@ import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.search.solr.SolrUpdateUtil;
 
-public class IndexExhibitTask extends AbstractIdxTask {
-
-
+public class IdxTradeBuyTask extends AbstractIdxTask{
+	
 	final static String DB="ep";
 	final static int LIMIT=25;
 	//final static int RESET_LIMIT=5000;
-	final static String MODEL="hbexhibit";
+	final static String MODEL="hbtradebuy";
 	
 	@Override
 	public Boolean idxReq(Long start, Long end) throws Exception {
 		StringBuffer sql = new StringBuffer();
-		sql.append("select count(*) from exhibit");
+		sql.append("select count(*) from trade_buy ");
 		sqlwhere(sql, start, end,0);
 		final Integer[] dealCount=new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
@@ -40,7 +39,7 @@ public class IndexExhibitTask extends AbstractIdxTask {
 			}
 		});
 		
-		if(dealCount[0]!=null && dealCount[0] >0){
+		if(dealCount[0]!=null && dealCount[0] >0 ){
 			return true;
 		}
 		
@@ -50,30 +49,31 @@ public class IndexExhibitTask extends AbstractIdxTask {
 	@Override
 	public void idxPost(Long start, Long end) throws Exception {
 		SolrServer server=SolrUpdateUtil.getInstance().getSolrServer(MODEL);
-		int resetId=0;
+		int id=0;
 		int docsize=0;
 		do {
-			List<SolrInputDocument> docs = queryDocs(start, end, resetId);
+			List<SolrInputDocument> docs = queryDocs(start, end, id);
 			if(docs.size()<=0){
 				break;
 			}
 			server.add(docs);
 			docsize=docsize+docs.size();
-				
 			
-				//start = resetStart(docs.get(docs.size()-1));
-				resetId=resetId(docs.get(docs.size()-1));
-					
+//			start = resetStart(docs.get(docs.size()-1));
+			id = resetId(docs.get(docs.size()-1));
+			
+//			System.out.println("tradebuy>>>>>"+docsize);
+			
 		} while (true);	
 		throw new Exception("共创建/更新"+docsize+"条索引");	
 	}
 
 	@Override
 	public void optimize() throws Exception {
-		
+		SolrUpdateUtil.getInstance().getSolrServer(MODEL).optimize();
 	}
 	
-	private void sqlwhere(StringBuffer sb, Long start, Long end,Integer resetId){
+	private void sqlwhere(StringBuffer sb, Long start, Long end,int resetId){
 		sb.append(" where gmt_modified >='").append(DateUtil.toString(new Date(start), FORMATE)).append("' ");
 		sb.append(" and gmt_modified <='").append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
 		sb.append(" and id > ").append(resetId);
@@ -85,57 +85,87 @@ public class IndexExhibitTask extends AbstractIdxTask {
 //	}
 	
 	private Integer resetId(SolrInputDocument doc){
-		Integer resetId =(Integer) doc.getFieldValue("id");
-		return resetId;
+		Integer  id=(Integer) doc.getFieldValue("id");
+		return id;
 	}
-	
 	
 	private List<SolrInputDocument> queryDocs(Long start, Long end, int resetId){
 		final List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
 		StringBuffer sql=new StringBuffer();
 		sql.append("select ");
-		sql.append("ex.id,ex.name,ex.plate_category_code,ex.industry_code,ex.province_code,ex.area_code,ex.pause_status,")
-			.append("ex.gmt_start,ex.gmt_end,ex.gmt_publish,ex.gmt_sort ");
-		sql.append("from exhibit ex");
+		sql.append("tb.id,tb.cid,tb.title,tb.province_code,tb.area_code,tb.quantity,tb.message_count, ")
+			.append("tb.valid_days,tb.gmt_refresh,tb.gmt_expired,tb.pause_status,tb.check_status,tb.del_status,tb.view_count,tb.favorite_count,tb.plus_count,tb.tags_sys");
+		sql.append(" from trade_buy tb");
 		sqlwhere(sql, start, end,resetId);
-		sql.append(" order by ex.id asc limit ").append(LIMIT);
+		sql.append(" order by tb.id asc limit ").append(LIMIT);
+		
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
-	
+			
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				SolrInputDocument doc = null;
 				while(rs.next()){
 					doc = new SolrInputDocument();
 					doc.addField("id", rs.getObject("id"));
-					doc.addField("name", rs.getObject("name"));
-					doc.addField("plateCategoryCode", rs.getObject("plate_category_code"));
-					doc.addField("industryCode", rs.getObject("industry_code"));
-					//doc.addField("showName", rs.getObject("show_name"));
-					//doc.addField("organizers", rs.getObject("organizers"));
+					doc.addField("cid", rs.getObject("cid"));
+					doc.addField("title", rs.getObject("title"));
 					doc.addField("provinceCode", rs.getObject("province_code"));
 					doc.addField("areaCode", rs.getObject("area_code"));
+					doc.addField("quantity", rs.getObject("quantity"));
+					doc.addField("messageCount", rs.getObject("message_count"));
+//					doc.addField("quantityYear",rs.getObject("quantity_year"));
+//					doc.addField("quantityUntis", rs.getObject("quantity_untis"));
+//					doc.addField("detailsQuery", rs.getObject("details_query"));
+					doc.addField("validDays", rs.getObject("valid_days"));
+					doc.addField("gmtRefresh",rs.getObject("gmt_refresh"));
+					doc.addField("gmtExpired", rs.getObject("gmt_expired"));
 					doc.addField("pauseStatus", rs.getObject("pause_status"));
-					doc.addField("gmtStart", rs.getDate("gmt_start").getTime());
-					doc.addField("gmtEnd", rs.getDate("gmt_end").getTime());
-					doc.addField("gmtPublish", rs.getDate("gmt_publish").getTime());
-					doc.addField("gmtSort", rs.getDate("gmt_sort").getTime());
-					//doc.addField("gmtModified", rs.getObject("gmt_modified"));
+					doc.addField("checkStatus", rs.getObject("check_status"));
+					doc.addField("delStatus", rs.getObject("del_status"));
+					doc.addField("viewCount", rs.getObject("view_count"));
+					doc.addField("favoriteCount", rs.getObject("favorite_count"));
+					doc.addField("plusCount", rs.getObject("plus_count"));
+//					doc.addField("gmtModified", rs.getObject("gmt_modified"));
+					doc.addField("tagsSys", rs.getObject("tags_sys"));
 					docs.add(doc);
 				}
 				
 			}
 		});
+		
+		for(SolrInputDocument doc : docs){
+			parseCodeBlock(doc,(Integer)doc.getFieldValue("cid"));
+		}
 		return  docs;
 	}
+	
+	 private void parseCodeBlock( SolrInputDocument doc,Integer cid){
+		  final String [] result =new String [1];
+		 DBUtils.select(DB, "select member_code_block  from comp_profile where id ="+cid, new IReadDataHandler() {
+			
+			@Override
+			public void handleRead(ResultSet rs) throws SQLException {
+				while(rs.next()){
+					result[0] = rs.getString("member_code_block");
+				}
+			}
+		});  
+		 	if(result[0]==null || "".equals(result[0])){
+		 		doc.addField("memberCodeBlock","-1");
+		 	}else{
+		 		doc.addField("memberCodeBlock",result[0]);
+		 	}
+			 
+	 }
 	
 	public static void main(String[] args) {
 		SolrUpdateUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		
-		String start="2012-10-19 09:40:48";
-		String end ="2012-11-19 15:34:15";
+		String start="2012-11-23 17:23:08";
+		String end ="2012-11-23 17:39:12";
 		
-		IndexExhibitTask task=new IndexExhibitTask();
+		IdxTradeBuyTask task=new IdxTradeBuyTask();
 		try {
 //			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
 			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
@@ -147,5 +177,4 @@ public class IndexExhibitTask extends AbstractIdxTask {
 		}
 		
 	}
-	
 }
