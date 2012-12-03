@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
+
 import com.zz91.task.common.ZZTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
@@ -29,7 +32,7 @@ import com.zz91.util.lang.StringUtils;
  */
 public class KLTonbuDataImportTask implements ZZTask {
 
-	private final static String DB_AST = "ast";
+	private final static String DB_AST = "zz91";
 	private final static String DB_KL91 = "kl91";
 
 	@Override
@@ -195,6 +198,8 @@ public class KLTonbuDataImportTask implements ZZTask {
 		String introduction = (String) map.get("introduction");
 		if (introduction == null) {
 			introduction = "";
+		}else {
+			introduction=Jsoup.clean((String) map.get("introduction"), Whitelist.none());
 		}
 		// 主营业务
 		String business = (String) map.get("business");

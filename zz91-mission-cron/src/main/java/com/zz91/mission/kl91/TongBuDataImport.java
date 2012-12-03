@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
+
 import com.zz91.task.common.ZZTask;
 import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
@@ -186,6 +189,8 @@ public class TongBuDataImport implements ZZTask {
 		String introduction = (String) map.get("introduction");
 		if (introduction == null) {
 			introduction = "";
+		}else {
+			introduction=Jsoup.clean((String) map.get("introduction"), Whitelist.none());
 		}
 		// 主营业务
 		String business = (String) map.get("business");
