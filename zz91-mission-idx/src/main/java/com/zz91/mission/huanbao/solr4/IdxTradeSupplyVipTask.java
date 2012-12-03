@@ -50,7 +50,7 @@ public class IdxTradeSupplyVipTask extends AbstractIdxTask {
 		end = end - 3*86400000;
 		StringBuffer sql = new StringBuffer();
 		sql.append("select count(*) from trade_supply ts");
-		sqlwhere(sql, start, end,0);
+		sqlwhere(sql, start, end,null);
 		final Integer[] dealCount=new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			
@@ -176,7 +176,10 @@ public class IdxTradeSupplyVipTask extends AbstractIdxTask {
 		sb.append(" inner join comp_profile cp on ts.cid = cp.id ");
 		sb.append(" where ts.gmt_modified >='").append(DateUtil.toString(new Date(start), FORMATE)).append("' ");
 		sb.append(" and ts.gmt_modified <='").append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
-		sb.append(" and ts.id > ").append(resetId);
+		if(resetId!=null){
+			sb.append(" and ts.id > ").append(resetId);
+		}
+		
 		sb.append(" and cp.member_code!='10011000' ");
 	}
 	

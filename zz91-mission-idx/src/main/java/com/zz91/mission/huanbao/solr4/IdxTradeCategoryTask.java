@@ -33,7 +33,7 @@ public class IdxTradeCategoryTask extends AbstractIdxTask {
 	public Boolean idxReq(Long start, Long end) throws Exception {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select count(*) from trade_category");
-		sqlwhere(sql, start, end, 0);
+		sqlwhere(sql, start, end, null);
 		final Integer[] dealCount = new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			@Override
@@ -93,7 +93,10 @@ public class IdxTradeCategoryTask extends AbstractIdxTask {
 				.append("' ");
 		sql.append(" and gmt_modified <='")
 				.append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
-		sql.append(" and id >").append(resetId);
+		if(resetId!=null){
+			sql.append(" and id >").append(resetId);
+		}
+		
 	}
 
 	// private Long resetStart(SolrInputDocument doc) {

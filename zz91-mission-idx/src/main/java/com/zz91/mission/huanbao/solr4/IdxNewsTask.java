@@ -31,7 +31,7 @@ public class IdxNewsTask extends AbstractIdxTask {
 	public Boolean idxReq(Long start, Long end) throws Exception {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select count(*) from news");
-		sqlwhere(sql, start, end, 0);
+		sqlwhere(sql, start, end, null);
 		final Integer[] dealCount = new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			@Override
@@ -81,13 +81,16 @@ public class IdxNewsTask extends AbstractIdxTask {
 		SolrUpdateUtil.getInstance().getSolrServer(MODEL).optimize();
 	}
 
-	private void sqlwhere(StringBuffer sql, Long start, Long end, int resetId) {
+	private void sqlwhere(StringBuffer sql, Long start, Long end, Integer resetId) {
 		sql.append(" where gmt_modified >='")
 				.append(DateUtil.toString(new Date(start), FORMATE))
 				.append("' ");
 		sql.append(" and gmt_modified <='")
 				.append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
-		sql.append("and id > ").append(resetId);
+		if(resetId!=null){
+			sql.append(" and id > ").append(resetId);
+		}
+		
 	}
 
 	// private Long resetStart(SolrInputDocument doc) {

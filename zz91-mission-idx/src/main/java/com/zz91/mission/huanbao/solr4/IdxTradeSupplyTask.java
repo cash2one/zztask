@@ -54,7 +54,7 @@ public class IdxTradeSupplyTask extends AbstractIdxTask {
 	public Boolean idxReq(Long start, Long end) throws Exception {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select count(*) from trade_supply ");
-		sqlwhere(sql, start, end, 0);
+		sqlwhere(sql, start, end, null);
 		final Integer[] dealCount = new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 
@@ -170,13 +170,16 @@ public class IdxTradeSupplyTask extends AbstractIdxTask {
 		return docs;
 	}
 
-	private void sqlwhere(StringBuffer sb, Long start, Long end, int resetId) {
+	private void sqlwhere(StringBuffer sb, Long start, Long end, Integer resetId) {
 		sb.append(" where gmt_modified >='")
 				.append(DateUtil.toString(new Date(start), FORMATE))
 				.append("' ");
 		sb.append(" and gmt_modified <='")
 				.append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
-		sb.append(" and id >").append(resetId);
+		if(resetId!=null){
+			sb.append(" and id >").append(resetId);
+		}
+		
 	}
 
 	private void parseCategory(SolrInputDocument doc,

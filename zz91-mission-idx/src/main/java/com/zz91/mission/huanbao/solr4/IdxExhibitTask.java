@@ -29,7 +29,7 @@ public class IdxExhibitTask extends AbstractIdxTask {
 	public Boolean idxReq(Long start, Long end) throws Exception {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select count(*) from exhibit");
-		sqlwhere(sql, start, end, 0);
+		sqlwhere(sql, start, end, null);
 		final Integer[] dealCount = new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			@Override
@@ -79,7 +79,10 @@ public class IdxExhibitTask extends AbstractIdxTask {
 				.append("' ");
 		sb.append(" and gmt_modified <='")
 				.append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
-		sb.append(" and id > ").append(resetId);
+		if(resetId!=null){
+			sb.append(" and id > ").append(resetId);
+		}
+		
 	}
 
 	// private Long resetStart(SolrInputDocument doc){
