@@ -15,6 +15,7 @@ import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
+import com.zz91.util.lang.StringUtils;
 import com.zz91.util.search.solr.SolrUpdateUtil;
 
 public class IdxNewsTask extends AbstractIdxTask {
@@ -23,13 +24,14 @@ public class IdxNewsTask extends AbstractIdxTask {
 	final static int LIMIT = 25;
 
 	final static String MODEL = "hbnews";
-	//final static int RESET_LIMIT = 5000;
+
+	// final static int RESET_LIMIT = 5000;
 
 	@Override
 	public Boolean idxReq(Long start, Long end) throws Exception {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select count(*) from news");
-		sqlwhere(sql, start, end,0);
+		sqlwhere(sql, start, end, 0);
 		final Integer[] dealCount = new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			@Override
@@ -40,7 +42,7 @@ public class IdxNewsTask extends AbstractIdxTask {
 			}
 		});
 
-		if (dealCount[0] != null && dealCount[0] >0 ) {
+		if (dealCount[0] != null && dealCount[0] > 0) {
 			return true;
 		}
 
@@ -55,22 +57,22 @@ public class IdxNewsTask extends AbstractIdxTask {
 		int docsize = 0;
 		do {
 			List<SolrInputDocument> docs = queryDocs(start, end, id);
-			
-			if(docs.size()<=0){
+
+			if (docs.size() <= 0) {
 				break;
 			}
-			
+
 			server.add(docs);
-			
-			docsize=docsize+docs.size();		
-//			start = resetStart(docs.get(docs.size()-1));
-			id=resetId(docs.get(docs.size()-1));
-			
-//			System.out.println("news>>>>>"+docsize);
-			
+
+			docsize = docsize + docs.size();
+			// start = resetStart(docs.get(docs.size()-1));
+			id = resetId(docs.get(docs.size() - 1));
+
+			// System.out.println("news>>>>>"+docsize);
+
 		} while (true);
-		
-		throw new Exception("共创建/更新"+docsize+"条索引");
+
+		throw new Exception("共创建/更新" + docsize + "条索引");
 
 	}
 
@@ -79,7 +81,7 @@ public class IdxNewsTask extends AbstractIdxTask {
 		SolrUpdateUtil.getInstance().getSolrServer(MODEL).optimize();
 	}
 
-	private void sqlwhere(StringBuffer sql, Long start, Long end,int resetId) {
+	private void sqlwhere(StringBuffer sql, Long start, Long end, int resetId) {
 		sql.append(" where gmt_modified >='")
 				.append(DateUtil.toString(new Date(start), FORMATE))
 				.append("' ");
@@ -88,31 +90,32 @@ public class IdxNewsTask extends AbstractIdxTask {
 		sql.append("and id > ").append(resetId);
 	}
 
-//	private Long resetStart(SolrInputDocument doc) {
-//		Date d = (Date) doc.getFieldValue("gmtModified");
-//		return d.getTime();
-//	}
-	
+	// private Long resetStart(SolrInputDocument doc) {
+	// Date d = (Date) doc.getFieldValue("gmtModified");
+	// return d.getTime();
+	// }
+
 	private Integer resetId(SolrInputDocument doc) {
 		Integer id = (Integer) doc.getFieldValue("id");
 		return id;
 	}
-	
-	private List<SolrInputDocument> queryDocs(Long start,Long end,Integer resetId){
+
+	private List<SolrInputDocument> queryDocs(Long start, Long end,
+			Integer resetId) {
 		final List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
 		StringBuffer sql = new StringBuffer();
 		sql.append("select ")
-			.append("n.id,n.title,n.title_index,n.category_code,n.description,n.tags,n.news_source,")
-			.append("n.view_count,n.pause_status,n.gmt_publish  ");
+				.append("n.id,n.title,n.title_index,n.category_code,n.description,n.tags,n.news_source,")
+				.append("n.view_count,n.pause_status,n.gmt_publish  ");
 		sql.append("from news n");
-		sqlwhere(sql, start, end,resetId);
+		sqlwhere(sql, start, end, resetId);
 		sql.append(" order by n.id asc limit ").append(LIMIT);
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
-			
+
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				SolrInputDocument doc = null;
-				while(rs.next()){
+				while (rs.next()) {
 					doc = new SolrInputDocument();
 					doc.addField("id", rs.getObject("id"));
 					doc.addField("title", rs.getObject("title"));
@@ -123,33 +126,53 @@ public class IdxNewsTask extends AbstractIdxTask {
 					doc.addField("newsSource", rs.getObject("news_source"));
 					doc.addField("viewCount", rs.getObject("view_count"));
 					doc.addField("pauseStatus", rs.getObject("pause_status"));
-					doc.addField("gmtPublish", rs.getDate("gmt_publish").getTime());
-//					doc.addField("gmtModified", rs.getObject("gmt_modified"));
+					String gmtPublish = rs.getString("gmt_publish");
+					doc.addField("gmtPublish", getTime(gmtPublish));
+					// doc.addField("gmtModified",
+					// rs.getObject("gmt_modified"));
 					docs.add(doc);
 				}
 			}
 		});
-		
+
 		return docs;
 	}
-	
+
+	private long getTime(String str) {
+		long longTime = 0;
+		if (StringUtils.isNotEmpty(str)) {
+			try {
+				longTime = DateUtil.getDate(str, "yyyy-MM-dd HH:mm:ss")
+						.getTime();
+			} catch (ParseException e) {
+
+			}
+		}
+
+		return longTime;
+	}
+
 	public static void main(String[] args) {
-		SolrUpdateUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
-		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
-		
-		String start="2012-10-19 09:40:48";
-		String end ="2012-11-19 15:34:15";
-		
-		IdxNewsTask task=new IdxNewsTask();
+		SolrUpdateUtil.getInstance().init(
+				"file:/usr/tools/config/search/search.properties");
+		DBPoolFactory.getInstance().init(
+				"file:/usr/tools/config/db/db-zztask-jdbc.properties");
+
+		String start = "2012-10-19 09:40:48";
+		String end = "2012-11-19 15:34:15";
+
+		IdxNewsTask task = new IdxNewsTask();
 		try {
-//			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
-			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
-//			task.optimize();
+			// System.out.println(task.idxReq(DateUtil.getDate(start,
+			// FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
+			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil
+					.getDate(end, FORMATE).getTime());
+			// task.optimize();
 		} catch (ParseException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 }

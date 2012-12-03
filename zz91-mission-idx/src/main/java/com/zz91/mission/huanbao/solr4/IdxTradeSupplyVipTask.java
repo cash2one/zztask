@@ -127,7 +127,7 @@ public class IdxTradeSupplyVipTask extends AbstractIdxTask {
 			.append("ts.gmt_refresh,ts.check_status,")
 			.append("ts.pause_status,ts.del_status,ts.category_code,ts.uid,")
 			.append("ts.integrity,ts.view_count,ts.favorite_count,ts.plus_count");
-		sql.append(" from trade_supply ts");
+		sql.append(" from trade_supply ts ");
 		sqlwhere(sql, start, end,resetId);
 		sql.append(" order by ts.id asc limit ").append(LIMIT);
 		
@@ -147,7 +147,8 @@ public class IdxTradeSupplyVipTask extends AbstractIdxTask {
 //					doc.addField("priceUnits", rs.getObject(8));
 					doc.addField("propertyQuery", rs.getObject("property_query"));
 //					doc.addField("detailsQuery", rs.getObject(10));
-					doc.addField("gmtRefresh", rs.getDate("gmt_refresh").getTime());
+					String gmtRefresh = rs.getString("gmt_refresh");
+					doc.addField("gmtRefresh", getTime(gmtRefresh));
 					doc.addField("checkStatus", rs.getObject("check_status"));
 					doc.addField("pauseStatus", rs.getObject("pause_status"));
 					doc.addField("delStatus", rs.getObject("del_status"));
@@ -172,10 +173,11 @@ public class IdxTradeSupplyVipTask extends AbstractIdxTask {
 	}
 	
 	private void sqlwhere(StringBuffer sb, Long start, Long end,Integer resetId){
-		sb.append(" where gmt_modified >='").append(DateUtil.toString(new Date(start), FORMATE)).append("' ");
-		sb.append(" and gmt_modified <='").append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
-		sb.append(" and id > ").append(resetId);
-		sb.append(" and exists (select cp.id from comp_profile cp where cp.id=ts.cid and cp.member_code!='10011000')");
+		sb.append(" inner join comp_profile cp on ts.cid = cp.id ");
+		sb.append(" where ts.gmt_modified >='").append(DateUtil.toString(new Date(start), FORMATE)).append("' ");
+		sb.append(" and ts.gmt_modified <='").append(DateUtil.toString(new Date(end), FORMATE)).append("' ");
+		sb.append(" and ts.id > ").append(resetId);
+		sb.append(" and cp.member_code!='10011000' ");
 	}
 	
 	private void parseCategory(SolrInputDocument doc, Map<String, String> categoryMap){
@@ -269,6 +271,19 @@ public class IdxTradeSupplyVipTask extends AbstractIdxTask {
 			doc.addField("sortRefresh", DateUtil.getDate(refresh, "yyyy-MM-dd").getTime());
 		} catch (ParseException e) {
 		}
+	}
+	
+	private long getTime(String str){
+		long longTime = 0;
+		if(StringUtils.isNotEmpty(str)){
+			try {
+				longTime = DateUtil.getDate(str, "yyyy-MM-dd HH:mm:ss").getTime();
+			} catch (ParseException e) {
+				
+			}
+		}
+		
+		return longTime;
 	}
 	
 	public static void main(String[] args) throws SolrServerException, IOException {

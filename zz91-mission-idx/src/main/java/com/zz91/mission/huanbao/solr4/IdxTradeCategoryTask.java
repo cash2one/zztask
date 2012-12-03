@@ -22,18 +22,18 @@ import com.zz91.util.search.solr.SolrUpdateUtil;
 
 public class IdxTradeCategoryTask extends AbstractIdxTask {
 
-
 	final static String DB = "ep";
 	final static int LIMIT = 50;
 
 	final static String MODEL = "hbtradecategory";
-	//final static int RESET_LIMIT = 5000;
+
+	// final static int RESET_LIMIT = 5000;
 
 	@Override
 	public Boolean idxReq(Long start, Long end) throws Exception {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select count(*) from trade_category");
-		sqlwhere(sql, start, end,0);
+		sqlwhere(sql, start, end, 0);
 		final Integer[] dealCount = new Integer[1];
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 			@Override
@@ -44,7 +44,7 @@ public class IdxTradeCategoryTask extends AbstractIdxTask {
 			}
 		});
 
-		if (dealCount[0] != null && dealCount[0] >0 ) {
+		if (dealCount[0] != null && dealCount[0] > 0) {
 			return true;
 		}
 
@@ -59,24 +59,25 @@ public class IdxTradeCategoryTask extends AbstractIdxTask {
 		int docsize = 0;
 		Map<String, String> categoryMap = new HashMap<String, String>();
 		do {
-			List<SolrInputDocument> docs = queryDocs(start, end, id,categoryMap);
-			
-			if(docs.size()<=0){
+			List<SolrInputDocument> docs = queryDocs(start, end, id,
+					categoryMap);
+
+			if (docs.size() <= 0) {
 				break;
 			}
-			
+
 			server.add(docs);
-			
-			docsize=docsize+docs.size();
-			
-//			start = resetStart(docs.get(docs.size()-1));
-			id=resetId(docs.get(docs.size()-1));
-			
-//			System.out.println("tradecategory>>>>>"+docsize);
-			
+
+			docsize = docsize + docs.size();
+
+			// start = resetStart(docs.get(docs.size()-1));
+			id = resetId(docs.get(docs.size() - 1));
+
+			// System.out.println("tradecategory>>>>>"+docsize);
+
 		} while (true);
-		
-		throw new Exception("共创建/更新"+docsize+"条索引");
+
+		throw new Exception("共创建/更新" + docsize + "条索引");
 
 	}
 
@@ -85,7 +86,8 @@ public class IdxTradeCategoryTask extends AbstractIdxTask {
 		SolrUpdateUtil.getInstance().getSolrServer(MODEL).optimize();
 	}
 
-	private void sqlwhere(StringBuffer sql, Long start, Long end,Integer resetId) {
+	private void sqlwhere(StringBuffer sql, Long start, Long end,
+			Integer resetId) {
 		sql.append(" where gmt_modified >='")
 				.append(DateUtil.toString(new Date(start), FORMATE))
 				.append("' ");
@@ -94,31 +96,32 @@ public class IdxTradeCategoryTask extends AbstractIdxTask {
 		sql.append(" and id >").append(resetId);
 	}
 
-//	private Long resetStart(SolrInputDocument doc) {
-//		Date d = (Date) doc.getFieldValue("gmtModified");
-//		return d.getTime();
-//	}
-	
+	// private Long resetStart(SolrInputDocument doc) {
+	// Date d = (Date) doc.getFieldValue("gmtModified");
+	// return d.getTime();
+	// }
+
 	private Integer resetId(SolrInputDocument doc) {
 		Integer id = (Integer) doc.getFieldValue("id");
 		return id;
 	}
-	
-	private List<SolrInputDocument> queryDocs(Long start,Long end,Integer resetId,Map<String, String> categoryMap){
+
+	private List<SolrInputDocument> queryDocs(Long start, Long end,
+			Integer resetId, Map<String, String> categoryMap) {
 		final List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
 		StringBuffer sql = new StringBuffer();
 		sql.append("select ");
-		sql.append("tc.id,tc.code,tc.name,tc.sort,tc.leaf,")
-			.append("tc.tags,tc.show_index,tc.gmt_created ");
+		sql.append("tc.id,tc.code,tc.name,tc.sort,tc.leaf,").append(
+				"tc.tags,tc.show_index,tc.gmt_created ");
 		sql.append("from trade_category tc");
-		sqlwhere(sql, start, end,resetId);
+		sqlwhere(sql, start, end, resetId);
 		sql.append(" order by tc.id asc limit ").append(LIMIT);
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
-			
+
 			@Override
 			public void handleRead(ResultSet rs) throws SQLException {
 				SolrInputDocument doc = null;
-				while(rs.next()){
+				while (rs.next()) {
 					doc = new SolrInputDocument();
 					doc.addField("id", rs.getObject("id"));
 					doc.addField("code", rs.getObject("code"));
@@ -127,24 +130,40 @@ public class IdxTradeCategoryTask extends AbstractIdxTask {
 					doc.addField("leaf", rs.getObject("leaf"));
 					doc.addField("tags", rs.getObject("tags"));
 					doc.addField("showIndex", rs.getObject("show_index"));
-					doc.addField("gmtCreated", rs.getDate("gmt_created").getTime());
-//					doc.addField("gmtModified", rs.getObject("gmt_modified"));
+					String gmtCreated = rs.getString("gmt_created");
+					doc.addField("gmtCreated", getTime(gmtCreated));
+					// doc.addField("gmtModified",
+					// rs.getObject("gmt_modified"));
 					docs.add(doc);
 				}
 			}
 		});
-		
-		for(SolrInputDocument doc:docs){
+
+		for (SolrInputDocument doc : docs) {
 			parseCategory(doc, categoryMap);
 		}
-		
+
 		return docs;
 	}
-	
 
-	private void parseCategory(SolrInputDocument doc, Map<String, String> categoryMap){
-		String code=String.valueOf(doc.getFieldValue("code"));
-		if(StringUtils.isNotEmpty(code)){
+	private long getTime(String str) {
+		long longTime = 0;
+		if (StringUtils.isNotEmpty(str)) {
+			try {
+				longTime = DateUtil.getDate(str, "yyyy-MM-dd HH:mm:ss")
+						.getTime();
+			} catch (ParseException e) {
+
+			}
+		}
+
+		return longTime;
+	}
+
+	private void parseCategory(SolrInputDocument doc,
+			Map<String, String> categoryMap) {
+		String code = String.valueOf(doc.getFieldValue("code"));
+		if (StringUtils.isNotEmpty(code)) {
 			doc.addField("code4", substringCode(code, 4));
 			doc.addField("code8", substringCode(code, 8));
 			doc.addField("code12", substringCode(code, 12));
@@ -152,31 +171,35 @@ public class IdxTradeCategoryTask extends AbstractIdxTask {
 			doc.addField("code20", substringCode(code, 20));
 		}
 	}
-	
-	private String substringCode(String code, int length){
-		if(code.length()>=length){
-			return  code.substring(0, length);
+
+	private String substringCode(String code, int length) {
+		if (code.length() >= length) {
+			return code.substring(0, length);
 		}
 		return code;
 	}
-	
+
 	public static void main(String[] args) {
-		SolrUpdateUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
-		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
-		
-		String start="2012-07-30 18:10:09";
-		String end ="2012-11-03 16:39:48";
-		
-		IdxTradeCategoryTask task=new IdxTradeCategoryTask();
+		SolrUpdateUtil.getInstance().init(
+				"file:/usr/tools/config/search/search.properties");
+		DBPoolFactory.getInstance().init(
+				"file:/usr/tools/config/db/db-zztask-jdbc.properties");
+
+		String start = "2012-07-30 18:10:09";
+		String end = "2012-11-03 16:39:48";
+
+		IdxTradeCategoryTask task = new IdxTradeCategoryTask();
 		try {
-//			System.out.println(task.idxReq(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
-			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime());
-//			task.optimize();
+			// System.out.println(task.idxReq(DateUtil.getDate(start,
+			// FORMATE).getTime(), DateUtil.getDate(end, FORMATE).getTime()));
+			task.idxPost(DateUtil.getDate(start, FORMATE).getTime(), DateUtil
+					.getDate(end, FORMATE).getTime());
+			// task.optimize();
 		} catch (ParseException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 }
