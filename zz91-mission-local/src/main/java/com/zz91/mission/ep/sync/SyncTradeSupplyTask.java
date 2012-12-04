@@ -252,36 +252,36 @@ public class SyncTradeSupplyTask implements ZZTask {
         
         long nowtime=seed-(now_zero*1000);
         
-            //6
-            if(nowtime <= 21600000){
-                return seed+2143;
-            }
-            //9
-            if(nowtime <= 32400000){
-                return seed+1799;
-            }
-            //11
-            if(nowtime <= 39600000){
-                return seed+411;
-            }
-            //13
-            if(nowtime <= 46800000){
-                return seed+1799;
-            }
-            //17
-            if(nowtime <= 61200000){
-                return seed+411;
-            }
-            //19
-            if(nowtime <= 68400000){
-                return seed+1799;
-            }
-            //21
-            if(nowtime <= 75600000){
-                return seed+411;
-            }
-            //24
-            return seed+1799;
+        //6
+        if(nowtime <= 21600000){
+            return seed+181818;
+        }
+        //9
+        if(nowtime <= 32400000){
+            return seed+36145;
+        }
+        //11
+        if(nowtime <= 39600000){
+            return seed+10292;
+        }
+        //13
+        if(nowtime <= 46800000){
+            return seed+18018;
+        }
+        //17
+        if(nowtime <= 61200000){
+            return seed+10292;
+        }
+        //19
+        if(nowtime <= 68400000){
+            return seed+24000;
+        }
+        //21
+        if(nowtime <= 75600000){
+            return seed+15000;
+        }
+        //24
+        return seed+36145;
     }
 	
 	public static void main(String[] args) {
