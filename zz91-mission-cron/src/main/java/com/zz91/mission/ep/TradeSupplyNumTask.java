@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 
 import com.zz91.task.common.ZZTask;
@@ -15,7 +16,8 @@ import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IInsertUpdateHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
-import com.zz91.util.search.SolrUtil;
+import com.zz91.util.search.solr.SolrQueryUtil;
+import com.zz91.util.search.solr.SolrReadHandler;
 
 public class TradeSupplyNumTask implements ZZTask {
 	
@@ -32,12 +34,18 @@ public class TradeSupplyNumTask implements ZZTask {
 		//用solr统计出各个类的信息量
 		final Map<String, Object> map = new HashMap<String, Object>();
 		for(int i= 0;i<8;i++){
-		SolrServer server = SolrUtil.getInstance().getSolrServer("tradesupply");
 		map.put("code", "1000100"+i);
 		SolrQuery query = new SolrQuery();
 		query.setQuery("category8:"+map.get("code"));
-		QueryResponse rsp=server.query(query);
-		map.put("num",(int)rsp.getResults().getNumFound());
+//		SolrServer server = SolrUtil.getInstance().getSolrServer("tradesupply");
+//		QueryResponse rsp=server.query(query);
+		SolrQueryUtil.getInstance().search("tradesupply", query, new SolrReadHandler() {
+			@Override
+			public void handlerReader(QueryResponse rsp)
+					throws SolrServerException {
+				map.put("num",(int)rsp.getResults().getNumFound());
+			}
+		});
 		
 		//将数据插入统计表
 		StringBuffer sql = new StringBuffer();
