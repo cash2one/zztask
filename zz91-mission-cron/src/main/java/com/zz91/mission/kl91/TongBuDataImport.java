@@ -157,12 +157,12 @@ public class TongBuDataImport implements ZZTask {
 		});
 		// 邮箱
 		String email = (String) map.get("email");
-		if (email == null) {
+		if (StringUtils.isEmpty(email)) {
 			email = "";
 		}
 		// 账户
 		String account = (String) map.get("account");
-		if(account==null){
+		if(StringUtils.isEmpty(account)){
 			account="";
 		}
 		// 判断账户是不是邮箱如果是就取@以前的为账户
@@ -182,24 +182,24 @@ public class TongBuDataImport implements ZZTask {
 		}
 		// 地址
 		String address = (String) map.get("address");
-		if (address == null) {
+		if (StringUtils.isEmpty(address)) {
 			address = "";
 		}
 		// 介绍
 		String introduction = (String) map.get("introduction");
-		if (introduction == null) {
+		if (StringUtils.isEmpty(introduction)) {
 			introduction = "";
 		}else {
-			introduction=Jsoup.clean((String) map.get("introduction"), Whitelist.none());
+			introduction=Jsoup.clean(introduction, Whitelist.none());
 		}
 		// 主营业务
 		String business = (String) map.get("business");
-		if (business == null) {
+		if (StringUtils.isEmpty(business)) {
 			business = "";
 		}
 		// 联系人
 		String contact = (String) map.get("contact");
-		if (contact == null) {
+		if (StringUtils.isEmpty(contact)) {
 			contact = "";
 		}
 		// 性别
@@ -212,17 +212,17 @@ public class TongBuDataImport implements ZZTask {
 		}
 		// 公司名称
 		String companyName = (String) map.get("name");
-		if (companyName == null) {
+		if (StringUtils.isEmpty(companyName)) {
 			companyName = "";
 		}
 		// 手机
 		String mobile = (String) map.get("mobile");
-		if (mobile == null) {
+		if (StringUtils.isEmpty(mobile)) {
 			mobile = "";
 		}
 		// 座机
 		String tel = (String) map.get("tel");
-		if (tel == null) {
+		if (StringUtils.isEmpty(tel)) {
 			tel = "";
 		}
 		// 密码
@@ -236,11 +236,14 @@ public class TongBuDataImport implements ZZTask {
 		}
 		// 域名
 		String website = (String) map.get("website");
-		if (website == null) {
+		if (StringUtils.isEmpty(website)) {
 			website = "";
+		}else {
+			website=Jsoup.clean(website, Whitelist.none());
 		}
+		
 		String regtime = (String) map.get("regtime");
-		if (regtime == null) {
+		if (StringUtils.isEmpty(regtime)) {
 			regtime = "";
 		}
 		if (id[0] != 0) {
@@ -252,29 +255,6 @@ public class TongBuDataImport implements ZZTask {
 					contact, sex, companyName, mobile, tel, 0,regtime,
 					"1000", website, 0, 1, companyId, regtime,password);
 		}
-	}
-
-	private void updateProducts(Integer klcid, String productCategoryCode,
-			String typeCode, String title, String details, String detailsQuery,
-			Integer checkedFlag, Integer deletedFlag, Integer imptFlag,
-			Integer publishFlag, String location, String useful,
-			String gmtPost, String gmtRefresh, String gmtExpired, String color,
-			String priceUnit, String quantityUnit, Integer quantity,
-			Integer minPrice, Integer maxPrice, Integer productId) {
-		String sql = "update products set cid=" + klcid
-				+ ",products_category_code='" + productCategoryCode
-				+ "',type_code='" + typeCode + "',title='" + title
-				+ "',details='" + details + "'," + "details_query='"
-				+ detailsQuery + "',checked_flag=" + checkedFlag
-				+ ",deleted_flag=" + deletedFlag + ",impt_flag=" + imptFlag
-				+ ",publish_flag=" + publishFlag + ",location='" + location
-				+ "',useful='" + useful + "',gmt_post='" + gmtPost + "',"
-				+ "gmt_refresh='" + gmtRefresh + "',gmt_expired='" + gmtExpired
-				+ "',color='" + color + "',price_unit='" + priceUnit
-				+ "',quantity_unit='" + quantityUnit + "',quantity=" + quantity
-				+ "," + "min_price=" + minPrice + ",max_price=" + maxPrice
-				+ " where old_id=" + productId + "";
-		DBUtils.insertUpdate(DB_KL91, sql);
 	}
 
 	private Integer getCompanyId(Integer cid) {
@@ -343,37 +323,41 @@ public class TongBuDataImport implements ZZTask {
 		}
 		// 标题
 		String title = (String) map.get("title");
-		if (title == null) {
+		if (StringUtils.isEmpty(title)) {
 			title = "";
 		}
 		// 产品详情
 		String details = (String) map.get("details");
-		if (details == null) {
+		if (StringUtils.isEmpty(details)) {
 			details = "";
+		}else {
+			details=Jsoup.clean(details, Whitelist.none());
 		}
 		// 发货地址
 		String location = (String) map.get("location");
-		if (location == null) {
+		if (StringUtils.isEmpty(location)) {
 			location = "";
 		}
 		// 供求用处
 		String useful = (String) map.get("useful");
-		if (useful == null) {
+		if (StringUtils.isEmpty(useful)) {
 			useful = "";
+		}else {
+			useful=Jsoup.clean(useful, Whitelist.none());
 		}
 		// 价格单位
 		String priceUnit = (String) map.get("priceUnit");
-		if (priceUnit == null) {
+		if (StringUtils.isEmpty(priceUnit)) {
 			priceUnit = "";
 		}
 		// 产品颜色
 		String color = (String) map.get("color");
-		if (color == null) {
+		if (StringUtils.isEmpty(color)) {
 			color = "";
 		}
 		// 数量单位
 		String quantityUnit = (String) map.get("quantityUnit");
-		if (quantityUnit == null) {
+		if (StringUtils.isEmpty(quantityUnit)) {
 			quantityUnit = "";
 		}
 		// 数量
@@ -421,7 +405,30 @@ public class TongBuDataImport implements ZZTask {
 		}
 
 	}
-
+	
+	private void updateProducts(Integer klcid, String productCategoryCode,
+			String typeCode, String title, String details, String detailsQuery,
+			Integer checkedFlag, Integer deletedFlag, Integer imptFlag,
+			Integer publishFlag, String location, String useful,
+			String gmtPost, String gmtRefresh, String gmtExpired, String color,
+			String priceUnit, String quantityUnit, Integer quantity,
+			Integer minPrice, Integer maxPrice, Integer productId) {
+		String sql = "update products set cid=" + klcid
+				+ ",products_category_code='" + productCategoryCode
+				+ "',type_code='" + typeCode + "',title='" + title
+				+ "',details='" + details + "'," + "details_query='"
+				+ detailsQuery + "',checked_flag=" + checkedFlag
+				+ ",deleted_flag=" + deletedFlag + ",impt_flag=" + imptFlag
+				+ ",publish_flag=" + publishFlag + ",location='" + location
+				+ "',useful='" + useful + "',gmt_post='" + gmtPost + "',"
+				+ "gmt_refresh='" + gmtRefresh + "',gmt_expired='" + gmtExpired
+				+ "',color='" + color + "',price_unit='" + priceUnit
+				+ "',quantity_unit='" + quantityUnit + "',quantity=" + quantity
+				+ "," + "min_price=" + minPrice + ",max_price=" + maxPrice
+				+ " where old_id=" + productId + "";
+		DBUtils.insertUpdate(DB_KL91, sql);
+	}
+	
 	private void insertProducts(Integer cid, String productCategoryCode,
 			String typeCode, String title, String details, String detailsQuery,
 			Integer checkedFlag, Integer deletedFlag, Integer imptFlag,
@@ -532,7 +539,7 @@ public class TongBuDataImport implements ZZTask {
 		DBPoolFactory.getInstance().init(
 				"file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		TongBuDataImport obj = new TongBuDataImport();
-		Date date = DateUtil.getDate("2008-11-25", "yyyy-MM-dd");
+		Date date = DateUtil.getDate("2008-12-01", "yyyy-MM-dd");
 		obj.exec(date);
 	}
 
