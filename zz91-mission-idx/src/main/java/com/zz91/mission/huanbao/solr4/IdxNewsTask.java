@@ -161,7 +161,7 @@ public class IdxNewsTask extends AbstractIdxTask {
 		DBPoolFactory.getInstance().init(
 				"file:/usr/tools/config/db/db-zztask-jdbc.properties");
 
-		String start = "2012-10-19 09:40:48";
+		String start = "2011-10-19 09:40:48";
 		String end = "2012-11-19 15:34:15";
 
 		IdxNewsTask task = new IdxNewsTask();

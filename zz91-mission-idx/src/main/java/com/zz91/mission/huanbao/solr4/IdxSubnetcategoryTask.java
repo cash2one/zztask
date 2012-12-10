@@ -151,8 +151,8 @@ public class IdxSubnetcategoryTask extends AbstractIdxTask {
 		DBPoolFactory.getInstance().init(
 				"file:/usr/tools/config/db/db-zztask-jdbc.properties");
 
-		String start = "2012-06-20 20:06:20";
-		String end = "2012-07-02 14:39:42";
+		String start = "2011-11-19 20:06:20";
+		String end = "2012-12-03 14:39:42";
 
 		IdxSubnetcategoryTask task = new IdxSubnetcategoryTask();
 		try {

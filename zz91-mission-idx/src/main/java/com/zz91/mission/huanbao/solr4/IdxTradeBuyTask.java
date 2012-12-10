@@ -206,8 +206,8 @@ public class IdxTradeBuyTask extends AbstractIdxTask {
 		DBPoolFactory.getInstance().init(
 				"file:/usr/tools/config/db/db-zztask-jdbc.properties");
 
-		String start = "2012-11-23 17:23:08";
-		String end = "2012-11-23 17:39:12";
+		String start = "2011-11-19 17:23:08";
+		String end = "2012-12-03 17:39:12";
 
 		IdxTradeBuyTask task = new IdxTradeBuyTask();
 		try {

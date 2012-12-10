@@ -210,7 +210,7 @@ public class IdxCompanyTask extends AbstractIdxTask {
 		final StringBuffer chainId = new StringBuffer("|");
 		StringBuffer sql = new StringBuffer();
 		sql.append("select chain_id from company_industry_chain where cid = ")
-				.append(id);
+				.append(id).append(" and del_status = 0 ");
 		DBUtils.select(DB, sql.toString(), new IReadDataHandler() {
 
 			@Override
@@ -238,8 +238,8 @@ public class IdxCompanyTask extends AbstractIdxTask {
 		DBPoolFactory.getInstance().init(
 				"file:/usr/tools/config/db/db-zztask-jdbc.properties");
 
-		String start = "2011-11-29 17:07:23";
-		String end = "2011-11-29 17:14:18";
+		String start = "2012-09-29 17:07:23";
+		String end = "2012-11-29 17:14:18";
 
 		IdxCompanyTask task = new IdxCompanyTask();
 		try {

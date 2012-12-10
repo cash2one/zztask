@@ -327,8 +327,8 @@ public class IdxTradeSupplyTask extends AbstractIdxTask {
 
 		// String start="2011-11-29 15:13:20";
 		// String end="2011-11-29 15:13:21";
-		String start = "2011-11-21 11:49:49";
-		String end = "2011-11-21 11:51:10";
+		String start = "2011-11-19 11:49:49";
+		String end = "2012-12-0 11:51:10";
 
 		AbstractIdxTask task = new IdxTradeSupplyTask();
 		try {

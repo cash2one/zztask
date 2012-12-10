@@ -293,8 +293,8 @@ public class IdxTradeSupplyVipTask extends AbstractIdxTask {
 		SolrUpdateUtil.getInstance().init("file:/usr/tools/config/search/search.properties");
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		
-		String start="2012-01-25 08:46:57";
-		String end ="2012-03-25 08:46:59";
+		String start="2011-11-19 08:46:57";
+		String end ="2012-12-04 08:46:59";
 //		
 		AbstractIdxTask task=new IdxTradeSupplyVipTask();
 		try {
