@@ -2,6 +2,7 @@ UPDATE
 
 2012-12-05 v1.0.8 kongsj
 1.修改kl91的tongbu任务逻辑上可能存在的bug
+2.添加QQ统计登录情况(点击数、绑定数、注册数)任务
 
 2012-12-03 v1.0.7 kongsj
 1.修改环保solr换成solrqueryutil包的错误
