@@ -5,6 +5,7 @@ package com.zz91.mission.ep;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,10 +16,13 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.zz91.task.common.ZZTask;
+import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
+import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.domain.Param;
 import com.zz91.util.lang.StringUtils;
+import com.zz91.util.seo.SeoUtil;
 
 /**
  * @author root
@@ -285,7 +289,7 @@ public class CrmTodaySaleDataTask implements ZZTask {
 	}
 	
 	private void tongji(String account) {
-		String sql = "select * from (SELECT id,cid,star_old,star,situation,sale_account,sale_name,sale_dept FROM crm_log "
+		String sql = "select * from (SELECT id,cid,star_old,star,situation,sale_account,sale_name,sale_dept,contact_type FROM crm_log "
 					+" where date_format(gmt_created,'%Y-%m-%d') = date_format(date_add(now(), interval -1 day),'%Y-%m-%d')"
 					+" and sale_account = '"+account+"' "
 					+" order by gmt_created desc) tmp group by cid";
@@ -307,6 +311,8 @@ public class CrmTodaySaleDataTask implements ZZTask {
 				int star5_disable = 0;
 				int drag_count = 0;
 				int destroy_count = 0;
+				int seo_count=0;
+				int add_renew_count=0;
 				while(rs.next()) {
 					if (StringUtils.isEmpty(account)) {
 						account = rs.getString("sale_account");
@@ -347,8 +353,6 @@ public class CrmTodaySaleDataTask implements ZZTask {
 						} else {
 							star5_disable++;
 						}
-					} else {
-						
 					}
 					if ("5".equals(rs.getString("star_old"))) {
 						if ("5".equals(rs.getString("star"))) {
@@ -357,11 +361,17 @@ public class CrmTodaySaleDataTask implements ZZTask {
 							destroy_count++;
 						}
 					}
+					if ("2".equals(rs.getString("contact_type"))){
+						seo_count++;
+					}
+					if ("3".equals(rs.getString("contact_type"))){
+						add_renew_count++;
+					}
 				}
 				insertTongji(account, saleName, saleDept,
 						star1_able, star1_disable, star2_able, star2_disable,
 						star3_able, star3_disable, star4_able, star4_disable,
-						star5_able, star5_disable, drag_count, destroy_count);
+						star5_able, star5_disable, drag_count, destroy_count,seo_count,add_renew_count);
 			}
 		});
 	}
@@ -372,17 +382,29 @@ public class CrmTodaySaleDataTask implements ZZTask {
 							Integer star3_able,Integer star3_disable,
 							Integer star4_able,Integer star4_disable,
 							Integer star5_able,Integer star5_disable,
-							Integer drag_count,Integer destroy_count){
+							Integer drag_count,Integer destroy_count,Integer seo_count,Integer add_renew_count){
 		String sql="INSERT INTO crm_contact_statistics(star1_able,star1_disable,star2_able,star2_disable,star3_able,star3_disable,"
-				+"star4_able,star4_disable,star5_able,star5_disable,drag_order_count,destroy_order_count,"
+				+"star4_able,star4_disable,star5_able,star5_disable,drag_order_count,destroy_order_count,seo_count,add_renew_count,"
 				+"sale_account,sale_dept,sale_name,gmt_target,gmt_created,gmt_modified) VALUES ("
 				+star1_able+","+star1_disable+","+star2_able+","+star2_disable+","+star3_able+","+star3_disable+","
-				+star4_able+","+star4_disable+","+star5_able+","+star5_disable+","+drag_count+","+destroy_count+",'"
+				+star4_able+","+star4_disable+","+star5_able+","+star5_disable+","+drag_count+","+destroy_count+","+seo_count+","+add_renew_count+",'"
 				+saleAccount+"','"+saleDept+"','"+saleName+"',date_format(date_add(now(), interval -1 day),'%Y-%m-%d'),now(),now()"
 				+")";
 		boolean result=DBUtils.insertUpdate(DB, sql);
 		if (!result) {
 			LOG.info(">>>>>>>>>>>>>>>>>统计销售联系量数据失败:"+sql);
+		}
+	}
+	
+	public static void main(String[] args) {
+		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
+		CrmTodaySaleDataTask comp = new CrmTodaySaleDataTask();
+		try {
+			comp.exec(DateUtil.getDate("2012-11-28", "yyyy-MM-dd"));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }
