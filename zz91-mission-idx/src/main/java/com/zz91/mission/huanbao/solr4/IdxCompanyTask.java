@@ -206,8 +206,7 @@ public class IdxCompanyTask extends AbstractIdxTask {
 		}
 	}
 
-	private void parseChainId(SolrInputDocument doc, Integer id) {
-		final StringBuffer chainId = new StringBuffer("|");
+	private void parseChainId(final SolrInputDocument doc, Integer id) {
 		StringBuffer sql = new StringBuffer();
 		sql.append("select chain_id from company_industry_chain where cid = ")
 				.append(id).append(" and del_status = 0 ");
@@ -217,19 +216,10 @@ public class IdxCompanyTask extends AbstractIdxTask {
 			public void handleRead(ResultSet rs) throws SQLException {
 
 				while (rs.next()) {
-					chainId.append(rs.getString("chain_id"));
-					chainId.append("|");
+					doc.addField("chainId", rs.getString("chain_id"));
 				}
-
 			}
 		});
-		if ("|".equals(chainId.toString())) {
-			doc.addField("chainId", "|0|");
-
-		} else {
-			doc.addField("chainId", chainId.toString());
-		}
-
 	}
 
 	public static void main(String[] args) {
@@ -238,7 +228,7 @@ public class IdxCompanyTask extends AbstractIdxTask {
 		DBPoolFactory.getInstance().init(
 				"file:/usr/tools/config/db/db-zztask-jdbc.properties");
 
-		String start = "2012-09-29 17:07:23";
+		String start = "2011-09-29 17:07:23";
 		String end = "2012-11-29 17:14:18";
 
 		IdxCompanyTask task = new IdxCompanyTask();
