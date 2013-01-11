@@ -92,7 +92,6 @@ public class AnalysisProductsSpotTask implements ZZTask{
 				+ "',"
 				+ loginCount
 				+ ", '" + targetDate + "',  now(),now())";
-		System.out.println(sql);
 		DBUtils.insertUpdate(DB, sql);
 	}
 

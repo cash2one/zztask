@@ -1,6 +1,0 @@
-ZZ91任务管理系统
-用于控制自定义任务的调度，监控等
-
-zz91-mission-cron:提供给ZZ91用于执行各类任务
-zz91-mission-local:提供给本地CRM及数据导入等使用
-zz91-mission-jx:提供给环保网使
