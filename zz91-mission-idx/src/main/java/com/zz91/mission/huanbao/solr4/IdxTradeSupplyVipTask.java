@@ -145,7 +145,14 @@ public class IdxTradeSupplyVipTask extends AbstractIdxTask {
 					doc.addField("areaCode", rs.getObject("area_code"));
 					doc.addField("priceNum", rs.getObject("price_num"));
 //					doc.addField("priceUnits", rs.getObject(8));
-					doc.addField("propertyQuery", rs.getObject("property_query"));
+					String propertyQuerys = rs.getString("property_query");
+					if(StringUtils.isNotEmpty(propertyQuerys)){
+						String [] propertyQuery = propertyQuerys.split(";");
+						for(String property : propertyQuery){
+							doc.addField("propertyQuery",property); 
+						}
+					}
+//					doc.addField("propertyQuery", rs.getObject("property_query"));
 //					doc.addField("detailsQuery", rs.getObject(10));
 					String gmtRefresh = rs.getString("gmt_refresh");
 					doc.addField("gmtRefresh", getTime(gmtRefresh));

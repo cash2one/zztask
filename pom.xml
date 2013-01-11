@@ -24,14 +24,14 @@
 		</developer>
 	</developers>
 	<modules>
-		<!--
-		<module>zz91-task-common</module>
-		<module>zz91-task-board</module>
-	-->
 		<module>zz91-mission-cron</module>
 		<module>zz91-mission-local</module>
 		<module>zz91-mission-jx</module>
 		<module>zz91-mission-idx</module>
+		<!--
+		<module>zz91-task-board</module>
+		<module>zz91-task-common</module>
+		-->
 	</modules>
 
 	<dependencyManagement>

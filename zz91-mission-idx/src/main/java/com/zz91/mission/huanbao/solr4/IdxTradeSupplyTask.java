@@ -141,8 +141,14 @@ public class IdxTradeSupplyTask extends AbstractIdxTask {
 					doc.addField("areaCode", rs.getObject("area_code"));
 					doc.addField("priceNum", rs.getObject("price_num"));
 					// doc.addField("priceUnits", rs.getObject(8));
-					doc.addField("propertyQuery",
-							rs.getObject("property_query"));
+					String propertyQuerys = rs.getString("property_query");
+					if(StringUtils.isNotEmpty(propertyQuerys)){
+						String [] propertyQuery = propertyQuerys.split(";");
+						for(String property : propertyQuery){
+							doc.addField("propertyQuery",property); 
+						}
+					}
+					//doc.addField("propertyQuery",rs.getObject("property_query"));
 					// doc.addField("detailsQuery", rs.getObject(10));
 					String gmtRefresh = rs.getString("gmt_refresh");
 					doc.addField("gmtRefresh", getTime(gmtRefresh));
@@ -327,8 +333,8 @@ public class IdxTradeSupplyTask extends AbstractIdxTask {
 
 		// String start="2011-11-29 15:13:20";
 		// String end="2011-11-29 15:13:21";
-		String start = "2011-11-19 11:49:49";
-		String end = "2012-12-0 11:51:10";
+		String start = "2012-09-01 11:49:49";
+		String end = "2013-01-01 11:51:10";
 
 		AbstractIdxTask task = new IdxTradeSupplyTask();
 		try {
