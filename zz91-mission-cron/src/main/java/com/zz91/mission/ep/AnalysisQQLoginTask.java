@@ -1,4 +1,4 @@
-package com.zz91.mission.front;
+package com.zz91.mission.ep;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -16,7 +16,7 @@ import com.zz91.util.db.pool.DBPoolFactory;
 
 /**
  * @author kongsj
- * @date 2012-12-20
+ * @date 2013-1-11
  */
 public class AnalysisQQLoginTask implements ZZTask {
 
@@ -26,7 +26,7 @@ public class AnalysisQQLoginTask implements ZZTask {
 	private final static String LOG_DATE_FORMAT = "yyyy-MM-dd";
 
 	private final static String APP_CODE="appCode";
-	private final static String APP_CODE_VALUE="zz91";
+	private final static String APP_CODE_VALUE="huanbao";
 	private final static String OPERATION = "operation";
 	private final static String OPERATOR = "operator";
 	private final static String OPERATOR_VALUE = "qq_login";
@@ -34,7 +34,7 @@ public class AnalysisQQLoginTask implements ZZTask {
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
 		String targetDate = DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -1), LOG_DATE_FORMAT);
-		return DBUtils.insertUpdate(DB,"delete from analysis_log where gmt_target='" + targetDate + "' and operator='"+OPERATOR_VALUE+"' ");
+		return DBUtils.insertUpdate(DB,"delete from analysis_log where gmt_target='" + targetDate + "' and operator='"+APP_CODE_VALUE+"_"+OPERATOR_VALUE+"' ");
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class AnalysisQQLoginTask implements ZZTask {
 				if (!OPERATOR_VALUE.equalsIgnoreCase(jobj.getString(OPERATOR))) {
 					break;
 				}
-				// 是否是zz91
+				// 是否是huanbao
 				if(!APP_CODE_VALUE.equalsIgnoreCase(jobj.getString(APP_CODE))){
 					break;
 				}
@@ -77,9 +77,9 @@ public class AnalysisQQLoginTask implements ZZTask {
 	private void saveToDB(String operationName, Integer loginCount,
 			String targetDate) {
 		String sql = "insert into analysis_log(operator, operation, log_total, gmt_target, gmt_created, gmt_modified) values('"
-				+ OPERATOR_VALUE
+				+ APP_CODE_VALUE+"_"+OPERATOR_VALUE
 				+ "','"
-				+ operationName
+				+ APP_CODE_VALUE+"_"+operationName
 				+ "',"
 				+ loginCount
 				+ ", '" + targetDate + "',  now(),now())";
