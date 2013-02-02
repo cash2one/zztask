@@ -22,11 +22,11 @@ public class AnalysisQQLoginTask implements ZZTask {
 
 	private final static String DB = "ast";
 
-	private static String LOG_FILE = "/usr/data/log4z/zz91/run.";
+	private static String LOG_FILE = "/usr/data/log4z/huanbao.admin/run.";
 	private final static String LOG_DATE_FORMAT = "yyyy-MM-dd";
 
 	private final static String APP_CODE="appCode";
-	private final static String APP_CODE_VALUE="huanbao";
+	private final static String APP_CODE_VALUE="huanbao.admin";
 	private final static String OPERATION = "operation";
 	private final static String OPERATOR = "operator";
 	private final static String OPERATOR_VALUE = "qq_login";
@@ -77,9 +77,9 @@ public class AnalysisQQLoginTask implements ZZTask {
 	private void saveToDB(String operationName, Integer loginCount,
 			String targetDate) {
 		String sql = "insert into analysis_log(operator, operation, log_total, gmt_target, gmt_created, gmt_modified) values('"
-				+ APP_CODE_VALUE+"_"+OPERATOR_VALUE
+				+"huanbao_"+OPERATOR_VALUE
 				+ "','"
-				+ APP_CODE_VALUE+"_"+operationName
+				+"huanbao_"+operationName
 				+ "',"
 				+ loginCount
 				+ ", '" + targetDate + "',  now(),now())";
@@ -100,8 +100,8 @@ public class AnalysisQQLoginTask implements ZZTask {
 		AnalysisQQLoginTask analysis = new AnalysisQQLoginTask();
 
 		AnalysisQQLoginTask.LOG_FILE = "/usr/data/log4z/zz91/run.";
-		analysis.clear(DateUtil.getDate("2012-12-31", "yyyy-MM-dd"));
-		analysis.exec(DateUtil.getDate("2012-12-31", "yyyy-MM-dd"));
+		analysis.clear(DateUtil.getDate("2013-1-27", "yyyy-MM-dd"));
+		analysis.exec(DateUtil.getDate("2013-1-27", "yyyy-MM-dd"));
 		long end = System.currentTimeMillis();
 		System.out.println("共耗时：" + (end - start));
 	}
