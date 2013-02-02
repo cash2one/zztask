@@ -34,8 +34,8 @@ public class SyncCompAccountTask implements ZZTask {
 	final static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	
 	
-	final static String SYNC_URL_SEED="http://221.12.127.195:8081/sync/seed";
-	final static String SYNC_URL_IMPT="http://221.12.127.195:8081/sync/imptCompAccount";
+	final static String SYNC_URL_SEED="http://huanbaoadmin.zz91.com/sync/seed";
+	final static String SYNC_URL_IMPT="http://huanbaoadmin.zz91.com/sync/imptCompAccount";
 	
 	@Override
 	public boolean init() throws Exception {
