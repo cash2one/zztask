@@ -31,6 +31,8 @@ public class AutoOutCRM implements ZZTask {
 	private static final Integer SIZE = 50;
 	private static final String ONE_MONTH_NOVISIT = "一个月未联系，自动掉公海";
 	private static final String THREE_MONTH_ISEXPIRED = "过期三个月，自动掉公海";
+	final static List<Map<String, Object>> OUT_LIST = new ArrayList<Map<String, Object>>();
+	
 
 	@Override
 	public boolean init() throws Exception {
@@ -42,11 +44,19 @@ public class AutoOutCRM implements ZZTask {
 		// 一个月未联系客户自动掉公海
 		Date omDate = DateUtil.getDateAfterDays(baseDate, -31);
 		oneMonthOut(omDate);
+		
 
 		// 过期三个月自动掉公海
 		Date tmDate = DateUtil.getDateAfterDays(baseDate, -91);
 		threeMonthOut(tmDate);
-
+		
+		if(OUT_LIST.size()>0){
+			Map<String, Object> dataMap=new HashMap<String, Object>();
+			dataMap.put("logList", OUT_LIST);
+			String date =  DateUtil.toString(new Date(), "yyyy年MM月dd日");
+			dataMap.put("date",date);
+			MailUtil.getInstance().sendMail("[CRM]"+date+"掉公海的公司以及客服信息", "zz91.crm.auto.out@asto.mail", null,null, "zz91", "zz91-crm-auto-out",	dataMap, MailUtil.PRIORITY_TASK);
+		}
 		return true;
 	}
 
@@ -79,6 +89,7 @@ public class AutoOutCRM implements ZZTask {
 		return end;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void outPub(List<Integer> list, final Integer i) {
 		final List<Map<String, Object>> logList = new ArrayList<Map<String, Object>>();
 		for (final Integer companyId : list) {
@@ -108,11 +119,8 @@ public class AutoOutCRM implements ZZTask {
 			for (Map<String, Object> logMap : logList) {
 				JSONObject js = JSONObject.fromObject(logMap);
 				LogUtil.getInstance().log("system", "auto_out_pub","127.0.0.1", js.toString());
+				OUT_LIST.add(js);
 			}
-
-			Map<String, Object> dataMap=new HashMap<String, Object>();
-			dataMap.put("logList", logList);
-			MailUtil.getInstance().sendMail("[CRM]今日掉公海的公司以及客服信息", "zz91.crm.auto.out@asto.mail", null,null, "zz91", "zz91-crm-auto-out",	dataMap, MailUtil.PRIORITY_TASK);
 
 			// 该客户符合条件
 			DBUtils.insertUpdate(DB, "delete FROM crm_cs where company_id=" + companyId);
@@ -176,6 +184,6 @@ public class AutoOutCRM implements ZZTask {
 		LogUtil.getInstance().init("web.properties");
 
 		AutoOutCRM task = new AutoOutCRM();
-		task.exec(DateUtil.getDate("2012-11-01", "yyyy-MM-dd"));
+		task.exec(DateUtil.getDate("2012-01-01", "yyyy-MM-dd"));
 	}
 }
