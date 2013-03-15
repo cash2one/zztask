@@ -17,6 +17,7 @@ import com.zz91.util.db.DBUtils;
 import com.zz91.util.db.IReadDataHandler;
 import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.log.LogUtil;
+import com.zz91.util.mail.MailUtil;
 
 /**
  * CS客户自动掉公海处理任务
@@ -106,9 +107,12 @@ public class AutoOutCRM implements ZZTask {
 			});
 			for (Map<String, Object> logMap : logList) {
 				JSONObject js = JSONObject.fromObject(logMap);
-				LogUtil.getInstance().log("system", "auto_out_pub",
-						"127.0.0.1", js.toString());
+				LogUtil.getInstance().log("system", "auto_out_pub","127.0.0.1", js.toString());
 			}
+
+			Map<String, Object> dataMap=new HashMap<String, Object>();
+			dataMap.put("logList", logList);
+			MailUtil.getInstance().sendMail("[CRM]今日掉公海的公司以及客服信息", "zz91.crm.auto.out@asto.mail", null,null, "zz91", "zz91-crm-auto-out",	dataMap, MailUtil.PRIORITY_TASK);
 
 			// 该客户符合条件
 			DBUtils.insertUpdate(DB, "delete FROM crm_cs where company_id=" + companyId);
