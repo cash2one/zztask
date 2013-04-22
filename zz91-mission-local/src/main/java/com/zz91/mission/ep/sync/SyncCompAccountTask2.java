@@ -23,7 +23,7 @@ import com.zz91.util.http.HttpUtils;
 import com.zz91.util.lang.StringUtils;
 import com.zz91.util.mail.MailUtil;
 
-public class SyncCompAccountTask implements ZZTask {
+public class SyncCompAccountTask2 implements ZZTask {
 	
 	final static String DB_EP="ep";
 	

@@ -24,7 +24,7 @@ import com.zz91.util.http.HttpUtils;
 import com.zz91.util.lang.StringUtils;
 import com.zz91.util.mail.MailUtil;
 
-public class SyncCompProfileTask implements ZZTask {
+public class SyncCompProfileTask2 implements ZZTask {
 	
 	final static String DB_EP="ep";
 	

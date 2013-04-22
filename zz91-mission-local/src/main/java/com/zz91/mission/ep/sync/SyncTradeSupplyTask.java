@@ -45,8 +45,8 @@ public class SyncTradeSupplyTask implements ZZTask {
 	final static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	
 	
-	final static String SYNC_URL_SEED="http://221.12.127.195:8081/sync/seed";
-	final static String SYNC_URL_IMPT="http://221.12.127.195:8081/sync/imptTradeSupply";
+	final static String SYNC_URL_SEED="http://122.225.11.195:8081/sync/seed";
+	final static String SYNC_URL_IMPT="http://122.225.11.195:8081/sync/imptTradeSupply";
 	
 //	final static String SYNC_URL_SEED="http://192.168.3.212:8080/sync/seed";
 //	final static String SYNC_URL_IMPT="http://192.168.3.212:8080/sync/imptTradeSupply";

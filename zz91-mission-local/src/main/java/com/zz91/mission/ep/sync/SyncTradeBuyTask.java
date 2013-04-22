@@ -34,8 +34,8 @@ public class SyncTradeBuyTask implements ZZTask {
 
 	final static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-	public static String SYNC_URL_SEED = "http://221.12.127.195:8081/sync/seed";
-	public static String SYNC_URL_IMPT = "http://221.12.127.195:8081/sync/imptTradeBuy";
+	public static String SYNC_URL_SEED = "http://122.225.11.195:8081/sync/seed";
+	public static String SYNC_URL_IMPT = "http://122.225.11.195:8081/sync/imptTradeBuy";
 
 	@Override
 	public boolean init() throws Exception {
