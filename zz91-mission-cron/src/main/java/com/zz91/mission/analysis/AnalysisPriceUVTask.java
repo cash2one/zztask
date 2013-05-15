@@ -77,6 +77,10 @@ public class AnalysisPriceUVTask implements ZZTask {
 				}
 				String data = jobj.getString(DATA);
 				JSONObject jb = JSONObject.fromObject("{"+data+"}");
+				String id = jb.get("id").toString();
+				if(!StringUtils.isNumber(id)){
+					break;
+				}
 				ipSet = resultMap.get(jb.getInt("id"));
 				if(ipSet==null){
 					ipSet = new HashSet<String>();
@@ -110,8 +114,8 @@ public class AnalysisPriceUVTask implements ZZTask {
 		AnalysisPriceUVTask analysis = new AnalysisPriceUVTask();
 
 		AnalysisPriceUVTask.LOG_FILE = "/usr/data/log4z/zz91/run.";
-		analysis.clear(DateUtil.getDate("2012-12-31", "yyyy-MM-dd"));
-		analysis.exec(DateUtil.getDate("2012-12-31", "yyyy-MM-dd"));
+		analysis.clear(DateUtil.getDate("2013-05-15", "yyyy-MM-dd"));
+		analysis.exec(DateUtil.getDate("2013-05-15", "yyyy-MM-dd"));
 		long end = System.currentTimeMillis();
 		System.out.println("共耗时：" + (end - start));
 	}
