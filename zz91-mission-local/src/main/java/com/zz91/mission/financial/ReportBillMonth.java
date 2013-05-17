@@ -68,7 +68,7 @@ public class ReportBillMonth implements ZZTask {
 	private Set<String> queryCoa(Integer start){
 		final Set<String> coaset=new HashSet<String>();
 		
-		String sql="select code_coa from config_coa where isleaf=1 limit "+start+","+PAGE_SIZE;
+		String sql="select code_coa from config_coa where isleaf=1 and islock=0 limit "+start+","+PAGE_SIZE;
 		DBUtils.select(DB, sql, new IReadDataHandler() {
 			
 			@Override
@@ -155,11 +155,11 @@ public class ReportBillMonth implements ZZTask {
 		
 		final Integer[] result={};
 		
-		String sql="select cy_begining_balance from report_bill where gmt_report='"
+		String sql="select cy_begining_balance from report_bill where gmt_report<='"
 				+DateUtil.toString(peroidFrom, DATE_FORMAT)
 				+"' and code_coa='"
 				+coa
-				+"' and report_category=0 limit 1";
+				+"' and report_category=0 order by gmt_report desc limit 1";
 		
 		DBUtils.select(DB, sql, new IReadDataHandler() {
 			
@@ -186,7 +186,7 @@ public class ReportBillMonth implements ZZTask {
 		return true;
 	}
 	
-	public static Date lastMonthFirstDay(Date targetDate){
+	private Date lastMonthFirstDay(Date targetDate){
 		
 		Date date=targetDate;
 		

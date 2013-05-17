@@ -68,7 +68,7 @@ public class ReportBillDaily implements ZZTask {
 	private Set<String> queryCoa(Integer start){
 		final Set<String> coaset=new HashSet<String>();
 		
-		String sql="select code_coa from config_coa where isleaf=1 limit "+start+","+PAGE_SIZE;
+		String sql="select code_coa from config_coa where isleaf=1 and islock=0 limit "+start+","+PAGE_SIZE;
 		DBUtils.select(DB, sql, new IReadDataHandler() {
 			
 			@Override
@@ -156,13 +156,13 @@ public class ReportBillDaily implements ZZTask {
 	private Integer queryEndBalanaceFromLastPeroid(String coa, Date peroidTo){
 		Date peroidFrom=DateUtil.getDateAfterDays(peroidTo, -1);
 		
-		final Integer[] result={};
+		final Integer[] result={0};
 		
-		String sql="select cy_end_balance from report_bill where gmt_report='"
+		String sql="select cy_end_balance from report_bill where gmt_report<='"
 				+DateUtil.toString(peroidFrom, DATE_FORMAT)
 				+"' and code_coa='"
 				+coa
-				+"' limit 1";
+				+"' and report_category=0 order by gmt_report desc limit 1";
 		
 		DBUtils.select(DB, sql, new IReadDataHandler() {
 			
@@ -195,8 +195,9 @@ public class ReportBillDaily implements ZZTask {
 		ReportBillDaily task=new ReportBillDaily();
 		
 		try {
-			task.clear(DateUtil.getDate("2013-04-26 00:00:00", "yyyy-MM-dd HH:mm:ss"));
-			task.exec(DateUtil.getDate("2013-04-26 00:00:00", "yyyy-MM-dd HH:mm:ss"));
+			
+			task.clear(DateUtil.getDate("2013-04-07 00:00:00", "yyyy-MM-dd HH:mm:ss"));
+			task.exec(DateUtil.getDate("2013-04-07 00:00:00", "yyyy-MM-dd HH:mm:ss"));
 			
 		} catch (ParseException e) {
 			e.printStackTrace();
