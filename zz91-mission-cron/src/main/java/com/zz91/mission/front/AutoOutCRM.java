@@ -118,13 +118,15 @@ public class AutoOutCRM implements ZZTask {
 				JSONObject js = JSONObject.fromObject(logMap);
 				LogUtil.getInstance().mongo("system", "auto_out_pub","127.0.0.1", js.toString());
 //				OUT_LIST.add(js);
+				// 记录掉公海
+				logOut(js.getString("companyId"));
 			}
 
 			// 该客户符合条件
 			DBUtils.insertUpdate(DB, "delete FROM crm_cs where company_id=" + companyId);
 		}
 	}
-
+	
 	private void oneMonthOut(Date date) {
 		Integer total = getTotal(
 				date,
@@ -175,13 +177,21 @@ public class AutoOutCRM implements ZZTask {
 			outPub(list, 3);
 		}
 	}
+	/**
+	 * 记录掉公海日志
+	 */
+	private void logOut(String companyId){
+		String sql = "INSERT INTO crm_out_log"
+		+"(company_id,operator,status,gmt_created,gmt_modified)"
+		+"VALUES ("+companyId+",0,0,now(),now())";
+		DBUtils.insertUpdate(DB, sql);
+	}
 
 	public static void main(String[] args) throws ParseException, Exception {
-		DBPoolFactory.getInstance().init(
-				"file:/usr/tools/config/db/db-zztask-jdbc.properties");
+		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
 		LogUtil.getInstance().init("web.properties");
 
 		AutoOutCRM task = new AutoOutCRM();
-		task.exec(DateUtil.getDate("2012-01-01", "yyyy-MM-dd"));
+		task.exec(DateUtil.getDate("2012-01-02", "yyyy-MM-dd"));
 	}
 }
