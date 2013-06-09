@@ -182,7 +182,7 @@ public class ReportBillMonth implements ZZTask {
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
 		Date from=lastMonthFirstDay(DateUtil.getDateAfterMonths(baseDate, -1));
-		DBUtils.insertUpdate(DB, "delete from report_bill where gmt_report='"+DateUtil.toString(from, DATE_FORMAT)+"' and report_catetory=2");
+		DBUtils.insertUpdate(DB, "delete from report_bill where gmt_report='"+DateUtil.toString(from, DATE_FORMAT)+"' and report_category=2");
 		return true;
 	}
 	

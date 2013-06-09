@@ -184,7 +184,7 @@ public class ReportBillWeekly implements ZZTask {
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
 		Date from=lastWeekFirstDay(DateUtil.getDateAfterDays(baseDate, -7));
-		DBUtils.insertUpdate(DB, "delete from report_bill where gmt_report='"+DateUtil.toString(from, DATE_FORMAT)+"' and report_catetory=1");
+		DBUtils.insertUpdate(DB, "delete from report_bill where gmt_report='"+DateUtil.toString(from, DATE_FORMAT)+"' and report_category=1");
 		return true;
 	}
 	
@@ -213,7 +213,6 @@ public class ReportBillWeekly implements ZZTask {
 		try {
 			task.clear(DateUtil.getDate("2013-04-29 00:00:00", "yyyy-MM-dd HH:mm:ss"));
 			task.exec(DateUtil.getDate("2013-04-29 00:00:00", "yyyy-MM-dd HH:mm:ss"));
-			
 		} catch (ParseException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
