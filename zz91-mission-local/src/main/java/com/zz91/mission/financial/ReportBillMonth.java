@@ -88,10 +88,10 @@ public class ReportBillMonth implements ZZTask {
 			if(coa.length()!=7){
 				continue ;
 			}
-			Integer beginingBalance=queryEndBalanaceFromLastPeroid(coa, from);
-			if(beginingBalance==null){
-				beginingBalance=0;
-			}
+//			Integer beginingBalance=queryEndBalanaceFromLastPeroid(coa, from);
+//			if(beginingBalance==null){
+//				beginingBalance=0;
+//			}
 			//key: dr,cr
 			Map<String, Integer> sumMap=querySumCy(coa, from, to);
 			if(sumMap==null || sumMap.size()<2){
@@ -103,8 +103,38 @@ public class ReportBillMonth implements ZZTask {
 			if(sumMap.get("dr")==null){
 				sumMap.put("dr", 0);
 			}
-			Integer endBalance=beginingBalance+sumMap.get("dr")-sumMap.get("cr");
+			
+			Integer beginingBalance = queryEndBalanace(coa, from);
+			Integer endBalance=queryEndBalanace(coa, to);
+			
 			saveAnalysis(coa, beginingBalance, endBalance, sumMap.get("dr"), sumMap.get("cr"), from);
+		}
+	}
+	
+	private Integer queryEndBalanace(String coa, Date peroid){
+
+		final Integer[] result={0};
+		
+		String sql="select abb.cy_balance from ac_bill_book abb where abb.code_coa='"+coa
+				+"' and  abb.gmt_build <'"
+				+DateUtil.toString(peroid, DATE_FORMAT)
+				+"' order by abb.gmt_build desc, id desc limit 1";
+		
+		DBUtils.select(DB, sql, new IReadDataHandler() {
+			
+			@Override
+			public void handleRead(ResultSet rs) throws SQLException {
+				while(rs.next()){
+					result[0]=rs.getInt(1);
+				}
+			}
+			
+		});
+		
+		if(result.length>0){
+			return result[0];
+		}else{
+			return 0;
 		}
 	}
 	
@@ -151,33 +181,33 @@ public class ReportBillMonth implements ZZTask {
 		return map;
 	}
 	
-	private Integer queryEndBalanaceFromLastPeroid(String coa, Date peroidFrom){
-		
-		final Integer[] result={};
-		
-		String sql="select cy_begining_balance from report_bill where gmt_report<='"
-				+DateUtil.toString(peroidFrom, DATE_FORMAT)
-				+"' and code_coa='"
-				+coa
-				+"' and report_category=0 order by gmt_report desc limit 1";
-		
-		DBUtils.select(DB, sql, new IReadDataHandler() {
-			
-			@Override
-			public void handleRead(ResultSet rs) throws SQLException {
-				while(rs.next()){
-					result[0]=rs.getInt(1);
-				}
-			}
-			
-		});
-		
-		if(result.length>0){
-			return result[0];
-		}else{
-			return 0;
-		}
-	}
+//	private Integer queryEndBalanaceFromLastPeroid(String coa, Date peroidFrom){
+//		
+//		final Integer[] result={};
+//		
+//		String sql="select cy_begining_balance from report_bill where gmt_report<='"
+//				+DateUtil.toString(peroidFrom, DATE_FORMAT)
+//				+"' and code_coa='"
+//				+coa
+//				+"' and report_category=0 order by gmt_report desc limit 1";
+//		
+//		DBUtils.select(DB, sql, new IReadDataHandler() {
+//			
+//			@Override
+//			public void handleRead(ResultSet rs) throws SQLException {
+//				while(rs.next()){
+//					result[0]=rs.getInt(1);
+//				}
+//			}
+//			
+//		});
+//		
+//		if(result.length>0){
+//			return result[0];
+//		}else{
+//			return 0;
+//		}
+//	}
 	
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
@@ -205,8 +235,8 @@ public class ReportBillMonth implements ZZTask {
 		ReportBillMonth task=new ReportBillMonth();
 		
 		try {
-			task.clear(DateUtil.getDate("2013-05-26 00:00:00", "yyyy-MM-dd HH:mm:ss"));
-			task.exec(DateUtil.getDate("2013-05-26 00:00:00", "yyyy-MM-dd HH:mm:ss"));
+			task.clear(DateUtil.getDate("2013-05-01 00:00:00", "yyyy-MM-dd HH:mm:ss"));
+			task.exec(DateUtil.getDate("2013-05-01 00:00:00", "yyyy-MM-dd HH:mm:ss"));
 			
 		} catch (ParseException e) {
 			e.printStackTrace();

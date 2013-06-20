@@ -89,10 +89,10 @@ public class ReportBillDaily implements ZZTask {
 				continue ;
 			}
 			//from:is this period's from, is last peroid's to
-			Integer beginingBalance=queryEndBalanaceFromLastPeroid(coa, from);
-			if(beginingBalance==null){
-				beginingBalance=0;
-			}
+//			Integer beginingBalance=queryEndBalanaceFromLastPeroid(coa, from);
+//			if(beginingBalance==null){
+//				beginingBalance=0;
+//			}
 			//key: dr,cr
 			Map<String, Integer> sumMap=querySumCy(coa, from, to);
 			if(sumMap==null || sumMap.size()<2){
@@ -104,7 +104,10 @@ public class ReportBillDaily implements ZZTask {
 			if(sumMap.get("dr")==null){
 				sumMap.put("dr", 0);
 			}
-			Integer endBalance=beginingBalance+sumMap.get("dr")-sumMap.get("cr");
+			
+			Integer beginingBalance = queryEndBalanace(coa, from);
+			Integer endBalance=queryEndBalanace(coa, to);
+			
 			saveAnalysis(coa, beginingBalance, endBalance, sumMap.get("dr"), sumMap.get("cr"), from);
 		}
 	}
@@ -153,17 +156,16 @@ public class ReportBillDaily implements ZZTask {
 		return map;
 	}
 	
-	private Integer queryEndBalanaceFromLastPeroid(String coa, Date peroidTo){
-		Date peroidFrom=DateUtil.getDateAfterDays(peroidTo, -1);
-		
+	private Integer queryEndBalanace(String coa, Date peroid){
+
 		final Integer[] result={0};
 		
-		String sql="select cy_end_balance from report_bill where gmt_report<='"
-				+DateUtil.toString(peroidFrom, DATE_FORMAT)
-				+"' and code_coa='"
-				+coa
-				+"' and report_category=0 order by gmt_report desc limit 1";
+		String sql="select abb.cy_balance from ac_bill_book abb where abb.code_coa='"+coa
+				+"' and abb.gmt_build <'"
+				+DateUtil.toString(peroid, DATE_FORMAT)
+				+"' order by abb.gmt_build desc, id desc limit 1";
 		
+		System.out.println(sql);;
 		DBUtils.select(DB, sql, new IReadDataHandler() {
 			
 			@Override
