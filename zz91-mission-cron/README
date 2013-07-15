@@ -1,5 +1,8 @@
 UPDATE
 
+2013-7-15 v1.0.13 kongsj
+1.添加系统自动发送询盘任务SystemInquiryTask
+2.添加400页面详单自动拉取任务SystemCPPTask
 
 2013-4-17 v1.0.12 kongsj
 1.添加文本统计报价发布任务
