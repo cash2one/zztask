@@ -23,7 +23,8 @@ public class SystemCPPTask implements ZZTask {
 		String to = DateUtil.toString(baseDate, "yyyy-MM-dd");
 		String from = DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -1), "yyyy-MM-dd");
 		String url = ADMIN_URL + "?from=" + from + "&to=" + to;
-		HttpUtils.getInstance().httpGet(url, HttpUtils.CHARSET_UTF8);
+		String result = HttpUtils.getInstance().httpGet(url, HttpUtils.CHARSET_UTF8);
+		System.out.println(result);
 		return true;
 	}
 
@@ -32,4 +33,8 @@ public class SystemCPPTask implements ZZTask {
 		return false;
 	}
 
+	public static void main(String[] args) throws Exception {
+		SystemCPPTask systemCPPTask = new SystemCPPTask();
+		systemCPPTask.exec(new Date());
+	}
 }
