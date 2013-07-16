@@ -30,9 +30,9 @@ public class SystemInquiryTask implements ZZTask {
 		Map<String, String> accountMap = new HashMap<String, String>();
 		do {
 
-			String to = DateUtil.toString(baseDate, "yyyy-MM-dd");
-			String from = DateUtil.toString(DateUtil.getDateAfterDays(baseDate,
-					-1), "yyyy-MM-dd");
+			String from = DateUtil.toString(baseDate, "yyyy-MM-dd");
+			String to = DateUtil.toString(DateUtil.getDateAfterDays(baseDate,
+					1), "yyyy-MM-dd");
 			String sql = "SELECT id,company_id,target_id,title,content "
 					+ "FROM inquiry_task "
 					+ "where  post_status='0' and post_time >= '" + from
