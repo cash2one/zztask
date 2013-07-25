@@ -316,12 +316,12 @@ public class DefinitionController extends BaseController {
 			}
 			
 			JobStatus status = new JobStatus();
+			Date taskStart = new Date();
 			try {
-				
 				status.setJobName(definition.getJobName());
-				status.setGmtBasetime(start);
+				status.setGmtBasetime(taskStart);
 				status.setGmtTrigger(start);
-				status.setResult("运行中...");
+				status.setResult("自动刷新");
 				status.setId(jobStatusService.insertJobStatus(status));
 				
 				ZZTask jobInstance = (ZZTask) ClassHelper.load(
@@ -357,7 +357,7 @@ public class DefinitionController extends BaseController {
 			}
 			
 			Date end = new Date();
-			status.setRuntime(end.getTime() - start.getTime());
+			status.setRuntime(end.getTime() - taskStart.getTime());
 			jobStatusService.updateJobStatusById(status);
 			
 			result.setSuccess(true);
