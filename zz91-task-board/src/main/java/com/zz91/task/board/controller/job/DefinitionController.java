@@ -33,6 +33,8 @@ import com.zz91.task.board.util.ClassHelper;
 import com.zz91.task.board.util.MvcUpload;
 import com.zz91.task.board.util.StacktraceUtil;
 import com.zz91.task.common.AbstractIdxTask;
+import com.zz91.task.common.ZZTask;
+import com.zz91.util.datetime.DateUtil;
 import com.zz91.util.lang.StringUtils;
 
 /**
@@ -292,7 +294,78 @@ public class DefinitionController extends BaseController {
 
 		return printJson(result, out);
 	}
-
+	
+	@RequestMapping
+	public ModelAndView doTaskSync(HttpServletRequest request, Map<String, Object> out,
+			String jobName, Date start, Date to) throws ParseException{
+		ExtResult result = new ExtResult();
+		do {
+			if (start ==null) {
+				break;
+			}
+			
+			if(to==null){
+				to=start;
+			}
+			
+			JobDefinition definition = jobDefinitionService
+					.queryJobDefinitionByName(jobName);
+			
+			if(definition==null){
+				break;
+			}
+			
+			JobStatus status = new JobStatus();
+			try {
+				
+				status.setJobName(definition.getJobName());
+				status.setGmtBasetime(start);
+				status.setGmtTrigger(start);
+				status.setResult("运行中...");
+				status.setId(jobStatusService.insertJobStatus(status));
+				
+				ZZTask jobInstance = (ZZTask) ClassHelper.load(
+						definition.getJobClasspath(), definition.getJobClassName())
+						.newInstance();
+				
+				Integer inteval=DateUtil.getIntervalDays(start, to);
+				
+				for(int i=0;i<inteval;i++){
+					jobInstance.clear(DateUtil.getDateAfterDays(start, i)); //清理任务执行前的数据
+					if (jobInstance.exec(DateUtil.getDateAfterDays(start, i))) {
+						status.setResult("执行成功");
+					} else {
+						status.setResult("执行失败");
+					}
+				}
+				
+			} catch (MalformedURLException e) {
+				status.setResult(e.getMessage());
+				status.setErrorMsg(StacktraceUtil.getStackTrace(e));
+			} catch (ClassNotFoundException e) {
+				status.setResult(e.getMessage());
+				status.setErrorMsg(StacktraceUtil.getStackTrace(e));
+			} catch (InstantiationException e) {
+				status.setResult(e.getMessage());
+				status.setErrorMsg(StacktraceUtil.getStackTrace(e));
+			} catch (IllegalAccessException e) {
+				status.setResult(e.getMessage());
+				status.setErrorMsg(StacktraceUtil.getStackTrace(e));
+			} catch (Exception e) {
+				status.setResult(e.getMessage());
+				status.setErrorMsg(StacktraceUtil.getStackTrace(e));
+			}
+			
+			Date end = new Date();
+			status.setRuntime(end.getTime() - start.getTime());
+			jobStatusService.updateJobStatusById(status);
+			
+			result.setSuccess(true);
+		}while(false);
+		
+		return printJson(result, out);
+	}
+	
 	/*************search index task*********************/
 	@RequestMapping
 	public ModelAndView createIdxJob(HttpServletRequest request, Map<String, Object> out,
