@@ -47,7 +47,7 @@
 		</init-param>
 		<init-param>
 			<param-name>noLoginPage</param-name>
-			<param-value>/login.htm|/logout.htm|/forbiden.htm|/error.htm|/authorize.htm</param-value>
+			<param-value>/login.htm|/logout.htm|/forbiden.htm|/error.htm|/authorize.htm|/job/definition/doTask.htm</param-value>
 		</init-param>
 	</filter>
 	<filter-mapping>

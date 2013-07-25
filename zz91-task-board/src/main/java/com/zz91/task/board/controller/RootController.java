@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
 
 import com.zz91.task.board.dto.ExtResult;
 import com.zz91.task.board.thread.TaskControlThread;

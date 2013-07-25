@@ -22,11 +22,6 @@
 			<name>mays</name>
 			<email>mays@zz91.net</email>
 		</developer>
-		<developer>
-			<id>liuwb</id>
-			<name>liuwb</name>
-			<email>liuwb@zz91.net</email>
-		</developer>
 	</developers>
 	<modules>
 		<module>zz91-task-common</module>
@@ -389,6 +384,7 @@
 			<id>test</id>
 			<properties>
 				<package.environment>test</package.environment>
+				<jdbc.location>file:/usr/tools/config/db/db-zztask.properties</jdbc.location>
 			</properties>
 		</profile>
 	</profiles>
