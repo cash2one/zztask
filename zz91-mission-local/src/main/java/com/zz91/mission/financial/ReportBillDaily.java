@@ -31,7 +31,9 @@ public class ReportBillDaily implements ZZTask {
 	final static String COA_PREFIX="";
 	
 	final static int PAGE_SIZE=50;
-
+	
+	final Map<String, Long> FREEZE=new HashMap<String, Long>();
+	
 	@Override
 	public boolean init() throws Exception {
 		
@@ -107,28 +109,55 @@ public class ReportBillDaily implements ZZTask {
 			
 			Integer beginingBalance = queryEndBalanace(coa, from);
 			Integer endBalance=queryEndBalanace(coa, to);
-			
 			saveAnalysis(coa, beginingBalance, endBalance, sumMap.get("dr"), sumMap.get("cr"), from);
 		}
 	}
 	
 	private void saveAnalysis(String coa, Integer bb, Integer eb, Integer sumdr, Integer sumcr, Date from){
+		
+		//要么从缓存中获取，要么从昨天获取
+		if(!FREEZE.containsKey(coa)){
+			FREEZE.put(coa, queryFreeze(coa, from));
+		}
+		
 		String dept=coa.substring(3, 5);
 		StringBuffer sb=new StringBuffer();
 		sb.append(" insert into report_bill(code_coa, code_item_dept, ")
 				.append("cy_begining_balance, cy_end_balance, cy_dr_sum, ")
 				.append("cy_cr_sum, report_category, gmt_report, ")
-				.append("gmt_created, gmt_modified) ")
+				.append("gmt_created, gmt_modified, cy_freeze) ")
 				.append(" values('").append(coa).append("','")
 				.append(dept).append("',")
 				.append(bb).append(",")
 				.append(eb).append(",")
 				.append(sumdr).append(",")
 				.append(sumcr).append(",0,'")
-				.append(DateUtil.toString(from, DATE_FORMAT)).append("',now(),now() )");
+				.append(DateUtil.toString(from, DATE_FORMAT))
+				.append("',now(),now(),")
+				.append(FREEZE.get(coa)).append(" )");
 		
 		DBUtils.insertUpdate(DB, sb.toString());
 		
+	}
+	
+	private Long queryFreeze(String coa, Date from){
+		
+		final Long[] cyfreeze={0l};
+		
+		DBUtils.select(DB, "select cy_freeze from report_bill where code_coa='"+coa+"' and gmt_report<'"+DateUtil.toString(from, DATE_FORMAT)+"' and report_category=0", new IReadDataHandler() {
+			
+			@Override
+			public void handleRead(ResultSet rs) throws SQLException {
+				while( rs.next() ){
+					cyfreeze[0] = rs.getLong(1);
+				}
+			}
+		});
+		
+		if(cyfreeze.length>0){
+			return cyfreeze[0];
+		}
+		return 0l;
 	}
 	
 	private Map<String, Integer> querySumCy(String coa, Date from, Date to){
@@ -149,7 +178,6 @@ public class ReportBillDaily implements ZZTask {
 					map.put("dr", rs.getInt(1));
 					map.put("cr", rs.getInt(2));
 				}
-				
 			}
 		});
 		
@@ -165,7 +193,7 @@ public class ReportBillDaily implements ZZTask {
 				+DateUtil.toString(peroid, DATE_FORMAT)
 				+"' order by abb.gmt_build desc, id desc limit 1";
 		
-		System.out.println(sql);;
+		//System.out.println(sql);;
 		DBUtils.select(DB, sql, new IReadDataHandler() {
 			
 			@Override
@@ -187,6 +215,21 @@ public class ReportBillDaily implements ZZTask {
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
 		Date from=DateUtil.getDateAfterDays(baseDate, -1);
+		
+		//获取冻结资金
+		
+		DBUtils.select(DB, "select code_coa, cy_freeze from report_bill where gmt_report='"+DateUtil.toString(from, DATE_FORMAT)+"' and report_category=0 and cy_freeze>0", new IReadDataHandler() {
+			
+			@Override
+			public void handleRead(ResultSet rs) throws SQLException {
+				while (rs.next()) {
+					FREEZE.put(rs.getString(1), rs.getLong(2));
+				}
+			}
+			
+		});
+		
+		
 		DBUtils.insertUpdate(DB, "delete from report_bill where gmt_report='"+DateUtil.toString(from, DATE_FORMAT)+"' and report_category=0");
 		return true;
 	}

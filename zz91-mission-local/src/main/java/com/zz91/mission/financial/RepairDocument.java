@@ -66,7 +66,7 @@ public class RepairDocument implements ZZTask {
 		String sql="";
 		for(Integer k:result.keySet()){
 			sql="update ac_document set code_item_dept="+result.get(k)+" where ac_bill_book_id="+k;
-			System.out.println(sql);
+			//System.out.println(sql);
 			DBUtils.insertUpdate(DB, sql);
 		}
 		
