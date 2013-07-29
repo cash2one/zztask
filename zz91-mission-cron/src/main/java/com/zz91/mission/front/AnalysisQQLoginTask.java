@@ -22,7 +22,7 @@ public class AnalysisQQLoginTask implements ZZTask {
 
 	private final static String DB = "ast";
 
-	private static String LOG_FILE = "/usr/data/log4z/zz91/run.";
+	private static String LOG_FILE = "/usr/data/log4z/run.";
 	private final static String LOG_DATE_FORMAT = "yyyy-MM-dd";
 
 	private final static String APP_CODE="appCode";

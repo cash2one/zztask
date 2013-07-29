@@ -11,7 +11,8 @@ import com.zz91.util.http.HttpUtils;
  */
 public class SystemCPPTask implements ZZTask {
 
-	final static String ADMIN_URL = "http://admin1949.zz91.com/web/zz91/phone/getBill.htm";
+	
+	final static String ADMIN_URL = "http://192.168.110.120:7130/web/zz91/phone/getBill.htm";
 
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
@@ -23,8 +24,7 @@ public class SystemCPPTask implements ZZTask {
 		String to = DateUtil.toString(baseDate, "yyyy-MM-dd");
 		String from = DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -1), "yyyy-MM-dd");
 		String url = ADMIN_URL + "?from=" + from + "&to=" + to;
-		String result = HttpUtils.getInstance().httpGet(url, HttpUtils.CHARSET_UTF8);
-		System.out.println(result);
+		HttpUtils.getInstance().httpGet(url, HttpUtils.CHARSET_UTF8);
 		return true;
 	}
 

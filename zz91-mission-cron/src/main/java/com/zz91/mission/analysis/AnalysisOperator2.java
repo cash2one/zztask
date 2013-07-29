@@ -1,12 +1,16 @@
+/**
+ * 
+ */
 package com.zz91.mission.analysis;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
 
 import com.zz91.task.common.ZZTask;
 import com.zz91.util.datetime.DateUtil;
@@ -15,67 +19,68 @@ import com.zz91.util.db.pool.DBPoolFactory;
 import com.zz91.util.log.LogUtil;
 
 /**
- * @author kongsj
- * @date 2012-9-5
+ * @author root
+ *
  */
-public class AnalysisOperator implements ZZTask {
+public class AnalysisOperator2 implements ZZTask{
 
-	final static String WEB_PROP = "web.properties";
+	private final static String DB="ast";
+	
+	private static String LOG_FILE = "/usr/data/log4z/run.";
+	private final static String LOG_DATE_FORMAT = "yyyy-MM-dd";
+	
 	final static String DATE_FORMAT = "yyyy-MM-dd";
-	final static String DB = "ast";
-	final static Integer SIZE = 100;
-
+	final static String WEB_PROP = "web.properties";
+	
+//	private final static String OPERATION = "operation";
+//	private final static String OPERATION_VALUE = "post_price";
+//	private final static String OPERATOR="operator";
+	
+	
 	@Override
 	public boolean clear(Date baseDate) throws Exception {
-		String from = DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -1), "yyyy-MM-dd");
-		String sql = "delete from analysis_product_type_code where gmt_created='"
-				+ from + "'";
-		DBUtils.insertUpdate(DB, sql);
-		sql = "delete from analysis_operate where gmt_created='" + from + "'";
-		return DBUtils.insertUpdate(DB, sql);
+		return false;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean exec(Date baseDate) throws Exception {
-		LogUtil.getInstance().init(WEB_PROP);
+		String targetDate=DateUtil.toString(DateUtil.getDateAfterDays(baseDate, -1), LOG_DATE_FORMAT);
+		
+//		Map<String, Integer> resultMap=new HashMap<String, Integer>();
 		Date to = DateUtil.getDateAfterDays(baseDate, -1);
-		Map<String, Object> param = new HashMap<String, Object>();
-		param.put("appCode", "zz91.admin");
-		param.put("time", LogUtil.getInstance().mgCompare(">=",String.valueOf(to.getTime()), "<",String.valueOf(baseDate.getTime())));
+		
+		BufferedReader br = new BufferedReader(new FileReader(LOG_FILE+targetDate));
+		
+		String line;
+//		Integer num=null;
 		Map<String, Map<String, Integer>> omap = new HashMap<String, Map<String, Integer>>();
 		Map<String, Map<String, Integer>> pmap = new HashMap<String, Map<String, Integer>>();
-		try {
-			for (int limit = 0;; limit++) {
-				JSONObject res = LogUtil.getInstance().readMongo(param,limit * SIZE, SIZE);
-				List<JSONObject> list = res.getJSONArray("records");
-				if (list == null || list.size() == 0) {
-					break;
-				}
-				for (int i = 0; i < list.size(); i++) {
-					JSONObject jobj = (JSONObject) JSONSerializer.toJSON(list.get(i));
-					String user = (String) jobj.get("operator");
-					String todo = (String) jobj.get("operation");
-					// 日常统计
-					analysisRiChang(omap, user,todo);
-					// 供求审核类别明细统计
-					if (todo.contains("check_products")) {
-						String data = jobj.getString("data");
-						if("{".equals(data.substring(0,1))){
-							JSONObject js  =  JSONObject.fromObject(data);
-							String code = (String) js.get("productTypecode");
-							analysisCheckInfo(pmap, user,todo,code);
-						}
-					}
+		while ((line = br.readLine()) != null) {
+			JSONObject jobj = JSONObject.fromObject(line);
+			String user = (String) jobj.get("operator");
+			String todo = (String) jobj.get("operation");
+			// 日常统计
+			analysisRiChang(omap, user,todo);
+			// 供求审核类别明细统计
+			if (todo.contains("check_products")) {
+				String data = jobj.getString("data");
+				if("{".equals(data.substring(0,1))){
+					JSONObject js  =  JSONObject.fromObject(data);
+					String code = (String) js.get("productTypecode");
+					analysisCheckInfo(pmap, user,todo,code);
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+		br.close();
 		
 		// 将统计的结果insert入数据表
 		addToODB(omap,DateUtil.toString(to, DATE_FORMAT));
 		addToPDB(pmap,DateUtil.toString(to, DATE_FORMAT));
+		
+//		for(String name:resultMap.keySet()){
+//			saveToDB(name, resultMap.get(name), targetDate);
+//		}
+		
 		return true;
 	}
 	
@@ -134,6 +139,7 @@ public class AnalysisOperator implements ZZTask {
 			DBUtils.insertUpdate(DB, sql);
 		}
 	}
+	
 	private void addToPDB(Map<String,Map<String, Integer>>map,String date){
 		for(String key:map.keySet()){
 			Map<String,Integer> usermap = map.get(key);
@@ -262,7 +268,12 @@ public class AnalysisOperator implements ZZTask {
 			DBUtils.insertUpdate(DB, sql);
 		}
 	}
-
+	
+//	private void saveToDB(String name, Integer num, String targetDate){
+//		String sql="update analysis_operate set post_price_text = "+num+" where operator='"+name+"' and gmt_created = '"+targetDate +"'";
+//		DBUtils.insertUpdate(DB, sql);
+//	}
+	
 	private void analysisRiChang(Map<String, Map<String,Integer>> map, String user,String opertion) {
 		Map<String,Integer> usermap =  map.get(user);
 		do{
@@ -301,18 +312,19 @@ public class AnalysisOperator implements ZZTask {
 			map.put(user, usermap);
 		}while(false);
 	}
-
+	
 	@Override
 	public boolean init() throws Exception {
 		return false;
 	}
-
-	public static void main(String[] args) throws Exception {
+	
+	public static void main(String[] args) throws ParseException, Exception {
 		LogUtil.getInstance().init(WEB_PROP);
 		DBPoolFactory.getInstance().init("file:/usr/tools/config/db/db-zztask-jdbc.properties");
-		Date baseDate = DateUtil.getDate("2013-5-15", DATE_FORMAT);
-		AnalysisOperator2 obj = new AnalysisOperator2();
+		Date baseDate = DateUtil.getDate("2012-11-13", DATE_FORMAT);
+		AnalysisOperator obj = new AnalysisOperator();
 		obj.clear(baseDate);
 		obj.exec(baseDate);
 	}
+
 }
