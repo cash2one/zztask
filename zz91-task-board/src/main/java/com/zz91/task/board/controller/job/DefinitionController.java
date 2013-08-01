@@ -328,9 +328,9 @@ public class DefinitionController extends BaseController {
 						definition.getJobClasspath(), definition.getJobClassName())
 						.newInstance();
 				
-				Integer inteval=DateUtil.getIntervalDays(start, to);
+				Integer inteval=DateUtil.getIntervalDays(to, start);
 				
-				for(int i=0;i<inteval;i++){
+				for(int i=0;i<=inteval;i++){
 					jobInstance.clear(DateUtil.getDateAfterDays(start, i)); //清理任务执行前的数据
 					if (jobInstance.exec(DateUtil.getDateAfterDays(start, i))) {
 						status.setResult("执行成功");
