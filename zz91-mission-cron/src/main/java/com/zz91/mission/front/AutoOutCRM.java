@@ -121,36 +121,29 @@ public class AutoOutCRM implements ZZTask {
 				// 记录掉公海
 				logOut(js.getString("companyId"));
 			}
+			System.out.println(companyId);
 
 			// 该客户符合条件
-			DBUtils.insertUpdate(DB, "delete FROM crm_cs where company_id=" + companyId);
+			DBUtils.insertUpdate(DB, "update crm_cs set cs_account ='' where company_id=" + companyId);
 		}
 	}
 	
 	private void oneMonthOut(Date date) {
-		Integer total = getTotal(
-				date,
-				"select count(0) from crm_cs_profile c left join crm_cs cs on c.company_id=cs.company_id inner join company co on c.company_id =co.id and co.membership_code='10051000' where '"
-						+ DateUtil.toString(date, "yyyy-MM-dd")
-						+ "' >= cs.gmt_visit ");
-		Integer end = getEnd(total);
-		for (int i = 1; i <= end; i++) {
-			// 查询一个月未联系客户
-			final List<Integer> list = new ArrayList<Integer>();
-			String sql = "select c.company_id from crm_cs_profile c left join crm_cs cs on c.company_id=cs.company_id inner join company co on c.company_id =co.id and co.membership_code='10051000' where '"
-					+ DateUtil.toString(date, "yyyy-MM-dd")
-					+ "' >= cs.gmt_visit limit " + (i - 1) * SIZE + "," + SIZE;
-			DBUtils.select(DB, sql, new IReadDataHandler() {
-				@Override
-				public void handleRead(ResultSet rs) throws SQLException {
-					while (rs.next()) {
-						list.add(rs.getInt(1));
-					}
+		// 查询一个月未联系客户
+		final List<Integer> list = new ArrayList<Integer>();
+		String sql = "select c.company_id from crm_cs_profile c left join crm_cs cs on c.company_id=cs.company_id inner join company co on c.company_id =co.id and co.membership_code='10051000' where '"
+				+ DateUtil.toString(date, "yyyy-MM-dd")
+				+ "' >= cs.gmt_visit";
+		DBUtils.select(DB, sql, new IReadDataHandler() {
+			@Override
+			public void handleRead(ResultSet rs) throws SQLException {
+				while (rs.next()) {
+					list.add(rs.getInt(1));
 				}
-			});
-			// 遍历 companyId搜索cs账户信息，记录日志，并执行该客户掉公害
-			outPub(list, 1);
-		}
+			}
+		});
+		// 遍历 companyId搜索cs账户信息，记录日志，并执行该客户掉公害
+		outPub(list, 1);
 	}
 
 	private void threeMonthOut(Date date) {
